@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Communities on Tokio</title>
+    <link>https://tokio-cn.github.io/community/index.xml</link>
+    <description>Recent content in Communities on Tokio</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <atom:link href="https://tokio-cn.github.io/community/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>The Tokio Community</title>
+      <link>https://tokio-cn.github.io/community/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/community/</guid>
+      <description>&lt;p&gt;The Tokio community is most readily found on
+&lt;a href=&#34;https://gitter.im/tokio-rs/tokio&#34;&gt;its gitter channel&lt;/a&gt;, where you&amp;rsquo;re welcome to
+ask questions, report problems, or pitch ideas.&lt;/p&gt;
+
+&lt;p&gt;Github is used for tracking issues.&lt;/p&gt;
+
+&lt;p&gt;We also have an issue tracker on the main &lt;a href=&#34;https://github.com/tokio-rs/tokio/issues&#34;&gt;Tokio
+repository&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;If you&amp;rsquo;re a Tokio user, you&amp;rsquo;re highly encouraged to keep an eye on these issues
+and jump in on the discussions, to help us understand how design tradeoffs might
+affect you.&lt;/p&gt;
+
+&lt;p&gt;These repositories also contain milestones for upcoming &lt;em&gt;major&lt;/em&gt; releases, which
+are currently used to track breaking changes that might be considered for the
+next major release.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

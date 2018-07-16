@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <link rel="apple-touch-icon" sizes="120x120" href="https://tokio-cn.github.io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://tokio-cn.github.io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://tokio-cn.github.io/favicon-16x16.png">
+    <link rel="manifest" href="https://tokio-cn.github.io/manifest.json">
+    <link rel="mask-icon" href="https://tokio-cn.github.io/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#ffffff">
+
+    
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/bootstrap-reboot.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/bootstrap.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/tokio.css">
+
+    
+    <link rel="alternate" type="application/rss+xml" href="https://tokio-cn.github.io/blog/index.xml" />
+
+    <title>Futures</title>
+  </head>
+  <body>
+    <header class="navbar navbar-light navbar-toggleable-md bd-navbar">
+      <nav class="tk-main-nav">
+        <div class="d-flex justify-content-between hidden-lg-up">
+            <a href="https://tokio-cn.github.io/" class="navbar-brand">
+              <img src="https://tokio-cn.github.io/img/logo.png" class="align-middle" alt="">
+            </a>
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#tk-main-nav" aria-label="Toggle navigation" aria-controls="tk-main-nav" aria-expanded="false">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+        <div class="navbar-collapse collapse" id="tk-main-nav">
+          <ul class="nav navbar-nav">
+            <li class="nav-item hd-lg-down">
+              <a class="navbar-brand" href="https://tokio-cn.github.io/"><img src="https://tokio-cn.github.io/img/logo.png" class="align-middle" alt=""></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/">首页 <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/docs/getting-started/hello-world/">文档</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/community/">社区</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/blog/2018-05-tokio-fs/">博客</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+
+
+<div class="tk-pageheader">
+  <div class="container">
+    <h1 class="display-4">Futures</h1>
+    <p class="lead"></p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+
+      <nav class="leftnav">
+        <div class="" id="">
+          <h5>入门</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/hello-world/" class="text-muted">Hello World!</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/" class="text-muted">Runtime Model</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/futures/" >Futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/tasks/" class="text-muted">Tasks</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/io/" class="text-muted">I/O with Tokio</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/chat/" class="text-muted">Example: A Chat Server</a>
+              </li>
+              
+            </ul>
+          </div>
+
+          <h5>深入</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/timers/" class="text-muted">Timers</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/futures-mechanics/" class="text-muted">Essential combinators</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="text-muted">Returning futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/frames/" class="text-muted">Working with framed streams</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/building-runtime/" class="text-muted">Building a runtime</a>
+              </li>
+              
+            </ul>
+          </div>
+
+          <br/>
+          <h5>参考</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              <li class="active">
+                <a href="https://docs.rs/tokio" class="text-muted"><code>tokio</code> API docs</a>
+              </li>
+              <li class="active">
+                <a href="https://docs.rs/futures/0.1" class="text-muted"><code>futures</code> API docs</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+    </div>
+    <div class="col-md-9">
+      <div class="tk-content">
+        <div class="github-edit">
+            <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/getting-started/futures.md"> 在 GitHub 上编辑</a>
+        </div>
+        
+
+<p>Futures, hinted at earlier in the guide, are the building block used to manage
+asynchronous logic. They are the underlying asynchronous abstraction used by
+Tokio.</p>
+
+<p>The future implementation is provided by the <a href="https://docs.rs/futures/0.1/futures"><code>futures</code></a> crate. However, for
+convenience, Tokio re-exports a number of the types.</p>
+
+<h2 id="what-are-futures"><a href="#what-are-futures">What Are Futures?</a></h2>
+
+<p>A future is a value that represents the completion of an asynchronous
+computation. Usually, the future <em>completes</em> due to an event that happens
+elsewhere in the system. While we’ve been looking at things from the perspective
+of basic I/O, you can use a future to represent a wide range of events, e.g.:</p>
+
+<ul>
+<li><p><strong>A database query</strong> that’s executing in a thread pool. When the query
+finishes, the future is completed, and its value is the result of the query.</p></li>
+
+<li><p><strong>An RPC invocation</strong> to a server. When the server replies, the future is
+completed, and its value is the server’s response.</p></li>
+
+<li><p><strong>A timeout</strong>. When time is up, the future is completed, and its value is
+<code>()</code>.</p></li>
+
+<li><p><strong>A long-running CPU-intensive task</strong>, running on a thread pool. When the task
+finishes, the future is completed, and its value is the return value of the
+task.</p></li>
+
+<li><p><strong>Reading bytes from a socket</strong>. When the bytes are ready, the future is
+completed – and depending on the buffering strategy, the bytes might be
+returned directly, or written as a side-effect into some existing buffer.</p></li>
+</ul>
+
+<p>The entire point of the future abstraction is to allow asynchronous functions,
+i.e., functions that cannot immediately return a value, to be able to return
+<strong>something</strong>.</p>
+
+<p>For example, an asynchronous HTTP client could provide a <code>get</code> function that
+looks like this:</p>
+
+<pre><code class="language-rust,ignore">pub fn get(&amp;self, uri: &amp;str) -&gt; ResponseFuture { ... }
+</code></pre>
+
+<p>Then, the user of the library would use the function as so:</p>
+
+<pre><code class="language-rust,ignore">let response_future = client.get(&quot;https://www.example.com&quot;);
+</code></pre>
+
+<p>Now, the <code>response_future</code> isn&rsquo;t the actual response. It is a future that will
+complete once the response is received. However, since the caller has a concrete
+<strong>thing</strong> (the future), they can start to use it. For example, they may chain
+computations to perform once the response is received or they might pass the
+future to a function.</p>
+
+<pre><code class="language-rust,ignore">let response_is_ok = response_future
+    .map(|response| {
+        response.status().is_ok()
+    });
+
+track_response_success(response_is_ok);
+</code></pre>
+
+<p>All of those actions taken with the future don&rsquo;t immediately perform any work.
+They cannot because they don&rsquo;t have the actual HTTP response. Instead, they
+define the work to be done when the response future completes.</p>
+
+<p>Both the <a href="https://docs.rs/futures/0.1/futures"><code>futures</code></a> crate and Tokio come with a collection of combinator
+functions that can be used to work with futures.</p>
+
+<h2 id="implementing"><a href="#implementing">Implementing <code>Future</code></a></h2>
+
+<p>Implementing the <code>Future</code> is pretty common when using Tokio, so it is important
+to be comfortable with it.</p>
+
+<p>As discussed in the previous section, Rust futures are poll based. This is a
+unique aspect of the Rust future library. Most future libraries for other
+programming languages use a push based model where callbacks are supplied to the
+future and the computation invokes the callback immediately with the computation
+result.</p>
+
+<p>Using a poll based model offers <a href="https://aturon.github.io/blog/2016/09/07/futures-design/">many advantages</a>, including being a zero cost
+abstraction, i.e., using Rust futures has no added overhead compared to writing
+the asynchronous code by hand.</p>
+
+<p>The <code>Future</code> trait is as follows:</p>
+
+<pre><code class="language-rust,ignore">trait Future {
+    /// The type of the value returned when the future completes.
+    type Item;
+
+    /// The type representing errors that occured while processing the
+    /// computation.
+    type Error;
+
+    fn poll(&amp;mut self) -&gt; Result&lt;Async&lt;Self::Item&gt;, Self::Error&gt;;
+}
+</code></pre>
+
+<p>You may notice that this is the exact same trait that was used to implement an
+asynchronous task. This is because asynchronous tasks are &ldquo;just&rdquo; futures that
+complete with a value of <code>()</code> once the computation has completed.</p>
+
+<p>Usually, when you implement a <code>Future</code>, you will be defining a computation that
+is a composition of sub (or inner) futures. In this case, the future implementation tries
+to call the inner future(s) and returns <code>NotReady</code> if the inner futures are not
+ready.</p>
+
+<p>The following example is a future that is composed of another future that
+returns a <code>usize</code> and will double that value:</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate futures;
+# use futures::*;
+pub struct Doubler&lt;T&gt; {
+    inner: T,
+}
+
+pub fn double&lt;T&gt;(inner: T) -&gt; Doubler&lt;T&gt; {
+    Doubler { inner }
+}
+
+impl&lt;T&gt; Future for Doubler&lt;T&gt;
+where T: Future&lt;Item = usize&gt;
+{
+    type Item = usize;
+    type Error = T::Error;
+
+    fn poll(&amp;mut self) -&gt; Result&lt;Async&lt;usize&gt;, T::Error&gt; {
+        match self.inner.poll()? {
+            Async::Ready(v) =&gt; Ok(Async::Ready(v * 2)),
+            Async::NotReady =&gt; Ok(Async::NotReady),
+        }
+    }
+}
+# pub fn main() {}
+</code></pre>
+
+<p>When the <code>Doubler</code> future is polled, it polls its inner future. If the inner
+future is not ready, the <code>Doubler</code> future returns <code>NotReady</code>. If the inner
+future is ready, then the <code>Doubler</code> future doubles the return value and returns
+<code>Ready</code>.</p>
+
+<p>Because the matching pattern above is common, the <a href="https://docs.rs/futures/0.1/futures"><code>futures</code></a> crate provides a
+macro: <code>try_ready!</code>. It is similar to <code>try!</code> or <code>?</code>, but it also returns on
+<code>NotReady</code>. The above <code>poll</code> function can be rewriten using <code>try_ready!</code> as
+follows:</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+# #[macro_use]
+# extern crate futures;
+# use futures::*;
+# pub struct Doubler&lt;T&gt; {
+#     inner: T,
+# }
+#
+# impl&lt;T&gt; Future for Doubler&lt;T&gt;
+# where T: Future&lt;Item = usize&gt;
+# {
+#     type Item = usize;
+#     type Error = T::Error;
+#
+fn poll(&amp;mut self) -&gt; Result&lt;Async&lt;usize&gt;, T::Error&gt; {
+    let v = try_ready!(self.inner.poll());
+    Ok(Async::Ready(v * 2))
+}
+# }
+# pub fn main() {}
+</code></pre>
+
+<h2 id="returning-not-ready"><a href="#returning-not-ready">Returning <code>NotReady</code></a></h2>
+
+<p>The last section handwaved a bit and said that when a task returns <code>NotReady</code>,
+once it transitioned to the ready state, the executor is notifed. This enables
+the executor to be efficient in scheduling tasks.</p>
+
+<p>When a function returns <code>Async::NotReady</code>, it is critical that the executor is
+notified when the state transitions to &ldquo;ready&rdquo;. Otherwise, the task will hang
+infinitely, never getting run again.</p>
+
+<p>For most future implementations, this is done transitively. When a future
+implementation is a combination of sub futures, the outer future only returns
+<code>NotReady</code> when at least one inner future returned <code>NotReady</code>. Thus, the outer
+future will transition to a ready state once the inner future transitions to a
+ready state. In this case, the <code>NotReady</code> contract is already satisfied as the
+inner future will notify the executor when it becomes ready.</p>
+
+<p>Innermost futures, sometimes called &ldquo;resources&rdquo;, are the ones responsible for
+notifying the executor. This is done by calling <a href="https://docs.rs/futures/0.1/futures/executor/trait.Notify.html#tymethod.notify"><code>notify</code></a> on the task returned
+by <a href="https://docs.rs/futures/0.1/futures/task/fn.current.html"><code>task::current()</code></a>.</p>
+
+<p>Before an executor calls <code>poll</code> on a task, it sets the task context to a
+thread-local variable. The inner most future then accesses the context from the
+thread-local so that it is able to notify the task once its readiness state
+changes.</p>
+
+<p>We will be exploring implementing resources and the task system in more depth in
+a later section. The key take away here is <strong>do not return <code>NotReady</code> unless you
+got <code>NotReady</code> from an inner future</strong>.</p>
+
+<h2 id="more-complicated"><a href="#more-completed">A More Complicated Future</a></h2>
+
+<p>Lets look at a slightly more complicated future implementation. In this case, we
+will implement a future that takes a host name, does DNS resolution, then
+establishes a connection to the remote host. We assume a <code>resolve</code> function
+exists that looks like this:</p>
+
+<pre><code class="language-rust,ignore">pub fn resolve(host: &amp;str) -&gt; ResolveFuture;
+</code></pre>
+
+<p>where <code>ResolveFuture</code> is a future returning a <code>SocketAddr</code>.</p>
+
+<p>The steps to implement the future are:</p>
+
+<ol>
+<li>Call <code>resolve</code> to get a <code>ResolveFuture</code> instance.</li>
+<li>Call <code>ResolveFuture::poll</code> until it returns a <code>SocketAddr</code>.</li>
+<li>Pass the <code>SocketAddr</code> to <code>TcpStream::connect</code>.</li>
+<li>Call <code>ConnectFuture::poll</code> until it returns the <code>TcpStream</code>.</li>
+<li>Complete the outer future with the <code>TcpStream</code>.</li>
+</ol>
+
+<p>We will use an <code>enum</code> to track the state of the future as it advances through
+these steps.</p>
+
+<pre><code class="language-rust"># extern crate tokio;
+# use tokio::net::ConnectFuture;
+# pub struct ResolveFuture;
+enum State {
+    // Currently resolving the host name
+    Resolving(ResolveFuture),
+
+    // Establishing a TCP connection to the remote host
+    Connecting(ConnectFuture),
+}
+# pub fn main() {}
+</code></pre>
+
+<p>And the <code>ResolveAndConnect</code> future is defined as:</p>
+
+<pre><code class="language-rust"># pub struct State;
+pub struct ResolveAndConnect {
+    state: State,
+}
+</code></pre>
+
+<p>Now, the implementation:</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+# #[macro_use]
+# extern crate futures;
+# extern crate tokio;
+# use tokio::net::{ConnectFuture, TcpStream};
+# use futures::prelude::*;
+# use std::io;
+# pub struct ResolveFuture;
+# enum State {
+#     Resolving(ResolveFuture),
+#     Connecting(ConnectFuture),
+# }
+# fn resolve(host: &amp;str) -&gt; ResolveFuture { unimplemented!() }
+# impl Future for ResolveFuture {
+#     type Item = ::std::net::SocketAddr;
+#     type Error = io::Error;
+#     fn poll(&amp;mut self) -&gt; Poll&lt;Self::Item, Self::Error&gt; {
+#         unimplemented!();
+#     }
+# }
+#
+# pub struct ResolveAndConnect {
+#     state: State,
+# }
+pub fn resolve_and_connect(host: &amp;str) -&gt; ResolveAndConnect {
+    let state = State::Resolving(resolve(host));
+    ResolveAndConnect { state }
+}
+
+impl Future for ResolveAndConnect {
+    type Item = TcpStream;
+    type Error = io::Error;
+
+    fn poll(&amp;mut self) -&gt; Result&lt;Async&lt;TcpStream&gt;, io::Error&gt; {
+        use self::State::*;
+
+        loop {
+            let addr = match self.state {
+                Resolving(ref mut fut) =&gt; {
+                    try_ready!(fut.poll())
+                }
+                Connecting(ref mut fut) =&gt; {
+                    return fut.poll();
+                }
+            };
+
+            let connecting = TcpStream::connect(&amp;addr);
+            self.state = Connecting(connecting);
+        }
+    }
+}
+# pub fn main() {}
+</code></pre>
+
+<p>This illustrates how <code>Future</code> implementations are state machines. This future
+can be in either of two states:</p>
+
+<ol>
+<li>Resolving</li>
+<li>Connecting</li>
+</ol>
+
+<p>Each time <code>poll</code> is called, we try to advance the state machine to the next
+state.</p>
+
+<p>Now, the future we just implemented is basically <a href="https://docs.rs/futures/0.1/futures/future/struct.AndThen.html"><code>AndThen</code></a>, so we would
+probably just use that combinator instead of re-implementing it.</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+# #[macro_use]
+# extern crate futures;
+# extern crate tokio;
+# use tokio::net::{ConnectFuture, TcpStream};
+# use futures::prelude::*;
+# use std::io;
+# pub struct ResolveFuture;
+# fn resolve(host: &amp;str) -&gt; ResolveFuture { unimplemented!() }
+# impl Future for ResolveFuture {
+#     type Item = ::std::net::SocketAddr;
+#     type Error = io::Error;
+#     fn poll(&amp;mut self) -&gt; Poll&lt;Self::Item, Self::Error&gt; {
+#         unimplemented!();
+#     }
+# }
+# pub fn dox(my_host: &amp;str) {
+# let _ =
+resolve(my_host)
+    .and_then(|addr| TcpStream::connect(&amp;addr))
+# ;
+# }
+# pub fn main() {}
+</code></pre>
+
+<p>which is much shorter.</p>
+
+        
+        <div class="tk-next"><b>Next up</b>: <a href = /docs/getting-started/tasks/>
+         Tasks</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <footer class="tk-footer">
+      <div class="text-muted tk-footer-gray d-flex justify-content-between">
+        <div class="tk-footer-info">
+          版权所有 © 2018 <a href="https://tokio.rs">Tokio 项目</a> & <a href="https://hltj.me">灰蓝天际</a> 
+        </div>
+        <div class="tk-footer-social">
+          <a href="https://twitter.com/tokio_rs" class="text-muted"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+          <a href="https://github.com/tokio-rs/tokio" class="text-muted"><i class="fa fa-github" aria-hidden="true"></i></a>
+        </div>
+      </div>
+    </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
+    <script src="https://tokio-cn.github.io/js/bootstrap.min.js"></script>
+    <script src="https://tokio-cn.github.io/js/highlight.js"></script>
+    <script>
+      $(function () {
+        $("pre code").each(function(i, block) {
+          
+          if (block.className.indexOf('language-rust') >= 0) {
+            var new_content = '';
+            var lines = block.textContent.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+              if (lines[i].indexOf('# ') == 0 || lines[i] == '#') {
+                continue
+              }
+              new_content += lines[i].trimRight() + '\n';
+            }
+            block.textContent = new_content.replace(/\n\n\n/g, "\n\n").trimRight();
+          }
+          hljs.highlightBlock(block);
+        });
+      });
+    </script>
+    
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-122396021-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+  </body>
+</html>
+

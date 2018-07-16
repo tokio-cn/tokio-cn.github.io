@@ -1,0 +1,2916 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Docs on Tokio</title>
+    <link>https://tokio-cn.github.io/docs/index.xml</link>
+    <description>Recent content in Docs on Tokio</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <atom:link href="https://tokio-cn.github.io/docs/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Hello World!</title>
+      <link>https://tokio-cn.github.io/docs/getting-started/hello-world/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/getting-started/hello-world/</guid>
+      <description>
+
+&lt;p&gt;To kick off our tour of Tokio, we will start with the obligatory &amp;ldquo;hello world&amp;rdquo;
+example. This server will listen for incoming connections. Once a connection is
+received, it will write &amp;ldquo;hello world&amp;rdquo; to the client and close the connection.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s get started.&lt;/p&gt;
+
+&lt;p&gt;First, generate a new crate.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;$ cargo new --bin hello-world
+$ cd hello-world
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, add the necessary dependencies:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-toml&#34;&gt;[dependencies]
+tokio = &amp;quot;0.1&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;and the crates and types into scope in &lt;code&gt;main.rs&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+extern crate tokio;
+
+use tokio::io;
+use tokio::net::TcpListener;
+use tokio::prelude::*;
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;writing&#34;&gt;&lt;a href=&#34;#writing&#34;&gt;Writing the server&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;The first step is to bind a &lt;code&gt;TcpListener&lt;/code&gt; to a local port. We use the
+&lt;code&gt;TcpListener&lt;/code&gt; implementation provided by Tokio.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+#
+# use tokio::io;
+# use tokio::net::TcpListener;
+# use tokio::prelude::*;
+fn main() {
+    let addr = &amp;quot;127.0.0.1:6142&amp;quot;.parse().unwrap();
+    let listener = TcpListener::bind(&amp;amp;addr).unwrap();
+
+    // Following snippets come here...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, we define the server task. This asynchronous task will listen for incoming
+connections on the bound listener and process each accepted connection.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+#
+# use tokio::io;
+# use tokio::net::TcpListener;
+# use tokio::prelude::*;
+# fn main() {
+#     let addr = &amp;quot;127.0.0.1:6142&amp;quot;.parse().unwrap();
+#     let listener = TcpListener::bind(&amp;amp;addr).unwrap();
+let server = listener.incoming().for_each(|socket| {
+    println!(&amp;quot;accepted socket; addr={:?}&amp;quot;, socket.peer_addr().unwrap());
+
+    // Process socket here.
+
+    Ok(())
+})
+.map_err(|err| {
+    // All tasks must have an `Error` type of `()`. This forces error
+    // handling and helps avoid silencing failures.
+    //
+    // In our example, we are only going to log the error to STDOUT.
+    println!(&amp;quot;accept error = {:?}&amp;quot;, err);
+});
+# }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Combinator functions are used to define asynchronous tasks. The call to
+&lt;code&gt;listener.incoming()&lt;/code&gt; returns a &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html&#34;&gt;&lt;code&gt;Stream&lt;/code&gt;&lt;/a&gt; of accepted connections. A &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html&#34;&gt;&lt;code&gt;Stream&lt;/code&gt;&lt;/a&gt;
+is kind of like an asynchronous iterator.&lt;/p&gt;
+
+&lt;p&gt;Each combinator function takes ownership of necessary state as well as the
+callback to perform and returns a new &lt;code&gt;Future&lt;/code&gt; or &lt;code&gt;Stream&lt;/code&gt; that has the
+additional &amp;ldquo;step&amp;rdquo; sequenced.&lt;/p&gt;
+
+&lt;p&gt;Returned futures and streams are lazy, i.e., no work is performed when calling
+the combinator. Instead, once all the asynchronous steps are sequenced, the
+final &lt;code&gt;Future&lt;/code&gt; (representing the task) is spawned on an executor. This is when
+the work that was previously defined starts getting run.&lt;/p&gt;
+
+&lt;p&gt;We will be digging into futures and streams later on.&lt;/p&gt;
+
+&lt;h2 id=&#34;spawning&#34;&gt;&lt;a href=&#34;#spawning&#34;&gt;Spawning the task&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Executors are responsible for scheduling asynchronous tasks, driving them to
+completion. There are a number of executor implementations to choose from, each have
+different pros and cons. In this example, we will use the &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/runtime/index.html&#34;&gt;Tokio runtime&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The Tokio runtime is a pre-configured runtime for asynchronous applications. It
+includes a thread pool as the default executor. This thread pool is tuned for
+usage in asynchronous applications.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+# extern crate futures;
+#
+# use tokio::io;
+# use tokio::net::TcpListener;
+# use tokio::prelude::*;
+# use futures::future;
+# fn main() {
+# let server = future::ok(());
+
+println!(&amp;quot;server running on localhost:6142&amp;quot;);
+tokio::run(server);
+# }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;tokio::run&lt;/code&gt; starts the runtime, blocking the current thread until
+all spawned tasks have completed and all resources (like TCP sockets) have been
+dropped. Spawning a task using &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/fn.spawn.html&#34;&gt;&lt;code&gt;tokio::spawn&lt;/code&gt;&lt;/a&gt; &lt;strong&gt;must&lt;/strong&gt; happen from within the
+context of a &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/runtime/index.html&#34;&gt;runtime&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;So far, we only have a single task running on the executor, so the &lt;code&gt;server&lt;/code&gt; task
+is the only one blocking &lt;code&gt;run&lt;/code&gt; from returning.&lt;/p&gt;
+
+&lt;p&gt;Next, we will process the inbound sockets.&lt;/p&gt;
+
+&lt;h2 id=&#34;writing-data&#34;&gt;&lt;a href=&#34;#writing-data&#34;&gt;Writing Data&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Our goal is to write &lt;code&gt;&amp;quot;hello world\n&amp;quot;&lt;/code&gt; on each accepted socket. We will do this
+by defining a new asynchronous task to do the write and spawning that task on
+the same &lt;code&gt;current_thread&lt;/code&gt; executor.&lt;/p&gt;
+
+&lt;p&gt;Going back to the &lt;code&gt;incoming().for_each&lt;/code&gt; block.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+#
+# use tokio::io;
+# use tokio::net::TcpListener;
+# use tokio::prelude::*;
+# fn main() {
+#     let addr = &amp;quot;127.0.0.1:6142&amp;quot;.parse().unwrap();
+#     let listener = TcpListener::bind(&amp;amp;addr).unwrap();
+let server = listener.incoming().for_each(|socket| {
+    println!(&amp;quot;accepted socket; addr={:?}&amp;quot;, socket.peer_addr().unwrap());
+
+    let connection = io::write_all(socket, &amp;quot;hello world\n&amp;quot;)
+        .then(|res| {
+            println!(&amp;quot;wrote message; success={:?}&amp;quot;, res.is_ok());
+            Ok(())
+        });
+
+    // Spawn a new task that processes the socket:
+    tokio::spawn(connection);
+
+    Ok(())
+})
+# ;
+# }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We are defining another asynchronous task. This task will take ownership of the
+socket, write the message on that socket, then complete. The &lt;code&gt;connection&lt;/code&gt;
+variable holds the final task. Again, no work has yet been performed.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;tokio::spawn&lt;/code&gt; is used to spawn the task on the runtime. Because the
+&lt;code&gt;server&lt;/code&gt; future is running on the runtime, we are able to spawn further tasks.
+&lt;code&gt;tokio::spawn&lt;/code&gt; will panic if called from outside of the runtime.&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/io/fn.write_all.html&#34;&gt;&lt;code&gt;io::write_all&lt;/code&gt;&lt;/a&gt; function takes ownership of &lt;code&gt;socket&lt;/code&gt;, returning a
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html&#34;&gt;&lt;code&gt;Future&lt;/code&gt;&lt;/a&gt; that completes once the entire message has been written to the
+socket. &lt;code&gt;then&lt;/code&gt; is used to sequence a step that gets run once the write has
+completed. In our example, we just write a message to &lt;code&gt;STDOUT&lt;/code&gt; indicating that
+the write has completed.&lt;/p&gt;
+
+&lt;p&gt;Note that &lt;code&gt;res&lt;/code&gt; is a &lt;code&gt;Result&lt;/code&gt; that contains the original socket. This allows us
+to sequence additional reads or writes on the same socket. However, we have
+nothing more to do, so we just drop the socket, which closes it.&lt;/p&gt;
+
+&lt;p&gt;You can find the full example &lt;a href=&#34;https://github.com/tokio-rs/tokio/blob/master/examples/hello_world.rs&#34;&gt;here&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;next-steps&#34;&gt;&lt;a href=&#34;#next-steps&#34;&gt;Next steps&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;We&amp;rsquo;ve only dipped our toes in Tokio and its asynchronous model. The next page in
+the guide, will start digging deeper into the Tokio runtime model.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Runtime Model</title>
+      <link>https://tokio-cn.github.io/docs/getting-started/runtime-model/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/getting-started/runtime-model/</guid>
+      <description>
+
+&lt;p&gt;Now we will go over the Tokio / futures runtime model. Tokio is built on top of
+the &lt;a href=&#34;https://docs.rs/futures/0.1/futures&#34;&gt;&lt;code&gt;futures&lt;/code&gt;&lt;/a&gt; crate and uses its runtime model. This allows it to interop
+with other libraries also using the &lt;a href=&#34;https://docs.rs/futures/0.1/futures&#34;&gt;&lt;code&gt;futures&lt;/code&gt;&lt;/a&gt; crate.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: This runtime model is very different than async libraries found in
+other languages. While, at a high level, APIs can look similar, the way code
+gets executed differs.&lt;/p&gt;
+
+&lt;h2 id=&#34;synchronous&#34;&gt;&lt;a href=&#34;#synchronous&#34;&gt;Synchronous Model&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;First, let&amp;rsquo;s talk briefly about the synchronous (or blocking) model. This is the
+model that the Rust &lt;a href=&#34;https://doc.rust-lang.org/std/&#34;&gt;standard library&lt;/a&gt; uses.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# use std::io::prelude::*;
+# use std::net::TcpStream;
+# fn dox(mut socket: TcpStream) {
+// let socket = ...;
+let mut buf = [0; 1024];
+let n = socket.read(&amp;amp;mut buf).unwrap();
+
+// Do something with &amp;amp;buf[..n];
+# }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When &lt;code&gt;socket.read&lt;/code&gt; is called, either the socket has pending data in its receive
+buffer or it does not. If there is pending data, then the call to &lt;code&gt;read&lt;/code&gt; will
+return immediately and &lt;code&gt;buf&lt;/code&gt; will be filled with that data. However, if there is
+no pending data, then the &lt;code&gt;read&lt;/code&gt; function will block the current thread until
+data is received. At which time, &lt;code&gt;buf&lt;/code&gt; will be filled with this newly received
+data and the &lt;code&gt;read&lt;/code&gt; function will return.&lt;/p&gt;
+
+&lt;p&gt;In order to perform reads on many different sockets concurrently, a thread per
+socket is required. Using a thread per socket does not scale up very well to
+large numbers of sockets. This is known as the &lt;a href=&#34;https://en.wikipedia.org/wiki/C10k_problem&#34;&gt;c10k&lt;/a&gt; problem.&lt;/p&gt;
+
+&lt;h2 id=&#34;non-blocking&#34;&gt;&lt;a href=&#34;#non-blocking&#34;&gt;Non-blocking sockets&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;The way to avoid blocking a thread when performing an operation like read is to
+not block the thread! When the socket has no pending data in its receive buffer,
+the &lt;code&gt;read&lt;/code&gt; function returns immediately, indicating that the socket was &amp;ldquo;not
+ready&amp;rdquo; to perform the read operation.&lt;/p&gt;
+
+&lt;p&gt;When using a Tokio &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/net/struct.TcpStream.html&#34;&gt;&lt;code&gt;TcpStream&lt;/code&gt;&lt;/a&gt;, a call to &lt;code&gt;read&lt;/code&gt; will return an error of kind
+&lt;a href=&#34;https://doc.rust-lang.org/std/io/enum.ErrorKind.html#variant.WouldBlock&#34;&gt;&lt;code&gt;ErrorKind::WouldBlock&lt;/code&gt;&lt;/a&gt; if there is no pending data to read. At this point,
+the caller is responsible for calling &lt;code&gt;read&lt;/code&gt; again at a later time. The trick is
+to know when that &amp;ldquo;later time&amp;rdquo; is.&lt;/p&gt;
+
+&lt;p&gt;Another way to think about a non-blocking read is as &amp;ldquo;polling&amp;rdquo; the socket for
+data to read.&lt;/p&gt;
+
+&lt;h2 id=&#34;polling&#34;&gt;&lt;a href=&#34;#polling&#34;&gt;Polling Model&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;The strategy of polling a socket for data can be generalized to any operation.
+For example, a function to get a &amp;ldquo;widget&amp;rdquo; in the polling model would look
+something like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust,ignore&#34;&gt;fn poll_widget() -&amp;gt; Async&amp;lt;Widget&amp;gt; { ... }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This function returns an &lt;code&gt;Async&amp;lt;Widget&amp;gt;&lt;/code&gt; where &lt;a href=&#34;https://docs.rs/futures/0.1/futures/enum.Async.html&#34;&gt;&lt;code&gt;Async&lt;/code&gt;&lt;/a&gt; is an enum of
+&lt;code&gt;Ready(Widget)&lt;/code&gt; or &lt;code&gt;NotReady&lt;/code&gt;. The &lt;a href=&#34;https://docs.rs/futures/0.1/futures/enum.Async.html&#34;&gt;&lt;code&gt;Async&lt;/code&gt;&lt;/a&gt; enum is provided by the &lt;a href=&#34;https://docs.rs/futures/0.1/futures&#34;&gt;&lt;code&gt;futures&lt;/code&gt;&lt;/a&gt;
+crate and is one of the building blocks of the polling model.&lt;/p&gt;
+
+&lt;p&gt;Now, lets define an asynchronous task without combinators that uses this
+&lt;code&gt;poll_widget&lt;/code&gt; function. The task will do the following:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Acquire a widget.&lt;/li&gt;
+&lt;li&gt;Print the widget to STDOUT.&lt;/li&gt;
+&lt;li&gt;Terminate the task.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;To define a task, we implement the &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html&#34;&gt;&lt;code&gt;Future&lt;/code&gt;&lt;/a&gt; trait.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate futures;
+# use futures::{Async, Future};
+#
+# #[derive(Debug)]
+# pub struct Widget;
+# fn poll_widget() -&amp;gt; Async&amp;lt;Widget&amp;gt; { unimplemented!() }
+#
+/// A task that polls a single widget and writes it to STDOUT.
+pub struct MyTask;
+
+impl Future for MyTask {
+    type Item = ();
+    type Error = ();
+
+    fn poll(&amp;amp;mut self) -&amp;gt; Result&amp;lt;Async&amp;lt;()&amp;gt;, ()&amp;gt; {
+        match poll_widget() {
+            Async::Ready(widget) =&amp;gt; {
+                println!(&amp;quot;widget={:?}&amp;quot;, widget);
+                Ok(Async::Ready(()))
+            }
+            Async::NotReady =&amp;gt; {
+                return Ok(Async::NotReady);
+            }
+        }
+    }
+}
+#
+# fn main() {
+# }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Important&lt;/strong&gt;: Returning &lt;code&gt;Async::NotReady&lt;/code&gt; has special meaning. See the &lt;a href=&#34;https://tokio-cn.github.io/docs/getting-started/futures/#returning-not-ready&#34;&gt;next
+section&lt;/a&gt; for more details.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;The key thing to note is, when &lt;code&gt;MyTask::poll&lt;/code&gt; is called, it immediately tries to
+get the widget. If the call to &lt;code&gt;poll_widget&lt;/code&gt; returns &lt;code&gt;NotReady&lt;/code&gt;, then the task
+is unable to make further progress. The task then returns &lt;code&gt;NotReady&lt;/code&gt; itself,
+indicating that it is not ready to complete processing.&lt;/p&gt;
+
+&lt;p&gt;The task implementation does not block. Instead, &amp;ldquo;sometime in the future&amp;rdquo;, the
+executor will call &lt;code&gt;MyTask::poll&lt;/code&gt; again. &lt;code&gt;poll_widget&lt;/code&gt; will be called again. If
+&lt;code&gt;poll_widget&lt;/code&gt; is ready to return a widget, then the task, in turn, is ready to
+print the widget. The task can then complete by returning &lt;code&gt;Ready&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;executors&#34;&gt;&lt;a href=&#34;#executors&#34;&gt;Executors&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;In order for the task to make progress, something has to call &lt;code&gt;MyTask::poll&lt;/code&gt;.
+This is the job of an executor.&lt;/p&gt;
+
+&lt;p&gt;Executors are responsible for repeatedly calling &lt;code&gt;poll&lt;/code&gt; on a task until &lt;code&gt;Ready&lt;/code&gt;
+is returned. There are many different ways to do this. For example, the
+&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/executor/current_thread/index.html&#34;&gt;&lt;code&gt;CurrentThread&lt;/code&gt;&lt;/a&gt; executor will block the current thread and loop through all
+spawned tasks, calling poll on them. &lt;a href=&#34;http://docs.rs/tokio-threadpool&#34;&gt;&lt;code&gt;ThreadPool&lt;/code&gt;&lt;/a&gt; schedules tasks across a thread
+pool. This is also the default executor used by the &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/runtime/index.html&#34;&gt;runtime&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;All tasks &lt;strong&gt;must&lt;/strong&gt; be spawned on an executor or no work will be performed.&lt;/p&gt;
+
+&lt;p&gt;At the very simplest, an executor could look something like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate futures;
+# use futures::{Async, Future};
+# use std::collections::VecDeque;
+#
+pub struct SpinExecutor {
+    tasks: VecDeque&amp;lt;Box&amp;lt;Future&amp;lt;Item = (), Error = ()&amp;gt;&amp;gt;&amp;gt;,
+}
+
+impl SpinExecutor {
+    pub fn spawn&amp;lt;T&amp;gt;(&amp;amp;mut self, task: T)
+    where T: Future&amp;lt;Item = (), Error = ()&amp;gt; + &#39;static
+    {
+        self.tasks.push_back(Box::new(task));
+    }
+
+    pub fn run(&amp;amp;mut self) {
+        while let Some(mut task) = self.tasks.pop_front() {
+            match task.poll().unwrap() {
+                Async::Ready(_) =&amp;gt; {}
+                Async::NotReady =&amp;gt; {
+                    self.tasks.push_back(task);
+                }
+            }
+        }
+    }
+}
+# pub fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Of course, this would not be very efficient. The executor spins in a busy loop
+and tries to poll all tasks even if the task will just return &lt;code&gt;NotReady&lt;/code&gt; again.&lt;/p&gt;
+
+&lt;p&gt;Ideally, there would be some way for the executor to know when the &amp;ldquo;readiness&amp;rdquo;
+state of a task is changed, i.e.  when a call to &lt;code&gt;poll&lt;/code&gt; will return &lt;code&gt;Ready&lt;/code&gt;.
+Then, the executor would look something like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate futures;
+# use futures::{Async, Future};
+# use std::collections::VecDeque;
+#
+# pub struct SpinExecutor {
+#     ready_tasks: VecDeque&amp;lt;Box&amp;lt;Future&amp;lt;Item = (), Error = ()&amp;gt;&amp;gt;&amp;gt;,
+#     not_ready_tasks: VecDeque&amp;lt;Box&amp;lt;Future&amp;lt;Item = (), Error = ()&amp;gt;&amp;gt;&amp;gt;,
+# }
+#
+# impl SpinExecutor {
+#     fn sleep_until_tasks_are_ready(&amp;amp;self) {}
+#
+    pub fn run(&amp;amp;mut self) {
+        loop {
+            while let Some(mut task) = self.ready_tasks.pop_front() {
+                match task.poll().unwrap() {
+                    Async::Ready(_) =&amp;gt; {}
+                    Async::NotReady =&amp;gt; {
+                        self.not_ready_tasks.push_back(task);
+                    }
+                }
+            }
+
+            if self.not_ready_tasks.is_empty() {
+                return;
+            }
+
+            // Put the thread to sleep until there is work to do
+            self.sleep_until_tasks_are_ready();
+        }
+    }
+# }
+# pub fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Being able to get notified when a task goes from &amp;ldquo;not ready&amp;rdquo; to &amp;ldquo;ready&amp;rdquo; is the
+core of the &lt;a href=&#34;https://docs.rs/futures/0.1/futures&#34;&gt;&lt;code&gt;futures&lt;/code&gt;&lt;/a&gt; task model. We will be digging more into that shortly.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Futures</title>
+      <link>https://tokio-cn.github.io/docs/getting-started/futures/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/getting-started/futures/</guid>
+      <description>
+
+&lt;p&gt;Futures, hinted at earlier in the guide, are the building block used to manage
+asynchronous logic. They are the underlying asynchronous abstraction used by
+Tokio.&lt;/p&gt;
+
+&lt;p&gt;The future implementation is provided by the &lt;a href=&#34;https://docs.rs/futures/0.1/futures&#34;&gt;&lt;code&gt;futures&lt;/code&gt;&lt;/a&gt; crate. However, for
+convenience, Tokio re-exports a number of the types.&lt;/p&gt;
+
+&lt;h2 id=&#34;what-are-futures&#34;&gt;&lt;a href=&#34;#what-are-futures&#34;&gt;What Are Futures?&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;A future is a value that represents the completion of an asynchronous
+computation. Usually, the future &lt;em&gt;completes&lt;/em&gt; due to an event that happens
+elsewhere in the system. While we’ve been looking at things from the perspective
+of basic I/O, you can use a future to represent a wide range of events, e.g.:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;A database query&lt;/strong&gt; that’s executing in a thread pool. When the query
+finishes, the future is completed, and its value is the result of the query.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;An RPC invocation&lt;/strong&gt; to a server. When the server replies, the future is
+completed, and its value is the server’s response.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;A timeout&lt;/strong&gt;. When time is up, the future is completed, and its value is
+&lt;code&gt;()&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;A long-running CPU-intensive task&lt;/strong&gt;, running on a thread pool. When the task
+finishes, the future is completed, and its value is the return value of the
+task.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;strong&gt;Reading bytes from a socket&lt;/strong&gt;. When the bytes are ready, the future is
+completed – and depending on the buffering strategy, the bytes might be
+returned directly, or written as a side-effect into some existing buffer.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The entire point of the future abstraction is to allow asynchronous functions,
+i.e., functions that cannot immediately return a value, to be able to return
+&lt;strong&gt;something&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;For example, an asynchronous HTTP client could provide a &lt;code&gt;get&lt;/code&gt; function that
+looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust,ignore&#34;&gt;pub fn get(&amp;amp;self, uri: &amp;amp;str) -&amp;gt; ResponseFuture { ... }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then, the user of the library would use the function as so:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust,ignore&#34;&gt;let response_future = client.get(&amp;quot;https://www.example.com&amp;quot;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now, the &lt;code&gt;response_future&lt;/code&gt; isn&amp;rsquo;t the actual response. It is a future that will
+complete once the response is received. However, since the caller has a concrete
+&lt;strong&gt;thing&lt;/strong&gt; (the future), they can start to use it. For example, they may chain
+computations to perform once the response is received or they might pass the
+future to a function.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust,ignore&#34;&gt;let response_is_ok = response_future
+    .map(|response| {
+        response.status().is_ok()
+    });
+
+track_response_success(response_is_ok);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;All of those actions taken with the future don&amp;rsquo;t immediately perform any work.
+They cannot because they don&amp;rsquo;t have the actual HTTP response. Instead, they
+define the work to be done when the response future completes.&lt;/p&gt;
+
+&lt;p&gt;Both the &lt;a href=&#34;https://docs.rs/futures/0.1/futures&#34;&gt;&lt;code&gt;futures&lt;/code&gt;&lt;/a&gt; crate and Tokio come with a collection of combinator
+functions that can be used to work with futures.&lt;/p&gt;
+
+&lt;h2 id=&#34;implementing&#34;&gt;&lt;a href=&#34;#implementing&#34;&gt;Implementing &lt;code&gt;Future&lt;/code&gt;&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Implementing the &lt;code&gt;Future&lt;/code&gt; is pretty common when using Tokio, so it is important
+to be comfortable with it.&lt;/p&gt;
+
+&lt;p&gt;As discussed in the previous section, Rust futures are poll based. This is a
+unique aspect of the Rust future library. Most future libraries for other
+programming languages use a push based model where callbacks are supplied to the
+future and the computation invokes the callback immediately with the computation
+result.&lt;/p&gt;
+
+&lt;p&gt;Using a poll based model offers &lt;a href=&#34;https://aturon.github.io/blog/2016/09/07/futures-design/&#34;&gt;many advantages&lt;/a&gt;, including being a zero cost
+abstraction, i.e., using Rust futures has no added overhead compared to writing
+the asynchronous code by hand.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;Future&lt;/code&gt; trait is as follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust,ignore&#34;&gt;trait Future {
+    /// The type of the value returned when the future completes.
+    type Item;
+
+    /// The type representing errors that occured while processing the
+    /// computation.
+    type Error;
+
+    fn poll(&amp;amp;mut self) -&amp;gt; Result&amp;lt;Async&amp;lt;Self::Item&amp;gt;, Self::Error&amp;gt;;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You may notice that this is the exact same trait that was used to implement an
+asynchronous task. This is because asynchronous tasks are &amp;ldquo;just&amp;rdquo; futures that
+complete with a value of &lt;code&gt;()&lt;/code&gt; once the computation has completed.&lt;/p&gt;
+
+&lt;p&gt;Usually, when you implement a &lt;code&gt;Future&lt;/code&gt;, you will be defining a computation that
+is a composition of sub (or inner) futures. In this case, the future implementation tries
+to call the inner future(s) and returns &lt;code&gt;NotReady&lt;/code&gt; if the inner futures are not
+ready.&lt;/p&gt;
+
+&lt;p&gt;The following example is a future that is composed of another future that
+returns a &lt;code&gt;usize&lt;/code&gt; and will double that value:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate futures;
+# use futures::*;
+pub struct Doubler&amp;lt;T&amp;gt; {
+    inner: T,
+}
+
+pub fn double&amp;lt;T&amp;gt;(inner: T) -&amp;gt; Doubler&amp;lt;T&amp;gt; {
+    Doubler { inner }
+}
+
+impl&amp;lt;T&amp;gt; Future for Doubler&amp;lt;T&amp;gt;
+where T: Future&amp;lt;Item = usize&amp;gt;
+{
+    type Item = usize;
+    type Error = T::Error;
+
+    fn poll(&amp;amp;mut self) -&amp;gt; Result&amp;lt;Async&amp;lt;usize&amp;gt;, T::Error&amp;gt; {
+        match self.inner.poll()? {
+            Async::Ready(v) =&amp;gt; Ok(Async::Ready(v * 2)),
+            Async::NotReady =&amp;gt; Ok(Async::NotReady),
+        }
+    }
+}
+# pub fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When the &lt;code&gt;Doubler&lt;/code&gt; future is polled, it polls its inner future. If the inner
+future is not ready, the &lt;code&gt;Doubler&lt;/code&gt; future returns &lt;code&gt;NotReady&lt;/code&gt;. If the inner
+future is ready, then the &lt;code&gt;Doubler&lt;/code&gt; future doubles the return value and returns
+&lt;code&gt;Ready&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Because the matching pattern above is common, the &lt;a href=&#34;https://docs.rs/futures/0.1/futures&#34;&gt;&lt;code&gt;futures&lt;/code&gt;&lt;/a&gt; crate provides a
+macro: &lt;code&gt;try_ready!&lt;/code&gt;. It is similar to &lt;code&gt;try!&lt;/code&gt; or &lt;code&gt;?&lt;/code&gt;, but it also returns on
+&lt;code&gt;NotReady&lt;/code&gt;. The above &lt;code&gt;poll&lt;/code&gt; function can be rewriten using &lt;code&gt;try_ready!&lt;/code&gt; as
+follows:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# #[macro_use]
+# extern crate futures;
+# use futures::*;
+# pub struct Doubler&amp;lt;T&amp;gt; {
+#     inner: T,
+# }
+#
+# impl&amp;lt;T&amp;gt; Future for Doubler&amp;lt;T&amp;gt;
+# where T: Future&amp;lt;Item = usize&amp;gt;
+# {
+#     type Item = usize;
+#     type Error = T::Error;
+#
+fn poll(&amp;amp;mut self) -&amp;gt; Result&amp;lt;Async&amp;lt;usize&amp;gt;, T::Error&amp;gt; {
+    let v = try_ready!(self.inner.poll());
+    Ok(Async::Ready(v * 2))
+}
+# }
+# pub fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;returning-not-ready&#34;&gt;&lt;a href=&#34;#returning-not-ready&#34;&gt;Returning &lt;code&gt;NotReady&lt;/code&gt;&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;The last section handwaved a bit and said that when a task returns &lt;code&gt;NotReady&lt;/code&gt;,
+once it transitioned to the ready state, the executor is notifed. This enables
+the executor to be efficient in scheduling tasks.&lt;/p&gt;
+
+&lt;p&gt;When a function returns &lt;code&gt;Async::NotReady&lt;/code&gt;, it is critical that the executor is
+notified when the state transitions to &amp;ldquo;ready&amp;rdquo;. Otherwise, the task will hang
+infinitely, never getting run again.&lt;/p&gt;
+
+&lt;p&gt;For most future implementations, this is done transitively. When a future
+implementation is a combination of sub futures, the outer future only returns
+&lt;code&gt;NotReady&lt;/code&gt; when at least one inner future returned &lt;code&gt;NotReady&lt;/code&gt;. Thus, the outer
+future will transition to a ready state once the inner future transitions to a
+ready state. In this case, the &lt;code&gt;NotReady&lt;/code&gt; contract is already satisfied as the
+inner future will notify the executor when it becomes ready.&lt;/p&gt;
+
+&lt;p&gt;Innermost futures, sometimes called &amp;ldquo;resources&amp;rdquo;, are the ones responsible for
+notifying the executor. This is done by calling &lt;a href=&#34;https://docs.rs/futures/0.1/futures/executor/trait.Notify.html#tymethod.notify&#34;&gt;&lt;code&gt;notify&lt;/code&gt;&lt;/a&gt; on the task returned
+by &lt;a href=&#34;https://docs.rs/futures/0.1/futures/task/fn.current.html&#34;&gt;&lt;code&gt;task::current()&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Before an executor calls &lt;code&gt;poll&lt;/code&gt; on a task, it sets the task context to a
+thread-local variable. The inner most future then accesses the context from the
+thread-local so that it is able to notify the task once its readiness state
+changes.&lt;/p&gt;
+
+&lt;p&gt;We will be exploring implementing resources and the task system in more depth in
+a later section. The key take away here is &lt;strong&gt;do not return &lt;code&gt;NotReady&lt;/code&gt; unless you
+got &lt;code&gt;NotReady&lt;/code&gt; from an inner future&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;more-complicated&#34;&gt;&lt;a href=&#34;#more-completed&#34;&gt;A More Complicated Future&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Lets look at a slightly more complicated future implementation. In this case, we
+will implement a future that takes a host name, does DNS resolution, then
+establishes a connection to the remote host. We assume a &lt;code&gt;resolve&lt;/code&gt; function
+exists that looks like this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust,ignore&#34;&gt;pub fn resolve(host: &amp;amp;str) -&amp;gt; ResolveFuture;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where &lt;code&gt;ResolveFuture&lt;/code&gt; is a future returning a &lt;code&gt;SocketAddr&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The steps to implement the future are:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Call &lt;code&gt;resolve&lt;/code&gt; to get a &lt;code&gt;ResolveFuture&lt;/code&gt; instance.&lt;/li&gt;
+&lt;li&gt;Call &lt;code&gt;ResolveFuture::poll&lt;/code&gt; until it returns a &lt;code&gt;SocketAddr&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Pass the &lt;code&gt;SocketAddr&lt;/code&gt; to &lt;code&gt;TcpStream::connect&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Call &lt;code&gt;ConnectFuture::poll&lt;/code&gt; until it returns the &lt;code&gt;TcpStream&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Complete the outer future with the &lt;code&gt;TcpStream&lt;/code&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;We will use an &lt;code&gt;enum&lt;/code&gt; to track the state of the future as it advances through
+these steps.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# extern crate tokio;
+# use tokio::net::ConnectFuture;
+# pub struct ResolveFuture;
+enum State {
+    // Currently resolving the host name
+    Resolving(ResolveFuture),
+
+    // Establishing a TCP connection to the remote host
+    Connecting(ConnectFuture),
+}
+# pub fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And the &lt;code&gt;ResolveAndConnect&lt;/code&gt; future is defined as:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# pub struct State;
+pub struct ResolveAndConnect {
+    state: State,
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now, the implementation:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# #[macro_use]
+# extern crate futures;
+# extern crate tokio;
+# use tokio::net::{ConnectFuture, TcpStream};
+# use futures::prelude::*;
+# use std::io;
+# pub struct ResolveFuture;
+# enum State {
+#     Resolving(ResolveFuture),
+#     Connecting(ConnectFuture),
+# }
+# fn resolve(host: &amp;amp;str) -&amp;gt; ResolveFuture { unimplemented!() }
+# impl Future for ResolveFuture {
+#     type Item = ::std::net::SocketAddr;
+#     type Error = io::Error;
+#     fn poll(&amp;amp;mut self) -&amp;gt; Poll&amp;lt;Self::Item, Self::Error&amp;gt; {
+#         unimplemented!();
+#     }
+# }
+#
+# pub struct ResolveAndConnect {
+#     state: State,
+# }
+pub fn resolve_and_connect(host: &amp;amp;str) -&amp;gt; ResolveAndConnect {
+    let state = State::Resolving(resolve(host));
+    ResolveAndConnect { state }
+}
+
+impl Future for ResolveAndConnect {
+    type Item = TcpStream;
+    type Error = io::Error;
+
+    fn poll(&amp;amp;mut self) -&amp;gt; Result&amp;lt;Async&amp;lt;TcpStream&amp;gt;, io::Error&amp;gt; {
+        use self::State::*;
+
+        loop {
+            let addr = match self.state {
+                Resolving(ref mut fut) =&amp;gt; {
+                    try_ready!(fut.poll())
+                }
+                Connecting(ref mut fut) =&amp;gt; {
+                    return fut.poll();
+                }
+            };
+
+            let connecting = TcpStream::connect(&amp;amp;addr);
+            self.state = Connecting(connecting);
+        }
+    }
+}
+# pub fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This illustrates how &lt;code&gt;Future&lt;/code&gt; implementations are state machines. This future
+can be in either of two states:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Resolving&lt;/li&gt;
+&lt;li&gt;Connecting&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Each time &lt;code&gt;poll&lt;/code&gt; is called, we try to advance the state machine to the next
+state.&lt;/p&gt;
+
+&lt;p&gt;Now, the future we just implemented is basically &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/struct.AndThen.html&#34;&gt;&lt;code&gt;AndThen&lt;/code&gt;&lt;/a&gt;, so we would
+probably just use that combinator instead of re-implementing it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# #[macro_use]
+# extern crate futures;
+# extern crate tokio;
+# use tokio::net::{ConnectFuture, TcpStream};
+# use futures::prelude::*;
+# use std::io;
+# pub struct ResolveFuture;
+# fn resolve(host: &amp;amp;str) -&amp;gt; ResolveFuture { unimplemented!() }
+# impl Future for ResolveFuture {
+#     type Item = ::std::net::SocketAddr;
+#     type Error = io::Error;
+#     fn poll(&amp;amp;mut self) -&amp;gt; Poll&amp;lt;Self::Item, Self::Error&amp;gt; {
+#         unimplemented!();
+#     }
+# }
+# pub fn dox(my_host: &amp;amp;str) {
+# let _ =
+resolve(my_host)
+    .and_then(|addr| TcpStream::connect(&amp;amp;addr))
+# ;
+# }
+# pub fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;which is much shorter.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Tasks</title>
+      <link>https://tokio-cn.github.io/docs/getting-started/tasks/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/getting-started/tasks/</guid>
+      <description>
+
+&lt;p&gt;Tasks are the application&amp;rsquo;s &amp;ldquo;unit of logic&amp;rdquo;. They are similar to &lt;a href=&#34;https://www.golang-book.com/books/intro/10&#34;&gt;Go&amp;rsquo;s
+goroutine&lt;/a&gt; and &lt;a href=&#34;http://erlang.org/doc/reference_manual/processes.html&#34;&gt;Erlang&amp;rsquo;s process&lt;/a&gt;, but asynchronous. In other words, tasks are
+asynchronous green threads.&lt;/p&gt;
+
+&lt;p&gt;Given that a task runs an asynchronous bit of logic, they are represented by the
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html&#34;&gt;&lt;code&gt;Future&lt;/code&gt;&lt;/a&gt; trait. The task&amp;rsquo;s future implementation completes with a &lt;code&gt;()&lt;/code&gt; value
+once the task is done processing.&lt;/p&gt;
+
+&lt;p&gt;Tasks are passed to &lt;a href=&#34;#&#34;&gt;executors&lt;/a&gt;, which handle scheduling the task. An executor
+usually is scheduling many tasks across a single or small set of threads.
+&lt;strong&gt;Tasks must not perform computation heavy logic or they will prevent other
+tasks from executing&lt;/strong&gt;. So don&amp;rsquo;t try to compute the fibonacci sequence as a
+task.&lt;/p&gt;
+
+&lt;p&gt;Tasks are implemented by either implementing the &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html&#34;&gt;&lt;code&gt;Future&lt;/code&gt;&lt;/a&gt; trait directly or by
+building up a future using the various combinator functions available in the
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures&#34;&gt;&lt;code&gt;futures&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio&#34;&gt;&lt;code&gt;tokio&lt;/code&gt;&lt;/a&gt; crates.&lt;/p&gt;
+
+&lt;p&gt;Here is an example that fetches the value from a URI using an HTTP get and
+caches the result.&lt;/p&gt;
+
+&lt;p&gt;The logic is as follows:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Check the cache to see if there is an entry for the URI.&lt;/li&gt;
+&lt;li&gt;If there is no entry, perform the HTTP get.&lt;/li&gt;
+&lt;li&gt;Store the response in the cache.&lt;/li&gt;
+&lt;li&gt;Return the response.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The entire sequence of events is also wrapped with a timeout in order to prevent
+unbounded execution time.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate futures;
+# use futures::prelude::*;
+# use futures::future::{self, Either};
+# use std::time::Duration;
+# fn docx() {
+#
+# pub struct Timeout;
+# impl Timeout {
+#     pub fn new&amp;lt;T&amp;gt;(_: T, _: Duration) -&amp;gt; Box&amp;lt;Future&amp;lt;Item = (), Error = ()&amp;gt;&amp;gt; {
+#         unimplemented!();
+#     }
+# }
+# pub struct MyExecutor;
+# impl MyExecutor {
+#     fn spawn&amp;lt;T&amp;gt;(&amp;amp;self, _: T) {
+#         unimplemented!();
+#     }
+# }
+# pub struct Error;
+
+// The functions here all return `Box&amp;lt;Future&amp;lt;...&amp;gt;&amp;gt;`. This is one
+// of a number of ways to return futures. For more details on
+// returning futures, see the &amp;quot;Returning futures&amp;quot; section in
+// &amp;quot;Going deeper: Futures&amp;quot;.
+
+/// Get a URI from some remote cache.
+fn cache_get(uri: &amp;amp;str)
+    -&amp;gt; Box&amp;lt;Future&amp;lt;Item = Option&amp;lt;String&amp;gt;, Error = Error&amp;gt;&amp;gt;
+# { unimplemented!() } /*
+{ ... }
+# */
+
+fn cache_put(uri: &amp;amp;str, val: String)
+    -&amp;gt; Box&amp;lt;Future&amp;lt;Item = (), Error = Error&amp;gt;&amp;gt;
+# { unimplemented!() } /*
+{ ... }
+# */
+
+/// Do a full HTTP get to a remote URL
+fn http_get(uri: &amp;amp;str)
+    -&amp;gt; Box&amp;lt;Future&amp;lt;Item = String, Error = Error&amp;gt;&amp;gt;
+# { unimplemented!() } /*
+{ ... }
+# */
+#
+# let my_executor = MyExecutor;
+
+fn fetch_and_cache(url: &amp;amp;str)
+    -&amp;gt; Box&amp;lt;Future&amp;lt;Item = String, Error = Error&amp;gt;&amp;gt;
+{
+    // The URL has to be converted to a string so that it can be
+    // moved into the closure. Given futures are asynchronous,
+    // the stack is not around anymore by the time the closure is called.
+    let url = url.to_string();
+
+    let response = http_get(&amp;amp;url)
+        .and_then(move |response| {
+            cache_put(&amp;amp;url, response.clone())
+                .map(|_| response)
+        });
+
+    Box::new(response)
+}
+
+let url = &amp;quot;https://example.com&amp;quot;;
+
+let response = cache_get(url)
+  .and_then(|resp| {
+      // `Either` is a utility provided by the `futures` crate
+      // that enables returning different futures from a single
+      // closure without boxing.
+      match resp {
+          Some(resp) =&amp;gt; Either::A(future::ok(resp)),
+          None =&amp;gt; {
+              Either::B(fetch_and_cache(url))
+          }
+      }
+  });
+
+// Only let the task run for up to 20 seconds.
+//
+// This uses a fictional timer API. Use the `tokio-timer` crate for
+// all your actual timer needs.
+let task = Timeout::new(response, Duration::from_secs(20));
+
+my_executor.spawn(task);
+# }
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Because the steps are all necessary for the task to complete, it makes sense to
+group them all within the same task.&lt;/p&gt;
+
+&lt;p&gt;However, if instead of updating the cache on a cache-miss, we wanted to update
+the cache value on an interval, then it would make sense to split that into
+multiple tasks as the steps are no longer directly related.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate futures;
+# use futures::prelude::*;
+# use futures::future::{self, Either};
+# use std::time::Duration;
+# fn docx() {
+#
+# pub struct Timeout;
+# impl Timeout {
+#     pub fn new&amp;lt;T&amp;gt;(_: T, _: Duration) -&amp;gt; Box&amp;lt;Future&amp;lt;Item = (), Error = ()&amp;gt;&amp;gt; {
+#         unimplemented!();
+#     }
+# }
+# pub struct Interval;
+# impl Interval {
+#     pub fn new(_: Duration) -&amp;gt; Box&amp;lt;Stream&amp;lt;Item = (), Error = Error&amp;gt;&amp;gt; {
+#         unimplemented!();
+#     }
+# }
+# pub struct MyExecutor;
+# impl MyExecutor {
+#     fn spawn&amp;lt;T&amp;gt;(&amp;amp;self, _: T) {
+#         unimplemented!();
+#     }
+# }
+# pub struct Error;
+#
+# fn cache_get(uri: &amp;amp;str)
+#     -&amp;gt; Box&amp;lt;Future&amp;lt;Item = Option&amp;lt;String&amp;gt;, Error = Error&amp;gt;&amp;gt;
+# { unimplemented!() }
+# fn cache_put(uri: &amp;amp;str, val: String)
+#     -&amp;gt; Box&amp;lt;Future&amp;lt;Item = (), Error = Error&amp;gt;&amp;gt;
+# { unimplemented!() }
+# fn http_get(uri: &amp;amp;str)
+#     -&amp;gt; Box&amp;lt;Future&amp;lt;Item = String, Error = Error&amp;gt;&amp;gt;
+# { unimplemented!() }
+# fn fetch_and_cache(url: &amp;amp;str)
+#     -&amp;gt; Box&amp;lt;Future&amp;lt;Item = String, Error = Error&amp;gt;&amp;gt;
+# { unimplemented!() }
+# let my_executor = MyExecutor;
+
+let url = &amp;quot;https://example.com&amp;quot;;
+
+// An Interval is a stream that yields `()` on a fixed interval.
+let update_cache = Interval::new(Duration::from_secs(60))
+    // On each tick of the interval, update the cache. This is done
+    // by using the same function from the previous snippet.
+    .for_each(|_| {
+        fetch_and_cache(url)
+            .map(|resp| println!(&amp;quot;updated cache with {}&amp;quot;, resp))
+    });
+
+// Spawn the cache update task so that it runs in the background
+my_executor.spawn(update_cache);
+
+// Now, only get from the cache.
+// (NB: see next section about ensuring the cache is up to date.)
+let response = cache_get(url);
+let task = Timeout::new(response, Duration::from_secs(20));
+
+my_executor.spawn(task);
+# }
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;message-passing&#34;&gt;&lt;a href=&#34;#message-passing&#34;&gt;Message Passing&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Just as with Go and Erlang, tasks can communicate using message passing. In
+fact, it will be very common to use message passing to coordinate multiple
+tasks. This allows independent tasks to still interact.&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&#34;https://docs.rs/futures/0.1/futures&#34;&gt;&lt;code&gt;futures&lt;/code&gt;&lt;/a&gt; crate provides a &lt;a href=&#34;https://docs.rs/futures/0.1/futures/sync/index.html&#34;&gt;&lt;code&gt;sync&lt;/code&gt;&lt;/a&gt; module which contains some channel
+types that are ideal for message passing across tasks.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/futures/0.1/futures/sync/oneshot/index.html&#34;&gt;&lt;code&gt;oneshot&lt;/code&gt;&lt;/a&gt; is a channel for sending exactly one value.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/futures/0.1/futures/sync/mpsc/index.html&#34;&gt;&lt;code&gt;mpsc&lt;/code&gt;&lt;/a&gt; is a channel for sending many (zero or more) values.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The previous example isn&amp;rsquo;t exactly correct. Given that tasks are executed
+concurrently, there is no guarantee that the cache updating task will have
+written the first value to the cache by the time the other task tries to read
+from the cache.&lt;/p&gt;
+
+&lt;p&gt;This is a perfect situation to use message passing. The cache updating task can
+send a message notifying the other task that it has primed the cache with an
+initial value.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate futures;
+# use futures::prelude::*;
+# use futures::future::{self, Either};
+# use futures::sync::oneshot;
+# use std::time::Duration;
+# fn docx() {
+#
+# pub struct Timeout;
+# impl Timeout {
+#     pub fn new&amp;lt;T&amp;gt;(_: T, _: Duration) -&amp;gt; Box&amp;lt;Future&amp;lt;Item = (), Error = ()&amp;gt;&amp;gt; {
+#         unimplemented!();
+#     }
+# }
+# pub struct Interval;
+# impl Interval {
+#     pub fn new(_: Duration) -&amp;gt; Box&amp;lt;Stream&amp;lt;Item = (), Error = Error&amp;gt;&amp;gt; {
+#         unimplemented!();
+#     }
+# }
+# pub struct MyExecutor;
+# impl MyExecutor {
+#     fn spawn&amp;lt;T&amp;gt;(&amp;amp;self, _: T) {
+#         unimplemented!();
+#     }
+# }
+# pub struct Error;
+#
+# fn cache_get(uri: &amp;amp;str)
+#     -&amp;gt; Box&amp;lt;Future&amp;lt;Item = Option&amp;lt;String&amp;gt;, Error = Error&amp;gt;&amp;gt;
+# { unimplemented!() }
+# fn cache_put(uri: &amp;amp;str, val: String)
+#     -&amp;gt; Box&amp;lt;Future&amp;lt;Item = (), Error = Error&amp;gt;&amp;gt;
+# { unimplemented!() }
+# fn http_get(uri: &amp;amp;str)
+#     -&amp;gt; Box&amp;lt;Future&amp;lt;Item = String, Error = Error&amp;gt;&amp;gt;
+# { unimplemented!() }
+# fn fetch_and_cache(url: &amp;amp;str)
+#     -&amp;gt; Box&amp;lt;Future&amp;lt;Item = String, Error = Error&amp;gt;&amp;gt;
+# { unimplemented!() }
+# let my_executor = MyExecutor;
+
+let url = &amp;quot;https://example.com&amp;quot;;
+
+let (primed_tx, primed_rx) = oneshot::channel();
+
+let update_cache = fetch_and_cache(url)
+    // Now, notify the other task that the cache is primed
+    .then(|_| primed_tx.send(()))
+    // Then we can start refreshing the cache on an interval
+    .then(|_| {
+        Interval::new(Duration::from_secs(60))
+            .for_each(|_| {
+                fetch_and_cache(url)
+                    .map(|resp| println!(&amp;quot;updated cache with {}&amp;quot;, resp))
+            })
+    });
+
+// Spawn the cache update task so that it runs in the background
+my_executor.spawn(update_cache);
+
+// First, wait for the cache to primed
+let response = primed_rx
+    .then(|_| cache_get(url));
+
+let task = Timeout::new(response, Duration::from_secs(20));
+
+my_executor.spawn(task);
+# }
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;task-notification&#34;&gt;&lt;a href=&#34;#task-notification&#34;&gt;Task Notification&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;An application built with Tokio is structured as a set of concurrently running
+tasks. Here is the basic structure of a server:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+#
+# use tokio::io;
+# use tokio::net::{TcpListener, TcpStream};
+# use tokio::prelude::*;
+#
+# pub fn process(socket: TcpStream) -&amp;gt; Box&amp;lt;Future&amp;lt;Item = (), Error = ()&amp;gt; + Send&amp;gt; {
+# unimplemented!();
+# }
+#
+# fn docx() {
+#     let addr = &amp;quot;127.0.0.1:6142&amp;quot;.parse().unwrap();
+#     let listener = TcpListener::bind(&amp;amp;addr).unwrap();
+let server = listener.incoming().for_each(|socket| {
+    // Spawn a task to process the connection
+    tokio::spawn(process(socket));
+
+    Ok(())
+})
+.map_err(|_| ()); // Just drop the error
+
+tokio::run(server);
+# }
+# pub fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In this case, we spawn a task for each inbound server socket. However, it is
+also possible to implement a server future that processes all inbound
+connections on the same socket:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate futures;
+# extern crate tokio;
+# use futures::prelude::*;
+# use tokio::net::*;
+# use std::io;
+pub struct Server {
+    listener: TcpListener,
+    connections: Vec&amp;lt;Box&amp;lt;Future&amp;lt;Item = (), Error = io::Error&amp;gt; + Send&amp;gt;&amp;gt;,
+}
+# pub fn process(socket: TcpStream) -&amp;gt; Box&amp;lt;Future&amp;lt;Item = (), Error = io::Error&amp;gt; + Send&amp;gt; {
+# unimplemented!();
+# }
+
+impl Future for Server {
+    type Item = ();
+    type Error = io::Error;
+
+    fn poll(&amp;amp;mut self) -&amp;gt; Result&amp;lt;Async&amp;lt;()&amp;gt;, io::Error&amp;gt; {
+        // First, accept all new connections
+        loop {
+            match self.listener.poll_accept()? {
+                Async::Ready((socket, _)) =&amp;gt; {
+                    let connection = process(socket);
+                    self.connections.push(connection);
+                }
+                Async::NotReady =&amp;gt; break,
+            }
+        }
+
+        // Now, poll all connection futures.
+        let len = self.connections.len();
+
+        for i in (0..len).rev() {
+            match self.connections[i].poll()? {
+                Async::Ready(_) =&amp;gt; {
+                    self.connections.remove(i);
+                }
+                Async::NotReady =&amp;gt; {}
+            }
+        }
+
+        // `NotReady` is returned here because the future never actually
+        // completes. The server runs until it is dropped.
+        Ok(Async::NotReady)
+    }
+}
+# pub fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;These two strategies are functionally equivalent, but have significantly
+different runtime characteristics.&lt;/p&gt;
+
+&lt;p&gt;Notifications happens at the task level. The task does not know which
+sub future triggered the notification. So, whenever the task is polled, it has
+to try polling all sub futures.&lt;/p&gt;
+
+
+&lt;figure &gt;
+    
+        &lt;img src=&#34;https://tokio-cn.github.io/img/diagrams/task-layout.png&#34; alt=&#34;Layout of a task&#34; /&gt;
+    
+    
+    &lt;figcaption&gt;
+        &lt;p&gt;
+        Layout of a task
+        
+            
+        
+        &lt;/p&gt; 
+    &lt;/figcaption&gt;
+    
+&lt;/figure&gt;
+
+
+&lt;p&gt;In this task, there are three sub futures that can get polled. If a resource
+contained by one of the sub futures transitions to &amp;ldquo;ready&amp;rdquo;, the task itself gets
+notified and it will try to poll all three of its sub futures. One of them will
+advance, which in turn advances the internal state of the task.&lt;/p&gt;
+
+&lt;p&gt;The key is to try to keep tasks small, doing as little as possible per task.
+This is why servers spawn new tasks for each connection instead of processing
+the connections in the same task as the listener.&lt;/p&gt;
+
+&lt;p&gt;Ok, there actually is a way for the task to know which sub future triggered the
+notification using &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/futures_unordered/struct.FuturesUnordered.html&#34;&gt;&lt;code&gt;FuturesUnordered&lt;/code&gt;&lt;/a&gt;, but usually the right thing to do is to
+spawn a new task.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>I/O with Tokio</title>
+      <link>https://tokio-cn.github.io/docs/getting-started/io/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/getting-started/io/</guid>
+      <description>
+
+&lt;p&gt;The &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio&#34;&gt;&lt;code&gt;tokio&lt;/code&gt;&lt;/a&gt; crate comes with TCP and UDP networking types. Unlike the types in
+&lt;code&gt;std&lt;/code&gt;, Tokio&amp;rsquo;s networking types are based on the poll model and will notify the
+task executors when their readiness states change (data is received and write
+buffers are flushed). In the &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/net/index.html&#34;&gt;&lt;code&gt;tokio::net&lt;/code&gt;&lt;/a&gt; module you&amp;rsquo;ll find types like
+&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/net/struct.TcpListener.html&#34;&gt;&lt;code&gt;TcpListener&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/net/struct.TcpStream.html&#34;&gt;&lt;code&gt;TcpStream&lt;/code&gt;&lt;/a&gt;, and &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/net/struct.UdpSocket.html&#34;&gt;&lt;code&gt;UdpSocket&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;All of these types provide both a future API as well as a poll
+API.&lt;/p&gt;
+
+&lt;p&gt;The Tokio net types are powered by a &lt;a href=&#34;https://docs.rs/mio/&#34;&gt;Mio&lt;/a&gt; based reactor that, by default, is
+started up lazily on a background thread. See &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/reactor/index.html&#34;&gt;reactor&lt;/a&gt; documentation for more
+details.&lt;/p&gt;
+
+&lt;h2 id=&#34;future-api&#34;&gt;&lt;a href=&#34;#future-api&#34;&gt;Using the Future API&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;We&amp;rsquo;ve already seen some of this earlier in the guide with the &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/net/struct.TcpListener.html#method.incoming&#34;&gt;&lt;code&gt;incoming&lt;/code&gt;&lt;/a&gt;
+function as well as the helpers found in &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/io/index.html&#34;&gt;&lt;code&gt;tokio_io::io&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;These helpers include:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/net/struct.TcpListener.html#method.incoming&#34;&gt;&lt;code&gt;incoming&lt;/code&gt;&lt;/a&gt;: A stream of inbound TCP connections.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/io/fn.read_exact.html&#34;&gt;&lt;code&gt;read_exact&lt;/code&gt;&lt;/a&gt;: Read exactly &lt;code&gt;n&lt;/code&gt; bytes into a buffer.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/io/fn.read_to_end.html&#34;&gt;&lt;code&gt;read_to_end&lt;/code&gt;&lt;/a&gt;: Read all bytes into a buffer.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/io/fn.write_all.html&#34;&gt;&lt;code&gt;write_all&lt;/code&gt;&lt;/a&gt;: Write the entire contents of a buffer.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/io/fn.copy.html&#34;&gt;&lt;code&gt;copy&lt;/code&gt;&lt;/a&gt;: Copy bytes from one I/O handle to another.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;A lot of these functions / helpers are generic over the &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html&#34;&gt;&lt;code&gt;AsyncRead&lt;/code&gt;&lt;/a&gt; and
+&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/io/trait.AsyncWrite.html&#34;&gt;&lt;code&gt;AsyncWrite&lt;/code&gt;&lt;/a&gt; traits. These traits are similar to &lt;a href=&#34;https://doc.rust-lang.org/std/io/trait.Read.html&#34;&gt;&lt;code&gt;Read&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://doc.rust-lang.org/std/io/trait.Write.html&#34;&gt;&lt;code&gt;Write&lt;/code&gt;&lt;/a&gt; from
+&lt;code&gt;std&lt;/code&gt;, but are only for types that are &amp;ldquo;future aware&amp;rdquo;, i.e. follow the
+mandated properties:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Calls to &lt;code&gt;read&lt;/code&gt; or &lt;code&gt;write&lt;/code&gt; are &lt;strong&gt;nonblocking&lt;/strong&gt;, they never block the calling
+thread.&lt;/li&gt;
+&lt;li&gt;If a call would otherwise block then an error is returned with the kind of
+&lt;code&gt;WouldBlock&lt;/code&gt;. If this happens then the current future&amp;rsquo;s task is scheduled to
+receive a notification (an unpark) when the I/O is ready again.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Note that users of &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html&#34;&gt;&lt;code&gt;AsyncRead&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/io/trait.AsyncWrite.html&#34;&gt;&lt;code&gt;AsyncWrite&lt;/code&gt;&lt;/a&gt; types should use
+&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html#method.poll_read&#34;&gt;&lt;code&gt;poll_read&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/io/trait.AsyncWrite.html#method.poll_write&#34;&gt;&lt;code&gt;poll_write&lt;/code&gt;&lt;/a&gt; instead of directly calling &lt;a href=&#34;https://doc.rust-lang.org/std/io/trait.Read.html&#34;&gt;&lt;code&gt;read&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://doc.rust-lang.org/std/io/trait.Write.html&#34;&gt;&lt;code&gt;write&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;For example, here is how to accept connections, read 5 bytes from them, then
+write the 5 bytes back to the socket:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+#
+# use tokio::io;
+# use tokio::net::TcpListener;
+# use tokio::prelude::*;
+# fn main() {
+#     let addr = &amp;quot;127.0.0.1:6142&amp;quot;.parse().unwrap();
+#     let listener = TcpListener::bind(&amp;amp;addr).unwrap();
+let server = listener.incoming().for_each(|socket| {
+    println!(&amp;quot;accepted socket; addr={:?}&amp;quot;, socket.peer_addr().unwrap());
+
+    let buf = vec![0; 5];
+
+    let connection = io::read_exact(socket, buf)
+        .and_then(|(socket, buf)| {
+            io::write_all(socket, buf)
+        })
+        .then(|_| Ok(())); // Just discard the socket and buffer
+
+    // Spawn a new task that processes the socket:
+    tokio::spawn(connection);
+
+    Ok(())
+})
+# ;
+# }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;poll-based&#34;&gt;&lt;a href=&#34;#poll-based&#34;&gt;Using the Poll API&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;The Poll based API is to be used when implementing &lt;code&gt;Future&lt;/code&gt; by hand and you need
+to return &lt;code&gt;Async&lt;/code&gt;. This is useful when you need to implement your own
+combinators that handle custom logic.&lt;/p&gt;
+
+&lt;p&gt;For example, this is how the &lt;code&gt;read_exact&lt;/code&gt; future could be implemented for a
+&lt;code&gt;TcpStream&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+# #[macro_use]
+# extern crate futures;
+# use tokio::io;
+# use tokio::prelude::*;
+#
+# use tokio::net::TcpStream;
+# use std::mem;
+pub struct ReadExact {
+    state: State,
+}
+
+enum State {
+    Reading {
+        stream: TcpStream,
+        buf: Vec&amp;lt;u8&amp;gt;,
+        pos: usize,
+    },
+    Empty,
+}
+
+impl Future for ReadExact {
+    type Item = (TcpStream, Vec&amp;lt;u8&amp;gt;);
+    type Error = io::Error;
+
+    fn poll(&amp;amp;mut self) -&amp;gt; Result&amp;lt;Async&amp;lt;Self::Item&amp;gt;, io::Error&amp;gt; {
+        match self.state {
+            State::Reading {
+                ref mut stream,
+                ref mut buf,
+                ref mut pos
+            } =&amp;gt; {
+                while *pos &amp;lt; buf.len() {
+                    let n = try_ready!({
+                        stream.poll_read(&amp;amp;mut buf[*pos..])
+                    });
+                    *pos += n;
+                    if n == 0 {
+                        let err = io::Error::new(
+                            io::ErrorKind::UnexpectedEof,
+                            &amp;quot;early eof&amp;quot;);
+
+                        return Err(err)
+                    }
+                }
+            }
+            State::Empty =&amp;gt; panic!(&amp;quot;poll a ReadExact after it&#39;s done&amp;quot;),
+        }
+
+        match mem::replace(&amp;amp;mut self.state, State::Empty) {
+            State::Reading { stream, buf, .. } =&amp;gt; {
+                Ok(Async::Ready((stream, buf)))
+            }
+            State::Empty =&amp;gt; panic!(),
+        }
+    }
+}
+# pub fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;datagrams&#34;&gt;&lt;a href=&#34;#datagrams&#34;&gt;Datagrams&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Note that most of this discussion has been around I/O or byte &lt;em&gt;streams&lt;/em&gt;, which
+UDP importantly is not! To accommodate this, however, the &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/net/struct.UdpSocket.html&#34;&gt;&lt;code&gt;UdpSocket&lt;/code&gt;&lt;/a&gt; type
+also provides a number of methods for working with it conveniently:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/net/struct.UdpSocket.html#method.send_dgram&#34;&gt;&lt;code&gt;send_dgram&lt;/code&gt;&lt;/a&gt; allows you to express sending a datagram as a future, returning
+an error if the entire datagram couldn&amp;rsquo;t be sent at once.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/net/struct.UdpSocket.html#method.recv_dgram&#34;&gt;&lt;code&gt;recv_dgram&lt;/code&gt;&lt;/a&gt; expresses reading a datagram into a buffer, yielding both the
+buffer and the address it came from.&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Example: A Chat Server</title>
+      <link>https://tokio-cn.github.io/docs/getting-started/chat/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/getting-started/chat/</guid>
+      <description>
+
+&lt;p&gt;We&amp;rsquo;re going to use what has been covered so far to build a chat server. This is
+a non-trivial Tokio server application.&lt;/p&gt;
+
+&lt;p&gt;The server is going to use a line-based protocol. Lines are terminated by
+&lt;code&gt;\r\n&lt;/code&gt;. This is compatible with telnet, so we will just use telnet for the
+client. When a client connects, it must identify itself by sending a line
+containing its &amp;ldquo;nick&amp;rdquo; (i.e., some name used to identify the client amongst its
+peers).&lt;/p&gt;
+
+&lt;p&gt;Once a client is identified, all sent lines are prefixed with &lt;code&gt;[nick]:&lt;/code&gt; and
+broadcasted to all other connected clients.&lt;/p&gt;
+
+&lt;p&gt;The full code can be found &lt;a href=&#34;https://github.com/tokio-rs/tokio/blob/master/examples/chat.rs&#34;&gt;here&lt;/a&gt;. Note that Tokio provides some additional
+abstractions that have not yet been covered that would enable the chat server to
+be written with less code.&lt;/p&gt;
+
+&lt;h2 id=&#34;setup&#34;&gt;&lt;a href=&#34;#setup&#34;&gt;Setup&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;First, generate a new crate.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;$ cargo new --bin line-chat
+cd line-chat
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next, add the necessary dependencies:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-toml&#34;&gt;[dependencies]
+tokio = &amp;quot;0.1&amp;quot;
+tokio-io = &amp;quot;0.1&amp;quot;
+futures = &amp;quot;0.1&amp;quot;
+bytes = &amp;quot;0.4&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;and the crates and types into scope in &lt;code&gt;main.rs&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+extern crate tokio;
+#[macro_use]
+extern crate futures;
+extern crate bytes;
+
+use tokio::io;
+use tokio::net::{TcpListener, TcpStream};
+use tokio::prelude::*;
+use futures::sync::mpsc;
+use futures::future::{self, Either};
+use bytes::{BytesMut, Bytes, BufMut};
+
+use std::collections::HashMap;
+use std::net::SocketAddr;
+use std::sync::{Arc, Mutex};
+
+/// Shorthand for the transmit half of the message channel.
+type Tx = mpsc::UnboundedSender&amp;lt;Bytes&amp;gt;;
+
+/// Shorthand for the receive half of the message channel.
+type Rx = mpsc::UnboundedReceiver&amp;lt;Bytes&amp;gt;;
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now, we setup the necessary structure for a server. These are the same steps
+that were used as part of the &lt;a href=&#34;https://tokio-cn.github.io/docs/getting-started/hello-world/&#34;&gt;Hello World!&lt;/a&gt; example:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Bind a &lt;code&gt;TcpListener&lt;/code&gt; to a local port.&lt;/li&gt;
+&lt;li&gt;Define a task that accepts inbound connections and processes them.&lt;/li&gt;
+&lt;li&gt;Start the Tokio runtime&lt;/li&gt;
+&lt;li&gt;Spawn the server task.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Again, no work actually happens until the server task is spawned on the
+executor.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+# extern crate futures;
+#
+# use tokio::prelude::*;
+# use tokio::net::TcpListener;
+fn main() {
+    let addr = &amp;quot;127.0.0.1:6142&amp;quot;.parse().unwrap();
+    let listener = TcpListener::bind(&amp;amp;addr).unwrap();
+
+    let server = listener.incoming().for_each(move |socket| {
+        // TODO: Process socket
+        Ok(())
+    })
+    .map_err(|err| {
+        // Handle error by printing to STDOUT.
+        println!(&amp;quot;accept error = {:?}&amp;quot;, err);
+    });
+
+    println!(&amp;quot;server running on localhost:6142&amp;quot;);
+# let server = server.select(futures::future::ok(())).then(|_| Ok(()));
+
+    // Start the server
+    //
+    // This does a few things:
+    //
+    // * Start the Tokio runtime (reactor, threadpool, etc...)
+    // * Spawns the `server` task onto the runtime.
+    // * Blocks the current thread until the runtime becomes idle, i.e. all
+    //   spawned tasks have completed.
+    tokio::run(server);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;chat-state&#34;&gt;&lt;a href=&#34;#chat-state&#34;&gt;Chat State&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;A chat server requires that messages received from one client are broadcasted to
+all other connected clients. This will be done using &lt;a href=&#34;https://tokio-cn.github.io/docs/getting-started/tasks/#message-passing&#34;&gt;message passing&lt;/a&gt; over
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures/sync/mpsc/index.html&#34;&gt;mpsc&lt;/a&gt; channels.&lt;/p&gt;
+
+&lt;p&gt;Each client socket will be managed by a task. Each task will have an associated
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures/sync/mpsc/index.html&#34;&gt;mpsc&lt;/a&gt; channel that is used to receive messages from other clients. The send
+half of all these channels is stored in an &lt;code&gt;Rc&lt;/code&gt; cell in order to make them
+accessible.&lt;/p&gt;
+
+&lt;p&gt;In this example, we are going to be using &lt;strong&gt;unbounded&lt;/strong&gt; channels. Ideally,
+channels should never be unbounded, but handling backpressure in this kind of
+situation is a bit tricky. We will leave bounding the channels to a later
+section dedicated to handling backpressure.&lt;/p&gt;
+
+&lt;p&gt;Here is how the shared state is defined (the &lt;code&gt;Tx&lt;/code&gt; type alias was done above):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# use std::collections::HashMap;
+# use std::net::SocketAddr;
+# struct Tx;
+struct Shared {
+    peers: HashMap&amp;lt;SocketAddr, Tx&amp;gt;,
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then, at the very top of the &lt;code&gt;main&lt;/code&gt; function, the state instance is created.
+This state instance will be moved into the task that accepts incoming
+connections.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# use std::sync::{Arc, Mutex};
+# type Shared = String;
+let state = Arc::new(Mutex::new(Shared::new()));
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now we can handle processing incoming connections. The server task is updated to
+this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+# extern crate futures;
+# use tokio::net::{TcpListener, TcpStream};
+# use futures::prelude::*;
+# fn dox() {
+# let addr = &amp;quot;127.0.0.1:6142&amp;quot;.parse().unwrap();
+# let listener = TcpListener::bind(&amp;amp;addr).unwrap();
+# fn process(_: TcpStream, _: String) {}
+# let state = String::new();
+listener.incoming().for_each(move |socket| {
+    process(socket, state.clone());
+    Ok(())
+})
+# ;
+# }
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The server task passes all sockets along with a clone of the server state to a
+&lt;code&gt;process&lt;/code&gt; function. Let&amp;rsquo;s define that function. It will have a structure like
+this:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+# extern crate futures;
+# use futures::future;
+# use tokio::net::TcpStream;
+# use tokio::executor::current_thread;
+# use std::sync::{Arc, Mutex};
+# type Shared = String;
+fn process(socket: TcpStream, state: Arc&amp;lt;Mutex&amp;lt;Shared&amp;gt;&amp;gt;) {
+    // Define the task that processes the connection.
+# /*
+    let task = unimplemented!();
+# */ let task = future::ok(());
+
+    // Spawn the task
+    tokio::spawn(task);
+}
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The call to &lt;code&gt;tokio::spawn&lt;/code&gt; will spawn a new task onto the current Tokio runtime.
+All the worker threads keep a reference to the current runtime stored in a
+thread-local variable. Note, attempting to call &lt;code&gt;tokio::spawn&lt;/code&gt; from outside of
+the Tokio runtime will result in a panic.&lt;/p&gt;
+
+&lt;p&gt;All the connection processing logic has to be able to do is understand the
+protocol. The protocol is line-based, terminated by &lt;code&gt;\r\n&lt;/code&gt;.  Instead of working
+at the byte stream level, it is much easier to work at the frame level, i.e.
+working with values that represent atomic messages.&lt;/p&gt;
+
+&lt;p&gt;We implement a codec that holds the socket and exposes an API that takes and
+consumes lines.&lt;/p&gt;
+
+&lt;h2 id=&#34;line-codec&#34;&gt;&lt;a href=&#34;#line-codec&#34;&gt;Line Codec&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;A codec is a loose term for a type that takes a byte stream type (&lt;code&gt;AsyncRead +
+AsyncWrite&lt;/code&gt;) and exposes a read and write API at the frame level. The
+&lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io&#34;&gt;&lt;code&gt;tokio-io&lt;/code&gt;&lt;/a&gt; crate provides additional helpers for writing codecs, in this
+example, we are going to do it by hand.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;Lines&lt;/code&gt; codec is defined as such:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+# extern crate bytes;
+# use tokio::net::TcpStream;
+# use bytes::BytesMut;
+struct Lines {
+    socket: TcpStream,
+    rd: BytesMut,
+    wr: BytesMut,
+}
+
+impl Lines {
+    /// Create a new `Lines` codec backed by the socket
+    fn new(socket: TcpStream) -&amp;gt; Self {
+        Lines {
+            socket,
+            rd: BytesMut::new(),
+            wr: BytesMut::new(),
+        }
+    }
+}
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Data read from the socket is buffered into &lt;code&gt;rd&lt;/code&gt;. When a full line is read, it is
+returned to the caller. Lines submitted by the caller to write to the socket are
+buffered into &lt;code&gt;wr&lt;/code&gt;, then flushed.&lt;/p&gt;
+
+&lt;p&gt;This is how the read half is implemented:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate bytes;
+# extern crate tokio;
+# #[macro_use]
+# extern crate futures;
+# #[macro_use]
+# use bytes::BytesMut;
+# use tokio::io;
+# use tokio::net::TcpStream;
+# use tokio::prelude::*;
+# struct Lines {
+#     socket: TcpStream,
+#     rd: BytesMut,
+#     wr: BytesMut,
+# }
+impl Stream for Lines {
+    type Item = BytesMut;
+    type Error = io::Error;
+
+    fn poll(&amp;amp;mut self) -&amp;gt; Result&amp;lt;Async&amp;lt;Option&amp;lt;Self::Item&amp;gt;&amp;gt;, Self::Error&amp;gt; {
+        // First, read any new data that might have been received
+        // off the socket
+        //
+        // We track if the socket is closed here and will be used
+        // to inform the return value below.
+        let sock_closed = self.fill_read_buf()?.is_ready();
+
+        // Now, try finding lines
+        let pos = self.rd.windows(2)
+            .position(|bytes| bytes == b&amp;quot;\r\n&amp;quot;);
+
+        if let Some(pos) = pos {
+            // Remove the line from the read buffer and set it
+            // to `line`.
+            let mut line = self.rd.split_to(pos + 2);
+
+            // Drop the trailing \r\n
+            line.split_off(pos);
+
+            // Return the line
+            return Ok(Async::Ready(Some(line)));
+        }
+
+        if sock_closed {
+            Ok(Async::Ready(None))
+        } else {
+            Ok(Async::NotReady)
+        }
+    }
+}
+
+impl Lines {
+    fn fill_read_buf(&amp;amp;mut self) -&amp;gt; Result&amp;lt;Async&amp;lt;()&amp;gt;, io::Error&amp;gt; {
+        loop {
+            // Ensure the read buffer has capacity.
+            //
+            // This might result in an internal allocation.
+            self.rd.reserve(1024);
+
+            // Read data into the buffer.
+            //
+            // The `read_buf` fn is provided by `AsyncRead`.
+            let n = try_ready!(self.socket.read_buf(&amp;amp;mut self.rd));
+
+            if n == 0 {
+                return Ok(Async::Ready(()));
+            }
+        }
+    }
+}
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The example uses &lt;a href=&#34;https://docs.rs/bytes/0.4/bytes/struct.BytesMut.html&#34;&gt;&lt;code&gt;BytesMut&lt;/code&gt;&lt;/a&gt; from the &lt;a href=&#34;https://docs.rs/bytes/0.4/bytes&#34;&gt;&lt;code&gt;bytes&lt;/code&gt;&lt;/a&gt; crate. This provides some nice
+utilities for working with byte sequences in a networking context. The
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html&#34;&gt;&lt;code&gt;Stream&lt;/code&gt;&lt;/a&gt; implementation yields &lt;code&gt;BytesMut&lt;/code&gt; values which contain exactly one
+line.&lt;/p&gt;
+
+&lt;p&gt;As always, the key to implementing a function that returns &lt;code&gt;Async&lt;/code&gt; is to never
+return &lt;code&gt;Async::NotReady&lt;/code&gt; unless the function implementation received an
+&lt;code&gt;Async::NotReady&lt;/code&gt; itself. In this example, &lt;code&gt;NotReady&lt;/code&gt; is only returned if
+&lt;code&gt;fill_read_buf&lt;/code&gt; returns &lt;code&gt;NotReady&lt;/code&gt; and &lt;code&gt;fill_read_buf&lt;/code&gt; only returns &lt;code&gt;NotReady&lt;/code&gt;
+if &lt;code&gt;TcpStream::read_buf&lt;/code&gt; returns &lt;code&gt;NotReady&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now, for the write half.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+# extern crate bytes;
+# #[macro_use]
+# extern crate futures;
+# use tokio::io;
+# use tokio::net::TcpStream;
+# use tokio::prelude::*;
+# use bytes::{BytesMut, BufMut};
+struct Lines {
+    socket: TcpStream,
+    rd: BytesMut,
+    wr: BytesMut,
+}
+impl Lines {
+    fn buffer(&amp;amp;mut self, line: &amp;amp;[u8]) {
+        // Push the line onto the end of the write buffer.
+        //
+        // The `put` function is from the `BufMut` trait.
+        self.wr.put(line);
+    }
+
+    fn poll_flush(&amp;amp;mut self) -&amp;gt; Poll&amp;lt;(), io::Error&amp;gt; {
+        // As long as there is buffered data to write, try to write it.
+        while !self.wr.is_empty() {
+            // Try to read some bytes from the socket
+            let n = try_ready!(self.socket.poll_write(&amp;amp;self.wr));
+
+            // As long as the wr is not empty, a successful write should
+            // never write 0 bytes.
+            assert!(n &amp;gt; 0);
+
+            // This discards the first `n` bytes of the buffer.
+            let _ = self.wr.split_to(n);
+        }
+
+        Ok(Async::Ready(()))
+    }
+}
+fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The caller queues up all lines by calling &lt;code&gt;buffer&lt;/code&gt;. This appends the line to the
+internal &lt;code&gt;wr&lt;/code&gt; buffer. Then, once all data is queued up, the caller calls
+&lt;code&gt;poll_flush&lt;/code&gt;, which does the actual writing to the socket. &lt;code&gt;poll_flush&lt;/code&gt; only
+returns &lt;code&gt;Ready&lt;/code&gt; once all the queued data has been succesfully written to the
+socket.&lt;/p&gt;
+
+&lt;p&gt;Similar to the read half, &lt;code&gt;NotReady&lt;/code&gt; is only returned when the function
+implementation received &lt;code&gt;NotReady&lt;/code&gt; itself.&lt;/p&gt;
+
+&lt;p&gt;And the &lt;code&gt;Lines&lt;/code&gt; codec is used in the &lt;code&gt;process&lt;/code&gt; function as such:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+# extern crate bytes;
+# use tokio::net::TcpStream;
+# use tokio::prelude::*;
+# use bytes::BytesMut;
+# use std::io;
+# use std::sync::{Arc, Mutex};
+# type Shared = String;
+# struct Lines;
+# impl Lines {
+# fn new(_: TcpStream) -&amp;gt; Self { unimplemented!() }
+# }
+# impl Stream for Lines {
+#     type Item = BytesMut;
+#     type Error = io::Error;
+#     fn poll(&amp;amp;mut self) -&amp;gt; Poll&amp;lt;Option&amp;lt;Self::Item&amp;gt;, io::Error&amp;gt; { unimplemented!() }
+# }
+fn process(socket: TcpStream, state: Arc&amp;lt;Mutex&amp;lt;Shared&amp;gt;&amp;gt;) {
+    // Wrap the socket with the `Lines` codec that we wrote above.
+    let lines = Lines::new(socket);
+
+    // The first line is treated as the client&#39;s name. The client
+    // is not added to the set of connected peers until this line
+    // is received.
+    //
+    // We use the `into_future` combinator to extract the first
+    // item from the lines stream. `into_future` takes a `Stream`
+    // and converts it to a future of `(first, rest)` where `rest`
+    // is the original stream instance.
+    let connection = lines.into_future()
+        // `into_future` doesn&#39;t have the right error type, so map
+        // the error to make it work.
+        .map_err(|(e, _)| e)
+        // Process the first received line as the client&#39;s name.
+        .and_then(|(name, lines)| {
+            let name = match name {
+                Some(name) =&amp;gt; name,
+                None =&amp;gt; {
+                    // TODO: Handle a client that disconnects
+                    // early.
+                    unimplemented!();
+                }
+            };
+
+            // TODO: Rest of the process function
+# Ok(())
+        });
+}
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;broadcasting-messages&#34;&gt;&lt;a href=&#34;#broadcasting-messages&#34;&gt;Broadcasting Messages&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;The next step is to implement the connection processing logic that handles the
+actual chat functionality, i.e. broadcasting messages from one client to all the
+others.&lt;/p&gt;
+
+&lt;p&gt;To implement this, we will explicitly implement a &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html&#34;&gt;&lt;code&gt;Future&lt;/code&gt;&lt;/a&gt; that takes the
+&lt;code&gt;Lines&lt;/code&gt; codec instance and handles the broadcasting logic. This logic handles:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Receive messages on its message channel and write them to the socket.&lt;/li&gt;
+&lt;li&gt;Receive messages from the socket and broadcast them to all peers.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Implementing this logic entirely with combinators is also possible, but requires
+using &lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncRead.html#method.split&#34;&gt;&lt;code&gt;split&lt;/code&gt;&lt;/a&gt;, which hasn&amp;rsquo;t been covered yet. Also, this provides an
+opportunity to see how to implement a non-trivial &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html&#34;&gt;&lt;code&gt;Future&lt;/code&gt;&lt;/a&gt; by hand.&lt;/p&gt;
+
+&lt;p&gt;Here is the definition of the future that processes the broadcast logic for a
+connection:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# use std::net::SocketAddr;
+# use std::sync::{Arc, Mutex};
+# type BytesMut = ();
+# type Lines = ();
+# type Shared = ();
+# type Rx = ();
+struct Peer {
+    /// Name of the peer. This is the first line received from the client.
+    name: BytesMut,
+
+    /// The TCP socket wrapped with the `Lines` codec.
+    lines: Lines,
+
+    /// Handle to the shared chat state.
+    state: Arc&amp;lt;Mutex&amp;lt;Shared&amp;gt;&amp;gt;,
+
+    /// Receive half of the message channel.
+    ///
+    /// This is used to receive messages from peers. When a message is received
+    /// off of this `Rx`, it will be written to the socket.
+    rx: Rx,
+
+    /// Client socket address.
+    ///
+    /// The socket address is used as the key in the `peers` HashMap. The
+    /// address is saved so that the `Peer` drop implementation can clean up its
+    /// entry.
+    addr: SocketAddr,
+}
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And a &lt;code&gt;Peer&lt;/code&gt; instance is created as such:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# extern crate bytes;
+# extern crate futures;
+# extern crate tokio;
+# use bytes::{BytesMut, Bytes};
+# use futures::sync::mpsc;
+# use tokio::net::TcpStream;
+# use tokio::prelude::*;
+# use std::net::SocketAddr;
+# use std::collections::HashMap;
+# use std::sync::{Arc, Mutex};
+# struct Peer {
+#     name: BytesMut,
+#     lines: Lines,
+#     state: Arc&amp;lt;Mutex&amp;lt;Shared&amp;gt;&amp;gt;,
+#     rx: Rx,
+#     addr: SocketAddr,
+# }
+# struct Shared {
+#     peers: HashMap&amp;lt;SocketAddr, Tx&amp;gt;,
+# }
+# struct Lines {
+#     socket: TcpStream,
+# }
+# type Tx = mpsc::UnboundedSender&amp;lt;Bytes&amp;gt;;
+# type Rx = mpsc::UnboundedReceiver&amp;lt;Bytes&amp;gt;;
+impl Peer {
+    fn new(name: BytesMut,
+           state: Arc&amp;lt;Mutex&amp;lt;Shared&amp;gt;&amp;gt;,
+           lines: Lines) -&amp;gt; Peer
+    {
+        // Get the client socket address
+        let addr = lines.socket.peer_addr().unwrap();
+
+        // Create a channel for this peer
+        let (tx, rx) = mpsc::unbounded();
+
+        // Add an entry for this `Peer` in the shared state map.
+        state.lock().unwrap()
+            .peers.insert(addr, tx);
+
+        Peer {
+            name,
+            lines,
+            state,
+            rx,
+            addr,
+        }
+    }
+}
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A &lt;a href=&#34;https://docs.rs/futures/0.1/futures/sync/mpsc/index.html&#34;&gt;mpsc&lt;/a&gt; channel is created for other peers to send their messages to this
+newly created peer. After creating the channel, the transmit half is inserted
+into the peers map. This entry is removed in the drop implementation for
+&lt;code&gt;Peer&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# use std::net::SocketAddr;
+# use std::collections::HashMap;
+# use std::sync::{Arc, Mutex};
+# struct Peer {
+#     state: Arc&amp;lt;Mutex&amp;lt;Shared&amp;gt;&amp;gt;,
+#     addr: SocketAddr,
+# }
+# struct Shared {
+#     peers: HashMap&amp;lt;SocketAddr, ()&amp;gt;,
+# }
+impl Drop for Peer {
+    fn drop(&amp;amp;mut self) {
+        self.state.lock().unwrap().peers
+            .remove(&amp;amp;self.addr);
+    }
+}
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;And here is the implementation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# extern crate tokio;
+# extern crate futures;
+# extern crate bytes;
+# use tokio::io;
+# use tokio::prelude::*;
+# use futures::sync::mpsc;
+# use bytes::{Bytes, BytesMut, BufMut};
+# use std::net::SocketAddr;
+# use std::collections::HashMap;
+# use std::sync::{Arc, Mutex};
+# struct Peer {
+#     name: BytesMut,
+#     lines: Lines,
+#     state: Arc&amp;lt;Mutex&amp;lt;Shared&amp;gt;&amp;gt;,
+#     rx: Rx,
+#     addr: SocketAddr,
+# }
+# struct Shared {
+#     peers: HashMap&amp;lt;SocketAddr, Tx&amp;gt;,
+# }
+# struct Lines;
+# type Tx = mpsc::UnboundedSender&amp;lt;Bytes&amp;gt;;
+# type Rx = mpsc::UnboundedReceiver&amp;lt;Bytes&amp;gt;;
+# impl Lines {
+#     fn buffer(&amp;amp;mut self, _: &amp;amp;[u8]) { unimplemented!() }
+#     fn poll_flush(&amp;amp;mut self) -&amp;gt; Poll&amp;lt;(), io::Error&amp;gt; { unimplemented!() }
+# }
+# impl Stream for Lines {
+#     type Item = BytesMut;
+#     type Error = io::Error;
+#     fn poll(&amp;amp;mut self) -&amp;gt; Poll&amp;lt;Option&amp;lt;Self::Item&amp;gt;, Self::Error&amp;gt; {
+#         unimplemented!();
+#     }
+# }
+impl Future for Peer {
+    type Item = ();
+    type Error = io::Error;
+
+    fn poll(&amp;amp;mut self) -&amp;gt; Poll&amp;lt;(), io::Error&amp;gt; {
+        // Receive all messages from peers.
+        loop {
+            // Polling an `UnboundedReceiver` cannot fail, so `unwrap`
+            // here is safe.
+            match self.rx.poll().unwrap() {
+                Async::Ready(Some(v)) =&amp;gt; {
+                    // Buffer the line. Once all lines are buffered,
+                    // they will be flushed to the socket (right
+                    // below).
+                    self.lines.buffer(&amp;amp;v);
+                }
+                _ =&amp;gt; break,
+            }
+        }
+
+        // Flush the write buffer to the socket
+        let _ = self.lines.poll_flush()?;
+
+        // Read new lines from the socket
+        while let Async::Ready(line) = self.lines.poll()? {
+            println!(&amp;quot;Received line ({:?}) : {:?}&amp;quot;, self.name, line);
+
+            if let Some(message) = line {
+                // Append the peer&#39;s name to the front of the line:
+                let mut line = self.name.clone();
+                line.put(&amp;quot;: &amp;quot;);
+                line.put(&amp;amp;message);
+                line.put(&amp;quot;\r\n&amp;quot;);
+
+                // We&#39;re using `Bytes`, which allows zero-copy clones
+                // (by storing the data in an Arc internally).
+                //
+                // However, before cloning, we must freeze the data.
+                // This converts it from mutable -&amp;gt; immutable,
+                // allowing zero copy cloning.
+                let line = line.freeze();
+
+                // Now, send the line to all other peers
+                for (addr, tx) in &amp;amp;self.state.lock().unwrap().peers {
+                    // Don&#39;t send the message to ourselves
+                    if *addr != self.addr {
+                        // The send only fails if the rx half has been
+                        // dropped, however this is impossible as the
+                        // `tx` half will be removed from the map
+                        // before the `rx` is dropped.
+                        tx.unbounded_send(line.clone()).unwrap();
+                    }
+                }
+            } else {
+                // EOF was reached. The remote client has disconnected.
+                // There is nothing more to do.
+                return Ok(Async::Ready(()));
+            }
+        }
+
+        // As always, it is important to not just return `NotReady`
+        // without ensuring an inner future also returned `NotReady`.
+        //
+        // We know we got a `NotReady` from either `self.rx` or
+        // `self.lines`, so the contract is respected.
+        Ok(Async::NotReady)
+    }
+}
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;final-touches&#34;&gt;&lt;a href=&#34;#final-touches&#34;&gt;Final Touches&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;All that remains is wiring up the &lt;code&gt;Peer&lt;/code&gt; future that was just implemented. To do
+this, the client connection task (defined in the &lt;code&gt;process&lt;/code&gt; function) is extended
+to use &lt;code&gt;Peer&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# extern crate tokio;
+# extern crate futures;
+# use tokio::io;
+# use tokio::prelude::*;
+# use futures::future::{self, Either};
+# type Lines = Box&amp;lt;Stream&amp;lt;Item = (), Error = io::Error&amp;gt;&amp;gt;;
+# struct Peer;
+# impl Peer {
+#     fn new(_: (), state: (), lines: Lines) -&amp;gt; Box&amp;lt;Future&amp;lt;Item = (), Error = io::Error&amp;gt;&amp;gt; {
+#         unimplemented!();
+#     }
+# }
+# fn dox(lines: Lines) {
+# let state = ();
+let connection = lines.into_future()
+    .map_err(|(e, _)| e)
+    .and_then(|(name, lines)| {
+        // If `name` is `None`, then the client disconnected without
+        // actually sending a line of data.
+        //
+        // Since the connection is closed, there is no further work
+        // that we need to do. So, we just terminate processing by
+        // returning `future::ok()`.
+        //
+        // The problem is that only a single future type can be
+        // returned from a combinator closure, but we want to
+        // return both `future::ok()` and `Peer` (below).
+        //
+        // This is a common problem, so the `futures` crate solves
+        // this by providing the `Either` helper enum that allows
+        // creating a single return type that covers two concrete
+        // future types.
+        let name = match name {
+            Some(name) =&amp;gt; name,
+            None =&amp;gt; {
+                // The remote client closed the connection without
+                // sending any data.
+                return Either::A(future::ok(()));
+            }
+        };
+
+        println!(&amp;quot;`{:?}` is joining the chat&amp;quot;, name);
+
+        // Create the peer.
+        //
+        // This is also a future that processes the connection, only
+        // completing when the socket closes.
+        let peer = Peer::new(
+            name,
+            state,
+            lines);
+
+        // Wrap `peer` with `Either::B` to make the return type fit.
+        Either::B(peer)
+    })
+    // Task futures have an error of type `()`, this ensures we handle
+    // the error. We do this by printing the error to STDOUT.
+    .map_err(|e| {
+        println!(&amp;quot;connection error = {:?}&amp;quot;, e);
+    });
+# }
+# fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Besides just adding &lt;code&gt;Peer&lt;/code&gt;, &lt;code&gt;name == None&lt;/code&gt; is also handled. In this case, the
+remote client terminated before identifying itself.&lt;/p&gt;
+
+&lt;p&gt;Returning multiple futures (the &lt;code&gt;name == None&lt;/code&gt; handler and &lt;code&gt;Peer&lt;/code&gt;) is handled by
+wrapping the returned futures in &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/enum.Either.html&#34;&gt;&lt;code&gt;Either&lt;/code&gt;&lt;/a&gt;. &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/enum.Either.html&#34;&gt;&lt;code&gt;Either&lt;/code&gt;&lt;/a&gt; is an enum that accepts
+a different future type for each variant. This allows returning multiple future
+types without reaching for trait objects.&lt;/p&gt;
+
+&lt;p&gt;The full code can be found &lt;a href=&#34;https://github.com/tokio-rs/tokio/blob/master/examples/chat.rs&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Timers</title>
+      <link>https://tokio-cn.github.io/docs/going-deeper/timers/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/going-deeper/timers/</guid>
+      <description>
+
+&lt;p&gt;When writing a network based application, it is common to need to perform
+actions based on time.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Run some code after a set period of time.&lt;/li&gt;
+&lt;li&gt;Cancel a running operation that takes too long.&lt;/li&gt;
+&lt;li&gt;Repeatedly perform an action at an interval.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These use cases are handled by using the various timer APIs that are provided in
+the &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/timer/index.html&#34;&gt;timer&lt;/a&gt; module.&lt;/p&gt;
+
+&lt;h2 id=&#34;delay&#34;&gt;&lt;a href=&#34;#delay&#34;&gt;Running code after a period of time&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;In this case, we want to perform a task after a set period of time. To do this,
+we use the &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/timer/struct.Delay.html&#34;&gt;&lt;code&gt;Delay&lt;/code&gt;&lt;/a&gt; API. All we will do is write &lt;code&gt;&amp;quot;Hello world!&amp;quot;&lt;/code&gt; to the
+terminal, but any action can be taken at this point.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+#
+use tokio::prelude::*;
+use tokio::timer::Delay;
+
+use std::time::{Duration, Instant};
+
+fn main() {
+    let when = Instant::now() + Duration::from_millis(100);
+    let task = Delay::new(when)
+        .and_then(|_| {
+            println!(&amp;quot;Hello world!&amp;quot;);
+            Ok(())
+        })
+        .map_err(|e| panic!(&amp;quot;delay errored; err={:?}&amp;quot;, e));
+
+    tokio::run(task);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above example creates a new &lt;code&gt;Delay&lt;/code&gt; instance that will complete 100
+milliseconds in the future. The &lt;code&gt;new&lt;/code&gt; function takes an &lt;code&gt;Instant&lt;/code&gt;, so we compute
+&lt;code&gt;when&lt;/code&gt; to be the instant 100 milliseconds from now.&lt;/p&gt;
+
+&lt;p&gt;Once the instant is reached, the &lt;code&gt;Delay&lt;/code&gt; future completes, resulting in the
+&lt;code&gt;and_then&lt;/code&gt; block to be executed.&lt;/p&gt;
+
+&lt;p&gt;As with all futures, &lt;code&gt;Delay&lt;/code&gt; is lazy. Simply creating a new &lt;code&gt;Delay&lt;/code&gt; instance
+does nothing. The instance must be used on a task that is spawned onto the Tokio
+&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/runtime/index.html&#34;&gt;runtime&lt;/a&gt;. The &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/runtime/index.html&#34;&gt;runtime&lt;/a&gt; comes preconfigured with a timer implementation to
+drive the &lt;code&gt;Delay&lt;/code&gt; instance to completion. In the example above, this is done by
+passing the task to &lt;code&gt;tokio::run&lt;/code&gt;. Using &lt;code&gt;tokio::spawn&lt;/code&gt; would also work.&lt;/p&gt;
+
+&lt;h2 id=&#34;deadline&#34;&gt;&lt;a href=&#34;#deadline&#34;&gt;Timing out a long running operation&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;When writing robust networking applications, it&amp;rsquo;s critical to ensure that
+operations complete within reasonable amounts of time. This is especially true
+when waiting for data from external, potentially untrusted, sources.&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/timer/struct.Deadline.html&#34;&gt;&lt;code&gt;Deadline&lt;/code&gt;&lt;/a&gt; type ensures that an operation completes by fixed
+instant in time.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+#
+use tokio::io;
+use tokio::net::TcpStream;
+use tokio::prelude::*;
+
+use std::time::{Duration, Instant};
+
+fn read_four_bytes(socket: TcpStream)
+    -&amp;gt; Box&amp;lt;Future&amp;lt;Item = (TcpStream, Vec&amp;lt;u8&amp;gt;), Error = ()&amp;gt;&amp;gt;
+{
+    // The instant at which the read will be aborted if
+    // it has not yet completed.
+    let when = Instant::now() + Duration::from_secs(5);
+
+    let buf = vec![0; 4];
+    let fut = io::read_exact(socket, buf)
+        .deadline(when)
+        .map_err(|_| println!(&amp;quot;failed to read 4 bytes by deadline&amp;quot;));
+
+    Box::new(fut)
+}
+# pub fn main() {}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above function takes a socket and returns a future that completes when 4
+bytes have been read from the socket. The read must complete within 5 seconds.
+This is ensured by calling &lt;code&gt;deadline&lt;/code&gt; on the read future with an instant that is
+5 seconds in the future.&lt;/p&gt;
+
+&lt;p&gt;The &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/util/trait.FutureExt.html#method.deadline&#34;&gt;&lt;code&gt;deadline&lt;/code&gt;&lt;/a&gt; function is defined by &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/util/trait.FutureExt.html&#34;&gt;&lt;code&gt;FutureExt&lt;/code&gt;&lt;/a&gt; and is included in the
+prelude. As such, &lt;code&gt;use tokio::prelude::*&lt;/code&gt; imports &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/util/trait.FutureExt.html&#34;&gt;&lt;code&gt;FutureExt&lt;/code&gt;&lt;/a&gt; as well, so
+we can call &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/util/trait.FutureExt.html#method.deadline&#34;&gt;&lt;code&gt;deadline&lt;/code&gt;&lt;/a&gt; on all futures in order to require them to complete by
+the specified instant.&lt;/p&gt;
+
+&lt;p&gt;If the deadline is reached without the read completing, the read operation is
+automatically canceled. This happens when the future returned by
+&lt;code&gt;io::read_exact&lt;/code&gt; is dropped. Because of the lazy runtime model, dropping a
+future results in the operation being canceled.&lt;/p&gt;
+
+&lt;h2 id=&#34;interval&#34;&gt;&lt;a href=&#34;#interval&#34;&gt;Running code on an interval&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Repeatedly running code on an interval is useful for cases like sending a PING
+message on a socket, or checking a configuration file every so often. This can
+be implemented by repeatedly creating &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/timer/struct.Delay.html&#34;&gt;&lt;code&gt;Delay&lt;/code&gt;&lt;/a&gt; values. However, because
+this is a common pattern, &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/timer/struct.Interval.html&#34;&gt;&lt;code&gt;Interval&lt;/code&gt;&lt;/a&gt; is provided.&lt;/p&gt;
+
+&lt;p&gt;The [&lt;code&gt;Interval&lt;/code&gt;] type implements &lt;code&gt;Stream&lt;/code&gt;, yielding at the specified rate.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
+# extern crate tokio;
+#
+use tokio::prelude::*;
+use tokio::timer::Interval;
+
+use std::time::{Duration, Instant};
+
+fn main() {
+    let task = Interval::new(Instant::now(), Duration::from_millis(100))
+        .take(10)
+        .for_each(|instant| {
+            println!(&amp;quot;fire; instant={:?}&amp;quot;, instant);
+            Ok(())
+        })
+        .map_err(|e| panic!(&amp;quot;interval errored; err={:?}&amp;quot;, e));
+
+    tokio::run(task);
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The above example creates an &lt;code&gt;Interval&lt;/code&gt; that yields every 100 milliseconds
+starting now (the first argument is the instant at which the &lt;code&gt;Interval&lt;/code&gt; should
+first fire).&lt;/p&gt;
+
+&lt;p&gt;By default, an &lt;code&gt;Instant&lt;/code&gt; stream is unbounded, i.e., it will continue yielding at
+the requested interval forever. The example uses &lt;code&gt;Stream::take&lt;/code&gt; to limit the
+number of times &lt;code&gt;Interval&lt;/code&gt; yields, here limiting to a sequence of 10 events.
+So, the example will run for 0.9 seconds since the first of 10 values is yielded
+immediately.&lt;/p&gt;
+
+&lt;h2 id=&#34;timer&#34;&gt;&lt;a href=&#34;#timer&#34;&gt;Notes on the timer&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;The Tokio timer has a granularity of one millisecond. Any smaller interval is
+rounded up to the nearest millisecond. The timer is implemented in user land
+(i.e., does not use an operating system timer like &lt;code&gt;timerfd&lt;/code&gt; on linux). It uses
+a hierarchical hashed timer wheel implementation, which provides efficient
+constant time complexity when creating, canceling, and firing timeouts.&lt;/p&gt;
+
+&lt;p&gt;The Tokio runtime includes one timer instance &lt;strong&gt;per worker thread&lt;/strong&gt;. This means
+that, if the runtime starts 4 worker threads, there will be 4 timer
+instances. This allows avoiding synchronization in most cases since the task,
+when working with a timer, will be operating on state located on the current
+thread.&lt;/p&gt;
+
+&lt;p&gt;That said, the timer implementation is thread safe and supports usage from
+any thread.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Essential combinators</title>
+      <link>https://tokio-cn.github.io/docs/going-deeper/futures-mechanics/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/going-deeper/futures-mechanics/</guid>
+      <description>
+
+&lt;p&gt;We saw a few of the most important combinators in the
+&lt;a href=&#34;../../getting-started/futures&#34;&gt;futures&lt;/a&gt; and
+&lt;a href=&#34;../../getting-started/streams-and-sinks&#34;&gt;streams&lt;/a&gt; overviews. Here we&amp;rsquo;ll take a
+look at a few more. It&amp;rsquo;s also worth spending some time with the trait
+documentation to familiarize yourself with the full range of combinators
+available (&lt;a href=&#34;https://tokio-cn.github.io/img/diagrams/cheatsheet-for-futures.html&#34;&gt;cheatsheet&lt;/a&gt;).&lt;/p&gt;
+
+&lt;h3 id=&#34;concrete&#34;&gt;&lt;a href=&#34;#concrete&#34;&gt;Some concrete futures and streams&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;Any value can be turned into an immediately complete future. There are a few
+functions in the &lt;code&gt;future&lt;/code&gt; module for creating such a future:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/fn.ok.html&#34;&gt;&lt;code&gt;ok&lt;/code&gt;&lt;/a&gt;, which is analogous to &lt;code&gt;Result::Ok&lt;/code&gt;: it treats the value you give it as an immediately successful future.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/fn.err.html&#34;&gt;&lt;code&gt;err&lt;/code&gt;&lt;/a&gt;, which is analogous to &lt;code&gt;Result::Err&lt;/code&gt;: it treats the value you give it as an immediately failed future.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/fn.result.html&#34;&gt;&lt;code&gt;result&lt;/code&gt;&lt;/a&gt;, which lifts a result to an immediately-complete future.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For streams, there are a few equivalents of an &amp;ldquo;immediately ready&amp;rdquo; stream:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/fn.iter.html&#34;&gt;&lt;code&gt;iter&lt;/code&gt;&lt;/a&gt;, which creates a stream that yields the same items as the underlying
+iterator. The iterator produces &lt;code&gt;Result&lt;/code&gt; values, and the first error terminates
+the stream with that error.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/fn.once.html&#34;&gt;&lt;code&gt;once&lt;/code&gt;&lt;/a&gt;, which creates a single-element stream from a &lt;code&gt;Result&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In addition to these constructors, there&amp;rsquo;s also a function, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/fn.lazy.html&#34;&gt;&lt;code&gt;lazy&lt;/code&gt;&lt;/a&gt;, which
+allows you to construct a future given a &lt;em&gt;closure&lt;/em&gt; that will produce that future
+later, on demand.&lt;/p&gt;
+
+&lt;h3 id=&#34;intofuture&#34;&gt;&lt;a href=&#34;#intofuture&#34;&gt;IntoFuture&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;A crucial API to know about is the &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.IntoFuture.html&#34;&gt;&lt;code&gt;IntoFuture&lt;/code&gt;&lt;/a&gt; trait, which is a trait for
+values that can be converted into futures. Most APIs that you think of as taking
+futures actually work with this trait instead. The key reason: the trait is
+implemented for &lt;code&gt;Result&lt;/code&gt;, allowing you to return &lt;code&gt;Result&lt;/code&gt; values in many places
+that futures are expected.&lt;/p&gt;
+
+&lt;h3 id=&#34;adapters&#34;&gt;&lt;a href=&#34;#adapters&#34;&gt;Adapters&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;Like &lt;a href=&#34;https://doc.rust-lang.org/std/iter/trait.Iterator.html&#34;&gt;&lt;code&gt;Iterator&lt;/code&gt;&lt;/a&gt;, the &lt;code&gt;Future&lt;/code&gt;, &lt;code&gt;Stream&lt;/code&gt; and &lt;code&gt;Sink&lt;/code&gt; traits all come equipped
+with a broad range of &amp;ldquo;adapter&amp;rdquo; methods. These methods all consume the receiving
+object and return a new, wrapped one. For futures, you can use adapters to:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Change the type of a future (&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.map&#34;&gt;&lt;code&gt;map&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.map_err&#34;&gt;&lt;code&gt;map_err&lt;/code&gt;&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;Run another future after one has completed (&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.then&#34;&gt;&lt;code&gt;then&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.and_then&#34;&gt;&lt;code&gt;and_then&lt;/code&gt;&lt;/a&gt;,
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.or_else&#34;&gt;&lt;code&gt;or_else&lt;/code&gt;&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;Figure out which of two futures resolves first (&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.select&#34;&gt;&lt;code&gt;select&lt;/code&gt;&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;Wait for two futures to both complete (&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.join&#34;&gt;&lt;code&gt;join&lt;/code&gt;&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;Convert to a trait object (&lt;a href=&#34;https://doc.rust-lang.org/std/boxed/struct.Box.html#method.new&#34;&gt;&lt;code&gt;Box::new&lt;/code&gt;&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;Convert unwinding into errors (&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.catch_unwind&#34;&gt;&lt;code&gt;catch_unwind&lt;/code&gt;&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For streams, there are a large set of adapters, including:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Many in common with &lt;a href=&#34;https://doc.rust-lang.org/std/iter/trait.Iterator.html&#34;&gt;&lt;code&gt;Iterator&lt;/code&gt;&lt;/a&gt;, like &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.map&#34;&gt;&lt;code&gt;map&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.fold&#34;&gt;&lt;code&gt;fold&lt;/code&gt;&lt;/a&gt;,
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.collect&#34;&gt;&lt;code&gt;collect&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.filter&#34;&gt;&lt;code&gt;filter&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.zip&#34;&gt;&lt;code&gt;zip&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.take&#34;&gt;&lt;code&gt;take&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.skip&#34;&gt;&lt;code&gt;skip&lt;/code&gt;&lt;/a&gt; and so on. Note that &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.fold&#34;&gt;&lt;code&gt;fold&lt;/code&gt;&lt;/a&gt; and
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.collect&#34;&gt;&lt;code&gt;collect&lt;/code&gt;&lt;/a&gt; produce &lt;em&gt;futures&lt;/em&gt;, and hence their result is computed
+asynchronously.&lt;/li&gt;
+&lt;li&gt;Adapters for sequencing with futures (&lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.then&#34;&gt;&lt;code&gt;then&lt;/code&gt;&lt;/a&gt;,
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.and_then&#34;&gt;&lt;code&gt;and_then&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.or_else&#34;&gt;&lt;code&gt;or_else&lt;/code&gt;&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;Additional adapters for combining streams (&lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.merge&#34;&gt;&lt;code&gt;merge&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.select&#34;&gt;&lt;code&gt;select&lt;/code&gt;&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The &lt;code&gt;Sink&lt;/code&gt; trait currently has fewer adapters&lt;!--TODO: fix this link; the most important ones were
+covered in [the introduction](../../getting-started/streams-and-sinks).--&gt;&lt;/p&gt;
+
+&lt;p&gt;Finally, an object that is both a stream and a sink can be broken into separate
+stream and sink objects using the &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.split&#34;&gt;&lt;code&gt;split&lt;/code&gt;&lt;/a&gt; adapter.&lt;/p&gt;
+
+&lt;p&gt;All adapters are zero-cost, meaning that no memory is allocated internally and
+the implementation will optimize to what you would have otherwise written by
+hand.&lt;/p&gt;
+
+&lt;h3 id=&#34;error-handling&#34;&gt;&lt;a href=&#34;#error-handling&#34;&gt;Error handling&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;Futures, streams and sinks all treat error handling as a core concern: they are
+all equipped with an associated error type, and the various adapter methods
+interpret errors in sensible ways. For example:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;The sequencing combinators &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.then&#34;&gt;&lt;code&gt;then&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.and_then&#34;&gt;&lt;code&gt;and_then&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.or_else&#34;&gt;&lt;code&gt;or_else&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.map&#34;&gt;&lt;code&gt;map&lt;/code&gt;&lt;/a&gt;, and
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.map_err&#34;&gt;&lt;code&gt;map_err&lt;/code&gt;&lt;/a&gt; all chain errors similarly to the &lt;code&gt;Result&lt;/code&gt; type in the standard
+library. So, for example, if you chain futures using &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.and_then&#34;&gt;&lt;code&gt;and_then&lt;/code&gt;&lt;/a&gt; and the
+first future fails with an error, the chained future is never run.&lt;/p&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;Combinators like &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.select&#34;&gt;&lt;code&gt;select&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.join&#34;&gt;&lt;code&gt;join&lt;/code&gt;&lt;/a&gt; also deal with errors. For
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.select&#34;&gt;&lt;code&gt;select&lt;/code&gt;&lt;/a&gt;, the first future to complete &lt;em&gt;in any way&lt;/em&gt; yields an answer,
+propagating the error, but also giving access to the other future should you
+want to keep working with it. For &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.join&#34;&gt;&lt;code&gt;join&lt;/code&gt;&lt;/a&gt;, if any future produces an error,
+the entire join produces that error.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;By default, futures don&amp;rsquo;t have any special handling for panics. In most cases,
+though, futures are ultimately run as tasks within a thread pool, where you&amp;rsquo;ll
+want to catch any panic they produce and propagate that elsewhere. The
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.catch_unwind&#34;&gt;&lt;code&gt;catch_unwind&lt;/code&gt;&lt;/a&gt; adapter can be used to reify a panic into a &lt;code&gt;Result&lt;/code&gt; without
+taking down the worker thread.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Returning futures</title>
+      <link>https://tokio-cn.github.io/docs/going-deeper/returning/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/going-deeper/returning/</guid>
+      <description>
+
+&lt;p&gt;When working with futures, one of the first things you&amp;rsquo;re likely to need to do
+is to return a &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html&#34;&gt;&lt;code&gt;Future&lt;/code&gt;&lt;/a&gt;. As with &lt;a href=&#34;https://doc.rust-lang.org/std/iter/trait.Iterator.html&#34;&gt;&lt;code&gt;Iterator&lt;/code&gt;&lt;/a&gt;s, however, doing so can be a little tricky.
+There are several options, listed from most to least ergonomic:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#trait-objects&#34;&gt;Trait objects&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#impl-trait&#34;&gt;&lt;code&gt;impl Trait&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#named-types&#34;&gt;Named types&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#custom-types&#34;&gt;Custom types&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;trait-objects&#34;&gt;&lt;a href=&#34;#trait-objects&#34;&gt;Trait objects&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;First, you always have the option of returning a boxed &lt;a href=&#34;https://doc.rust-lang.org/book/trait-objects.html&#34;&gt;trait object&lt;/a&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# extern crate futures;
+# use std::io;
+# use futures::Future;
+# fn main() {}
+fn foo() -&amp;gt; Box&amp;lt;Future&amp;lt;Item = u32, Error = io::Error&amp;gt;&amp;gt; {
+    // ...
+# loop {}
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The upside of this strategy is that it&amp;rsquo;s easy to write down (just a &lt;a href=&#34;https://doc.rust-lang.org/std/boxed/struct.Box.html&#34;&gt;&lt;code&gt;Box&lt;/code&gt;&lt;/a&gt;) and
+easy to create. This is also maximally flexible in terms of future changes to
+the method as &lt;em&gt;any&lt;/em&gt; type of future can be returned as an opaque, boxed &lt;code&gt;Future&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The downside of this approach is that it requires a runtime allocation when the
+future is constructed, and dynamic dispatch when using that future. The &lt;code&gt;Box&lt;/code&gt;
+needs to be allocated on the heap and the future itself is then placed
+inside. Note, though that this is the &lt;em&gt;only&lt;/em&gt; allocation here, otherwise while
+the future is being executed no allocations will be made.&lt;/p&gt;
+
+&lt;p&gt;It&amp;rsquo;s often possible to mitigate that cost by boxing only at the end of a long
+chain of futures you want to return, which entails only a single allocation and
+dynamic dispatch for the entire chain.&lt;/p&gt;
+
+&lt;h3 id=&#34;impl-trait&#34;&gt;&lt;a href=&#34;#impl-trait&#34;&gt;&lt;code&gt;impl Trait&lt;/code&gt;&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;In an ideal world, however, we can have our cake and eat it too with a new
+language feature called &lt;a href=&#34;https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md&#34;&gt;&lt;code&gt;impl Trait&lt;/code&gt;&lt;/a&gt;. This language feature will allow, for
+example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust,ignore&#34;&gt;fn add_10&amp;lt;F&amp;gt;(f: F) -&amp;gt; impl Future&amp;lt;Item = i32, Error = F::Error&amp;gt;
+    where F: Future&amp;lt;Item = i32&amp;gt;,
+{
+    f.map(|i| i + 10)
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here we&amp;rsquo;re indicating that the return type is &amp;ldquo;something that implements
+&lt;code&gt;Future&lt;/code&gt;&amp;rdquo; with the given associated types. Other than that we just use the
+future combinators as we normally would.&lt;/p&gt;
+
+&lt;p&gt;The upsides to this approach are that it is zero overhead with no &lt;code&gt;Box&lt;/code&gt;
+necessary, it&amp;rsquo;s maximally flexible to future implementations as the actual
+return type is hidden, and it&amp;rsquo;s ergonomic to write as it&amp;rsquo;s similar to the nice
+&lt;code&gt;Box&lt;/code&gt; example above.&lt;/p&gt;
+
+&lt;p&gt;The downside to this approach is only that it&amp;rsquo;s only on versions of Rust later
+than 1.26 (released May 7th, 2018), and using a &lt;code&gt;Box&lt;/code&gt; is still more flexible &amp;ndash;
+if you might return two different types of &lt;code&gt;Future&lt;/code&gt;, then you must still return
+&lt;code&gt;Box&amp;lt;Future&amp;lt;Item = F::Item, Error = F::Error&amp;gt;&lt;/code&gt; instead of
+&lt;code&gt;impl Future&amp;lt;Item = F::Item, Error = F::Error&amp;gt;&lt;/code&gt;.  The good news however is that
+this case is rare; in general, it should be a backwards-compatible extension to
+change return types from &lt;code&gt;Box&lt;/code&gt; to &lt;a href=&#34;https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md&#34;&gt;&lt;code&gt;impl Trait&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;named-types&#34;&gt;&lt;a href=&#34;#named-types&#34;&gt;Named types&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;If you wouldn&amp;rsquo;t like to return a &lt;code&gt;Box&lt;/code&gt; and want to stick with older versions of
+Rust, another option is to write the return type directly:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# extern crate futures;
+# use futures::Future;
+# use futures::future::Map;
+# fn main() {}
+fn add_10&amp;lt;F&amp;gt;(f: F) -&amp;gt; Map&amp;lt;F, fn(i32) -&amp;gt; i32&amp;gt;
+    where F: Future&amp;lt;Item = i32&amp;gt;,
+{
+    fn do_map(i: i32) -&amp;gt; i32 { i + 10 }
+    f.map(do_map)
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here we name the return type exactly as the compiler sees it. The &lt;code&gt;map&lt;/code&gt;
+function returns the &lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/struct.Map.html&#34;&gt;&lt;code&gt;Map&lt;/code&gt;&lt;/a&gt; struct which internally contains the future and the
+function to perform the map.&lt;/p&gt;
+
+&lt;p&gt;The upside to this approach is that it doesn&amp;rsquo;t have the runtime overhead of
+&lt;code&gt;Box&lt;/code&gt; from before, and works on Rust versions pre-1.26.&lt;/p&gt;
+
+&lt;p&gt;The downside, however, is that it&amp;rsquo;s often quite difficult to name the type.
+Sometimes the types can get quite large or be unnameable altogether. Here we&amp;rsquo;re
+using a function pointer (&lt;code&gt;fn(i32) -&amp;gt; i32&lt;/code&gt;), but we would ideally use a closure.
+Unfortunately, the return type cannot name the closure, for now. It also leads to
+very verbose signatures, and leaks implementation details to clients.&lt;/p&gt;
+
+&lt;h3 id=&#34;custom-types&#34;&gt;&lt;a href=&#34;#custom-types&#34;&gt;Custom types&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;Finally, you can wrap the concrete return type in a new type, and implement
+future for it. For example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust,ignore&#34;&gt;struct MyFuture {
+    inner: Sender&amp;lt;i32&amp;gt;,
+}
+
+fn foo() -&amp;gt; MyFuture {
+    let (tx, rx) = oneshot::channel();
+    // ...
+    MyFuture { inner: tx }
+}
+
+impl Future for MyFuture {
+    // ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In this example we&amp;rsquo;re returning a custom type, &lt;code&gt;MyFuture&lt;/code&gt;, and we implement the
+&lt;code&gt;Future&lt;/code&gt; trait directly for it. This implementation leverages an underlying
+&lt;code&gt;Oneshot&amp;lt;i32&amp;gt;&lt;/code&gt;, but any other kind of protocol can also be implemented here as
+well.&lt;/p&gt;
+
+&lt;p&gt;The upside to this approach is that it won&amp;rsquo;t require a &lt;code&gt;Box&lt;/code&gt; allocation and it&amp;rsquo;s
+still maximally flexible. The implementation details of &lt;code&gt;MyFuture&lt;/code&gt; are hidden to
+the outside world so it can change without breaking others.&lt;/p&gt;
+
+&lt;p&gt;The downside to this approach, however, is that this is the least ergonomic way
+to return futures.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Working with framed streams</title>
+      <link>https://tokio-cn.github.io/docs/going-deeper/frames/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/going-deeper/frames/</guid>
+      <description>
+
+&lt;p&gt;Tokio has helpers to transform a stream of bytes into a stream frames. Examples
+of byte streams include TCP connections, pipes, file objects and the standard
+input and output file descriptors. In Rust, streams are easily identified
+because they implement the &lt;code&gt;Read&lt;/code&gt; and &lt;code&gt;Write&lt;/code&gt; traits.&lt;/p&gt;
+
+&lt;p&gt;One of the simplest form of framed message is the line delimited message.
+Each message ends with a &lt;code&gt;\n&lt;/code&gt; character. Let&amp;rsquo;s look at how one would implement
+a stream of line delimited messages with tokio.&lt;/p&gt;
+
+&lt;h2 id=&#34;writing-a-codec&#34;&gt;Writing a codec&lt;/h2&gt;
+
+&lt;p&gt;The codec implements the &lt;code&gt;tokio_codec::Decoder&lt;/code&gt; and
+&lt;code&gt;tokio_codec::Encoder&lt;/code&gt; traits. Its job is to convert a frame to and from
+bytes. Those traits are used in conjunction with the &lt;code&gt;tokio_codec::Framed&lt;/code&gt;
+struct to provide buffering, decoding and encoding of byte streams.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at a simplified version of the &lt;code&gt;LinesCodec&lt;/code&gt; struct, which implements
+decoding and encoding of the line delimited message.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;pub struct LinesCodec {
+    // Stored index of the next index to examine for a `\n` character.
+    // This is used to optimize searching.
+    // For example, if `decode` was called with `abc`, it would hold `3`,
+    // because that is the next index to examine.
+    // The next time `decode` is called with `abcde\n`, the method will
+    // only look at `de\n` before returning.
+    next_index: usize,
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The comments here explain how, since the bytes are buffered until a line is
+found, it is wasteful to search for a &lt;code&gt;\n&lt;/code&gt; from the beginning of the buffer
+everytime data is received. It&amp;rsquo;s more efficient to keep the last length of
+the buffer and start searching from there when new data is received.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;Decoder::decode&lt;/code&gt; method is called when data is received on the underlying
+stream. The method can produce a frame or return &lt;code&gt;Ok(None)&lt;/code&gt; to signify that
+it needs more data to produce a frame. The &lt;code&gt;decode&lt;/code&gt; method is responsible
+for removing the data that no longer needs to be buffered by splitting it off
+using the &lt;code&gt;BytesMut&lt;/code&gt; methods. If the data is not removed, the buffer will
+keep growing.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at how &lt;code&gt;Decoder::decode&lt;/code&gt; is implemented for &lt;code&gt;LinesCodec&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# extern crate bytes;
+# extern crate tokio_io;
+# use std::io;
+# use std::str;
+# use bytes::BytesMut;
+# use tokio_io::codec::*;
+# struct LinesCodec { next_index: usize };
+# impl Decoder for LinesCodec {
+#    type Item = String;
+#    type Error = io::Error;
+fn decode(&amp;amp;mut self, buf: &amp;amp;mut BytesMut) -&amp;gt; Result&amp;lt;Option&amp;lt;String&amp;gt;, io::Error&amp;gt; {
+    // Look for a byte with the value &#39;\n&#39; in buf. Start searching from the search start index.
+    if let Some(newline_offset) = buf[self.next_index..].iter().position(|b| *b == b&#39;\n&#39;)
+    {
+        // Found a &#39;\n&#39; in the string.
+
+        // The index of the &#39;\n&#39; is at the sum of the start position + the offset found.
+        let newline_index = newline_offset + self.next_index;
+
+        // Split the buffer at the index of the &#39;\n&#39; + 1 to include the &#39;\n&#39;.
+        // `split_to` returns a new buffer with the contents up to the index.
+        // The buffer on which `split_to` is called will now start at this index.
+        let line = buf.split_to(newline_index + 1);
+
+        // Trim the `\n` from the buffer because it&#39;s part of the protocol,
+        // not the data.
+        let line = &amp;amp;line[..line.len() - 1];
+
+        // Convert the bytes to a string and panic if the bytes are not valid utf-8.
+        let line = str::from_utf8(&amp;amp;line).expect(&amp;quot;invalid utf8 data&amp;quot;);
+
+        // Set the search start index back to 0.
+        self.next_index = 0;
+
+        // Return Ok(Some(...)) to signal that a full frame has been produced.
+        Ok(Some(line.to_string()))
+    } else {
+        // &#39;\n&#39; not found in the string.
+
+        // Tell the next call to start searching after the current length of the buffer
+        // since all of it was scanned and no &#39;\n&#39; was found.
+        self.next_index = buf.len();
+
+        // Ok(None) signifies that more data is needed to produce a full frame.
+        Ok(None)
+    }
+}
+# }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;Encoder::encode&lt;/code&gt; method is called when a frame must be written to the
+underlying stream. The frame must be written to the buffer received as a
+parameter. The data written to the buffer will be written to the
+stream as it becomes ready to send the data.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s now look at how &lt;code&gt;Encoder::encode&lt;/code&gt; is implemented for &lt;code&gt;LinesCodec&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# extern crate bytes;
+# extern crate tokio_io;
+# use std::io;
+# use std::str;
+# use bytes::*;
+# use tokio_io::codec::*;
+# struct LinesCodec { next_index: usize };
+# impl Encoder for LinesCodec {
+#    type Item = String;
+#    type Error = io::Error;
+fn encode(&amp;amp;mut self, line: String, buf: &amp;amp;mut BytesMut) -&amp;gt; Result&amp;lt;(), io::Error&amp;gt; {
+    // It&#39;s important to reserve the amount of space needed. The `bytes` API
+    // does not grow the buffers implicitly.
+    // Reserve the length of the string + 1 for the &#39;\n&#39;.
+    buf.reserve(line.len() + 1);
+
+    // String implements IntoBuf, a trait used by the `bytes` API to work with
+    // types that can be expressed as a sequence of bytes.
+    buf.put(line);
+
+    // Put the &#39;\n&#39; in the buffer.
+    buf.put_u8(b&#39;\n&#39;);
+
+    // Return ok to signal that no error occured.
+    Ok(())
+}
+# }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It&amp;rsquo;s often simpler to encode information. Here we simply reserve the space
+needed and write the data to the buffer.&lt;/p&gt;
+
+&lt;h2 id=&#34;using-a-codec&#34;&gt;Using a codec&lt;/h2&gt;
+
+&lt;p&gt;The simplest way of using a codec is with the &lt;code&gt;Framed&lt;/code&gt; struct. It&amp;rsquo;s a wrapper
+around a codec that implements automatic buffering. The &lt;code&gt;Framed&lt;/code&gt; struct is both
+a &lt;code&gt;Stream&lt;/code&gt; and a &lt;code&gt;Sink&lt;/code&gt;. Thus, you can receive frames from it and send frames
+to it.&lt;/p&gt;
+
+&lt;p&gt;You can create a &lt;code&gt;Framed&lt;/code&gt; struct using any type that implement the &lt;code&gt;AsyncRead&lt;/code&gt;
+and &lt;code&gt;AsyncWrite&lt;/code&gt; traits using the &lt;code&gt;AsyncRead::framed&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# extern crate futures;
+# extern crate tokio;
+# extern crate tokio_io;
+# use futures::prelude::*;
+# use tokio::net::TcpStream;
+# use tokio_io::AsyncRead;
+# use tokio_io::codec::LinesCodec;
+# let addr = &amp;quot;127.0.0.1:5000&amp;quot;.parse().expect(&amp;quot;invalid socket address&amp;quot;);
+TcpStream::connect(&amp;amp;addr).and_then(|sock| {
+    let framed_sock = sock.framed(LinesCodec::new());
+    framed_sock.for_each(|line| {
+        println!(&amp;quot;Received line {}&amp;quot;, line);
+        Ok(())
+    })
+});
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Building a runtime</title>
+      <link>https://tokio-cn.github.io/docs/going-deeper/building-runtime/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/going-deeper/building-runtime/</guid>
+      <description>
+
+&lt;p&gt;The runtime ‒ all the pieces needed to run an event driven application ‒ is
+already available. You don&amp;rsquo;t &lt;em&gt;need&lt;/em&gt; to know this if you want to just use tokio.
+However, it may be useful to know what happens under the hood, both to gain some
+more understanding of the details in case something goes wrong, and to be able
+to customize it beyond what the &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/runtime/struct.Builder.html&#34;&gt;runtime &lt;code&gt;Builder&lt;/code&gt;&lt;/a&gt; supports.&lt;/p&gt;
+
+&lt;p&gt;We are going to build a single threaded runtime, because it is slightly simpler
+to put together. Not that the default multi threaded one would be conceptually
+more complex, but there are more moving parts around. Knowing the details here
+can be a stepping stone to reading the code of the default runtime.&lt;/p&gt;
+
+&lt;p&gt;A complete, working example of things discussed here can be found in the
+&lt;a href=&#34;https://github.com/tokio-rs/tokio/tree/master/examples/manual-runtime.rs&#34;&gt;git repository&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;the-park-trait&#34;&gt;The &lt;code&gt;Park&lt;/code&gt; trait&lt;/h2&gt;
+
+&lt;p&gt;The asynchronous world is inherently about &lt;em&gt;waiting&lt;/em&gt; for something to happen
+(and being able to wait for multiple things at once). It is no surprise there&amp;rsquo;s
+a trait to abstract over the waiting. It&amp;rsquo;s called &lt;a href=&#34;https://docs.rs/tokio-executor/0.1/tokio_executor/park/trait.Park.html&#34;&gt;&lt;code&gt;Park&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The idea is, if there&amp;rsquo;s nothing better to do, the control is passed to the
+&lt;code&gt;Park&lt;/code&gt; until something interesting happens and the control is taken away from it
+again or until some specified time passes. It is up to the &lt;code&gt;Park&lt;/code&gt; how it spends
+this time. It can either do something useful (processing background jobs) or
+simply block the thread in some way.&lt;/p&gt;
+
+&lt;p&gt;Some things are the bottom &lt;code&gt;Park&lt;/code&gt; implementations ‒ they somehow block the
+thread. Other things implementing the trait only delegate the park calls to some
+underlying object they wrap (with some added functionality), allowing to stack
+things onto each other.&lt;/p&gt;
+
+&lt;h2 id=&#34;the-usual-components&#34;&gt;The usual components&lt;/h2&gt;
+
+&lt;p&gt;We definitely need a &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/reactor/struct.Reactor.html&#34;&gt;&lt;code&gt;Reactor&lt;/code&gt;&lt;/a&gt; to accept external events (like network sockets
+being readable) from the OS. It does so by blocking on &lt;code&gt;epoll&lt;/code&gt;, &lt;code&gt;kqueue&lt;/code&gt; or
+other OS-dependent primitive, through the &lt;a href=&#34;https://crates.io/crates/mio&#34;&gt;mio&lt;/a&gt; crate. This can&amp;rsquo;t delegate the
+waiting to anything else, so reactor goes to the bottom of our stack.&lt;/p&gt;
+
+&lt;p&gt;The reactor is able to notify our futures of data coming over the network and
+similar events, but we need an executor to actually run them. We&amp;rsquo;ll be using the
+&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/executor/current_thread/struct.CurrentThread.html&#34;&gt;&lt;code&gt;CurrentThread&lt;/code&gt;&lt;/a&gt; executor, because we&amp;rsquo;re building a single-threaded runtime.
+Use any other executor that suits your needs. The executor needs a &lt;code&gt;Park&lt;/code&gt;
+underneath to wait when there are no futures ready to run. It doesn&amp;rsquo;t implement
+&lt;code&gt;Park&lt;/code&gt;, therefore it must go on the top of the whole stack.&lt;/p&gt;
+
+&lt;p&gt;While not strictly necessary, it is useful to be able to run delayed futures ‒
+timeouts and similar. Therefore, we place the &lt;a href=&#34;https://docs.rs/tokio-timer/0.2/timer/struct.Timer.html&#34;&gt;&lt;code&gt;Timer&lt;/code&gt;&lt;/a&gt; in the middle ‒
+fortunately, it can be placed on top of one &lt;code&gt;Park&lt;/code&gt; and also implements &lt;code&gt;Park&lt;/code&gt;.
+This plays a similar role for timeouts as reactor does for IO-based futures.&lt;/p&gt;
+
+&lt;p&gt;In addition, any custom layer can be added. One example could be some kind of
+idle bookkeeping component ‒ it would try to repeatedly do a bit of work if
+asked to wait and interleave it with letting the park below it also pick up
+events. If there was no bookkeeping to be done, it would simply delegate the
+waiting.&lt;/p&gt;
+
+&lt;p&gt;This is how the creation of the reactor, timer and executor would look like in
+code:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# extern crate futures;
+# extern crate tokio;
+# extern crate tokio_executor;
+# extern crate tokio_reactor;
+# extern crate tokio_timer;
+#
+# use std::io::Error as IoError;
+# use std::time::{Duration, Instant};
+#
+# use futures::{future, Future};
+# use tokio::executor::current_thread::{self, CurrentThread};
+# use tokio_reactor::Reactor;
+# use tokio_timer::timer::{self, Timer};
+# fn run&amp;lt;F: Future&amp;lt;Item = (), Error = std::io::Error&amp;gt;&amp;gt;(f: F) -&amp;gt; Result&amp;lt;(), std::io::Error&amp;gt; {
+let reactor = Reactor::new()?;
+// The reactor itself will get consumed by timer,
+// so we keep a handle to communicate with it.
+let reactor_handle = reactor.handle();
+let timer = Timer::new(reactor);
+let timer_handle = timer.handle();
+let mut executor = CurrentThread::new_with_park(timer);
+# Ok(())
+# }
+# fn main() {
+#      run(futures::future::lazy(|| Ok(()))).unwrap();
+# }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This way, if there are futures to execute, they&amp;rsquo;ll get executed first. Then once
+it runs out of ready futures, it&amp;rsquo;ll look for timeouts to fire. This may generate
+some more ready futures (which would get executed next). If no timeouts fire,
+the timer computes for how long the reactor can safely block and lets it wait
+for external events.&lt;/p&gt;
+
+&lt;h2 id=&#34;global-state&#34;&gt;Global state&lt;/h2&gt;
+
+&lt;p&gt;We&amp;rsquo;ve built the components that do the actual work. But we need a way to build
+and submit the work to them. We could do so through the handles, but to do that,
+we would have to carry them around which would be far from ergonomic.&lt;/p&gt;
+
+&lt;p&gt;To avoid the tedious passing of several handles around, the built-in runtime
+stores them in a thread local storage. Several modules in tokio have a
+&lt;code&gt;with_default&lt;/code&gt; method, which takes the corresponding handle and a closure. It
+stores the handle in the thread local storage and runs the closure. It then
+restores the original value of the TLS after the closure finishes.&lt;/p&gt;
+
+&lt;p&gt;This way we would run a future with all the default values set, so it can freely
+use them:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# extern crate futures;
+# extern crate tokio;
+# extern crate tokio_executor;
+# extern crate tokio_reactor;
+# extern crate tokio_timer;
+#
+# use std::io::Error as IoError;
+# use std::time::{Duration, Instant};
+#
+# use futures::{future, Future};
+# use tokio::executor::current_thread::{self, CurrentThread};
+# use tokio_reactor::Reactor;
+# use tokio_timer::timer::{self, Timer};
+# fn run&amp;lt;F: Future&amp;lt;Item = (), Error = std::io::Error&amp;gt;&amp;gt;(f: F) -&amp;gt; Result&amp;lt;(), std::io::Error&amp;gt; {
+# let reactor = Reactor::new()?;
+# let reactor_handle = reactor.handle();
+# let timer = Timer::new(reactor);
+# let timer_handle = timer.handle();
+# let mut executor = CurrentThread::new_with_park(timer);
+// Binds an executor to this thread
+let mut enter = tokio_executor::enter()
+    .expect(&amp;quot;Multiple executors at once&amp;quot;);
+// Set the defaults before running the closure
+let result = tokio_reactor::with_default(
+    &amp;amp;reactor_handle,
+    &amp;amp;mut enter,
+    |enter| timer::with_default(
+        &amp;amp;timer_handle,
+        enter,
+        |enter| {
+            let mut default_executor =
+                current_thread::TaskExecutor::current();
+            tokio_executor::with_default(
+                &amp;amp;mut default_executor,
+                enter,
+                |enter| executor.enter(enter).block_on(f)
+            )
+        }
+    )
+);
+# Ok(())
+# }
+# fn main() {
+#      run(futures::future::lazy(|| Ok(()))).unwrap();
+# }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;There are few things of note. First, the &lt;code&gt;enter&lt;/code&gt; thing just ensures that we
+don&amp;rsquo;t run multiple executors on the same thread at the same time. Running
+multiple executors would get one of them blocked, which would act in a very not
+useful way, therefore this is footgun prevention.&lt;/p&gt;
+
+&lt;p&gt;Second, we want to use the same executor as the default executor and default
+current thread executor, and also to run the executor (not only spawn a future
+onto it without further waiting). To do both, we need two mutable references to
+it, which is not possible. To work around that, we set the current thread
+executor (it actually sets itself, in the &lt;code&gt;executor.block_on&lt;/code&gt; call, or any
+similar one). We use the &lt;code&gt;TaskExecutor&lt;/code&gt; as the default one, which is a proxy to
+whatever current thread executor is configured at the time of its use.&lt;/p&gt;
+
+&lt;p&gt;Finally, the &lt;code&gt;block_on&lt;/code&gt; will execute the single future to completion (and will
+process any other futures spawned in the executor as well, but it&amp;rsquo;ll not wait
+for them to finish if &lt;code&gt;f&lt;/code&gt; finishes first). The result of the future is bubbled
+upwards through all the &lt;code&gt;with_default&lt;/code&gt; calls and can be returned or used in any
+other way. If you want to wait for all the other futures to finish too, there&amp;rsquo;s
+also &lt;code&gt;executor.run&lt;/code&gt; which can be executed afterwards.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

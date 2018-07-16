@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <link rel="apple-touch-icon" sizes="120x120" href="https://tokio-cn.github.io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://tokio-cn.github.io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://tokio-cn.github.io/favicon-16x16.png">
+    <link rel="manifest" href="https://tokio-cn.github.io/manifest.json">
+    <link rel="mask-icon" href="https://tokio-cn.github.io/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#ffffff">
+
+    
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/bootstrap-reboot.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/bootstrap.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/tokio.css">
+
+    
+    <link rel="alternate" type="application/rss+xml" href="https://tokio-cn.github.io/blog/index.xml" />
+
+    <title>Essential combinators</title>
+  </head>
+  <body>
+    <header class="navbar navbar-light navbar-toggleable-md bd-navbar">
+      <nav class="tk-main-nav">
+        <div class="d-flex justify-content-between hidden-lg-up">
+            <a href="https://tokio-cn.github.io/" class="navbar-brand">
+              <img src="https://tokio-cn.github.io/img/logo.png" class="align-middle" alt="">
+            </a>
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#tk-main-nav" aria-label="Toggle navigation" aria-controls="tk-main-nav" aria-expanded="false">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+        <div class="navbar-collapse collapse" id="tk-main-nav">
+          <ul class="nav navbar-nav">
+            <li class="nav-item hd-lg-down">
+              <a class="navbar-brand" href="https://tokio-cn.github.io/"><img src="https://tokio-cn.github.io/img/logo.png" class="align-middle" alt=""></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/">首页 <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/docs/getting-started/hello-world/">文档</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/community/">社区</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/blog/2018-05-tokio-fs/">博客</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+
+
+<div class="tk-pageheader">
+  <div class="container">
+    <h1 class="display-4">Essential combinators</h1>
+    <p class="lead">Common APIs for futures and stream programming</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+
+      <nav class="leftnav">
+        <div class="" id="">
+          <h5>入门</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/hello-world/" class="text-muted">Hello World!</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/" class="text-muted">Runtime Model</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="text-muted">Futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/tasks/" class="text-muted">Tasks</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/io/" class="text-muted">I/O with Tokio</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/chat/" class="text-muted">Example: A Chat Server</a>
+              </li>
+              
+            </ul>
+          </div>
+
+          <h5>深入</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/timers/" class="text-muted">Timers</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/futures-mechanics/" >Essential combinators</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="text-muted">Returning futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/frames/" class="text-muted">Working with framed streams</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/building-runtime/" class="text-muted">Building a runtime</a>
+              </li>
+              
+            </ul>
+          </div>
+
+          <br/>
+          <h5>参考</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              <li class="active">
+                <a href="https://docs.rs/tokio" class="text-muted"><code>tokio</code> API docs</a>
+              </li>
+              <li class="active">
+                <a href="https://docs.rs/futures/0.1" class="text-muted"><code>futures</code> API docs</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+    </div>
+    <div class="col-md-9">
+      <div class="tk-content">
+        <div class="github-edit">
+            <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/going-deeper/futures-mechanics.md"> 在 GitHub 上编辑</a>
+        </div>
+        
+
+<p>We saw a few of the most important combinators in the
+<a href="../../getting-started/futures">futures</a> and
+<a href="../../getting-started/streams-and-sinks">streams</a> overviews. Here we&rsquo;ll take a
+look at a few more. It&rsquo;s also worth spending some time with the trait
+documentation to familiarize yourself with the full range of combinators
+available (<a href="https://tokio-cn.github.io/img/diagrams/cheatsheet-for-futures.html">cheatsheet</a>).</p>
+
+<h3 id="concrete"><a href="#concrete">Some concrete futures and streams</a></h3>
+
+<p>Any value can be turned into an immediately complete future. There are a few
+functions in the <code>future</code> module for creating such a future:</p>
+
+<ul>
+<li><a href="https://docs.rs/futures/0.1/futures/future/fn.ok.html"><code>ok</code></a>, which is analogous to <code>Result::Ok</code>: it treats the value you give it as an immediately successful future.</li>
+<li><a href="https://docs.rs/futures/0.1/futures/future/fn.err.html"><code>err</code></a>, which is analogous to <code>Result::Err</code>: it treats the value you give it as an immediately failed future.</li>
+<li><a href="https://docs.rs/futures/0.1/futures/future/fn.result.html"><code>result</code></a>, which lifts a result to an immediately-complete future.</li>
+</ul>
+
+<p>For streams, there are a few equivalents of an &ldquo;immediately ready&rdquo; stream:</p>
+
+<ul>
+<li><a href="https://docs.rs/futures/0.1/futures/stream/fn.iter.html"><code>iter</code></a>, which creates a stream that yields the same items as the underlying
+iterator. The iterator produces <code>Result</code> values, and the first error terminates
+the stream with that error.</li>
+<li><a href="https://docs.rs/futures/0.1/futures/stream/fn.once.html"><code>once</code></a>, which creates a single-element stream from a <code>Result</code>.</li>
+</ul>
+
+<p>In addition to these constructors, there&rsquo;s also a function, <a href="https://docs.rs/futures/0.1/futures/future/fn.lazy.html"><code>lazy</code></a>, which
+allows you to construct a future given a <em>closure</em> that will produce that future
+later, on demand.</p>
+
+<h3 id="intofuture"><a href="#intofuture">IntoFuture</a></h3>
+
+<p>A crucial API to know about is the <a href="https://docs.rs/futures/0.1/futures/future/trait.IntoFuture.html"><code>IntoFuture</code></a> trait, which is a trait for
+values that can be converted into futures. Most APIs that you think of as taking
+futures actually work with this trait instead. The key reason: the trait is
+implemented for <code>Result</code>, allowing you to return <code>Result</code> values in many places
+that futures are expected.</p>
+
+<h3 id="adapters"><a href="#adapters">Adapters</a></h3>
+
+<p>Like <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a>, the <code>Future</code>, <code>Stream</code> and <code>Sink</code> traits all come equipped
+with a broad range of &ldquo;adapter&rdquo; methods. These methods all consume the receiving
+object and return a new, wrapped one. For futures, you can use adapters to:</p>
+
+<ul>
+<li>Change the type of a future (<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.map"><code>map</code></a>, <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.map_err"><code>map_err</code></a>)</li>
+<li>Run another future after one has completed (<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.then"><code>then</code></a>, <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.and_then"><code>and_then</code></a>,
+<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.or_else"><code>or_else</code></a>)</li>
+<li>Figure out which of two futures resolves first (<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.select"><code>select</code></a>)</li>
+<li>Wait for two futures to both complete (<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.join"><code>join</code></a>)</li>
+<li>Convert to a trait object (<a href="https://doc.rust-lang.org/std/boxed/struct.Box.html#method.new"><code>Box::new</code></a>)</li>
+<li>Convert unwinding into errors (<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.catch_unwind"><code>catch_unwind</code></a>)</li>
+</ul>
+
+<p>For streams, there are a large set of adapters, including:</p>
+
+<ul>
+<li>Many in common with <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a>, like <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.map"><code>map</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.fold"><code>fold</code></a>,
+<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.collect"><code>collect</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.filter"><code>filter</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.zip"><code>zip</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.take"><code>take</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.skip"><code>skip</code></a> and so on. Note that <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.fold"><code>fold</code></a> and
+<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.collect"><code>collect</code></a> produce <em>futures</em>, and hence their result is computed
+asynchronously.</li>
+<li>Adapters for sequencing with futures (<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.then"><code>then</code></a>,
+<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.and_then"><code>and_then</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.or_else"><code>or_else</code></a>)</li>
+<li>Additional adapters for combining streams (<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.merge"><code>merge</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.select"><code>select</code></a>)</li>
+</ul>
+
+<p>The <code>Sink</code> trait currently has fewer adapters<!--TODO: fix this link; the most important ones were
+covered in [the introduction](../../getting-started/streams-and-sinks).--></p>
+
+<p>Finally, an object that is both a stream and a sink can be broken into separate
+stream and sink objects using the <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.split"><code>split</code></a> adapter.</p>
+
+<p>All adapters are zero-cost, meaning that no memory is allocated internally and
+the implementation will optimize to what you would have otherwise written by
+hand.</p>
+
+<h3 id="error-handling"><a href="#error-handling">Error handling</a></h3>
+
+<p>Futures, streams and sinks all treat error handling as a core concern: they are
+all equipped with an associated error type, and the various adapter methods
+interpret errors in sensible ways. For example:</p>
+
+<ul>
+<li><p>The sequencing combinators <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.then"><code>then</code></a>, <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.and_then"><code>and_then</code></a>, <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.or_else"><code>or_else</code></a>, <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.map"><code>map</code></a>, and
+<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.map_err"><code>map_err</code></a> all chain errors similarly to the <code>Result</code> type in the standard
+library. So, for example, if you chain futures using <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.and_then"><code>and_then</code></a> and the
+first future fails with an error, the chained future is never run.</p></li>
+
+<li><p>Combinators like <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.select"><code>select</code></a> and <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.join"><code>join</code></a> also deal with errors. For
+<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.select"><code>select</code></a>, the first future to complete <em>in any way</em> yields an answer,
+propagating the error, but also giving access to the other future should you
+want to keep working with it. For <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.join"><code>join</code></a>, if any future produces an error,
+the entire join produces that error.</p></li>
+</ul>
+
+<p>By default, futures don&rsquo;t have any special handling for panics. In most cases,
+though, futures are ultimately run as tasks within a thread pool, where you&rsquo;ll
+want to catch any panic they produce and propagate that elsewhere. The
+<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html#method.catch_unwind"><code>catch_unwind</code></a> adapter can be used to reify a panic into a <code>Result</code> without
+taking down the worker thread.</p>
+
+        
+        <div class="tk-next"><b>Next up</b>: <a href = /docs/going-deeper/returning/>
+         Returning futures</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <footer class="tk-footer">
+      <div class="text-muted tk-footer-gray d-flex justify-content-between">
+        <div class="tk-footer-info">
+          版权所有 © 2018 <a href="https://tokio.rs">Tokio 项目</a> & <a href="https://hltj.me">灰蓝天际</a> 
+        </div>
+        <div class="tk-footer-social">
+          <a href="https://twitter.com/tokio_rs" class="text-muted"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+          <a href="https://github.com/tokio-rs/tokio" class="text-muted"><i class="fa fa-github" aria-hidden="true"></i></a>
+        </div>
+      </div>
+    </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
+    <script src="https://tokio-cn.github.io/js/bootstrap.min.js"></script>
+    <script src="https://tokio-cn.github.io/js/highlight.js"></script>
+    <script>
+      $(function () {
+        $("pre code").each(function(i, block) {
+          
+          if (block.className.indexOf('language-rust') >= 0) {
+            var new_content = '';
+            var lines = block.textContent.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+              if (lines[i].indexOf('# ') == 0 || lines[i] == '#') {
+                continue
+              }
+              new_content += lines[i].trimRight() + '\n';
+            }
+            block.textContent = new_content.replace(/\n\n\n/g, "\n\n").trimRight();
+          }
+          hljs.highlightBlock(block);
+        });
+      });
+    </script>
+    
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-122396021-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+  </body>
+</html>
+

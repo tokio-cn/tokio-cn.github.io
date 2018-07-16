@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <link rel="apple-touch-icon" sizes="120x120" href="https://tokio-cn.github.io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://tokio-cn.github.io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://tokio-cn.github.io/favicon-16x16.png">
+    <link rel="manifest" href="https://tokio-cn.github.io/manifest.json">
+    <link rel="mask-icon" href="https://tokio-cn.github.io/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#ffffff">
+
+    
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/bootstrap-reboot.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/bootstrap.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/tokio.css">
+
+    
+    <link rel="alternate" type="application/rss+xml" href="https://tokio-cn.github.io/blog/index.xml" />
+
+    <title>Returning futures</title>
+  </head>
+  <body>
+    <header class="navbar navbar-light navbar-toggleable-md bd-navbar">
+      <nav class="tk-main-nav">
+        <div class="d-flex justify-content-between hidden-lg-up">
+            <a href="https://tokio-cn.github.io/" class="navbar-brand">
+              <img src="https://tokio-cn.github.io/img/logo.png" class="align-middle" alt="">
+            </a>
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#tk-main-nav" aria-label="Toggle navigation" aria-controls="tk-main-nav" aria-expanded="false">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+        <div class="navbar-collapse collapse" id="tk-main-nav">
+          <ul class="nav navbar-nav">
+            <li class="nav-item hd-lg-down">
+              <a class="navbar-brand" href="https://tokio-cn.github.io/"><img src="https://tokio-cn.github.io/img/logo.png" class="align-middle" alt=""></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/">首页 <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/docs/getting-started/hello-world/">文档</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/community/">社区</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/blog/2018-05-tokio-fs/">博客</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+
+
+<div class="tk-pageheader">
+  <div class="container">
+    <h1 class="display-4">Returning futures</h1>
+    <p class="lead"></p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+
+      <nav class="leftnav">
+        <div class="" id="">
+          <h5>入门</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/hello-world/" class="text-muted">Hello World!</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/" class="text-muted">Runtime Model</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="text-muted">Futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/tasks/" class="text-muted">Tasks</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/io/" class="text-muted">I/O with Tokio</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/chat/" class="text-muted">Example: A Chat Server</a>
+              </li>
+              
+            </ul>
+          </div>
+
+          <h5>深入</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/timers/" class="text-muted">Timers</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/futures-mechanics/" class="text-muted">Essential combinators</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/returning/" >Returning futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/frames/" class="text-muted">Working with framed streams</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/building-runtime/" class="text-muted">Building a runtime</a>
+              </li>
+              
+            </ul>
+          </div>
+
+          <br/>
+          <h5>参考</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              <li class="active">
+                <a href="https://docs.rs/tokio" class="text-muted"><code>tokio</code> API docs</a>
+              </li>
+              <li class="active">
+                <a href="https://docs.rs/futures/0.1" class="text-muted"><code>futures</code> API docs</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+    </div>
+    <div class="col-md-9">
+      <div class="tk-content">
+        <div class="github-edit">
+            <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/going-deeper/returning.md"> 在 GitHub 上编辑</a>
+        </div>
+        
+
+<p>When working with futures, one of the first things you&rsquo;re likely to need to do
+is to return a <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>. As with <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a>s, however, doing so can be a little tricky.
+There are several options, listed from most to least ergonomic:</p>
+
+<ul>
+<li><a href="#trait-objects">Trait objects</a></li>
+<li><a href="#impl-trait"><code>impl Trait</code></a></li>
+<li><a href="#named-types">Named types</a></li>
+<li><a href="#custom-types">Custom types</a></li>
+</ul>
+
+<h3 id="trait-objects"><a href="#trait-objects">Trait objects</a></h3>
+
+<p>First, you always have the option of returning a boxed <a href="https://doc.rust-lang.org/book/trait-objects.html">trait object</a>:</p>
+
+<pre><code class="language-rust"># extern crate futures;
+# use std::io;
+# use futures::Future;
+# fn main() {}
+fn foo() -&gt; Box&lt;Future&lt;Item = u32, Error = io::Error&gt;&gt; {
+    // ...
+# loop {}
+}
+</code></pre>
+
+<p>The upside of this strategy is that it&rsquo;s easy to write down (just a <a href="https://doc.rust-lang.org/std/boxed/struct.Box.html"><code>Box</code></a>) and
+easy to create. This is also maximally flexible in terms of future changes to
+the method as <em>any</em> type of future can be returned as an opaque, boxed <code>Future</code>.</p>
+
+<p>The downside of this approach is that it requires a runtime allocation when the
+future is constructed, and dynamic dispatch when using that future. The <code>Box</code>
+needs to be allocated on the heap and the future itself is then placed
+inside. Note, though that this is the <em>only</em> allocation here, otherwise while
+the future is being executed no allocations will be made.</p>
+
+<p>It&rsquo;s often possible to mitigate that cost by boxing only at the end of a long
+chain of futures you want to return, which entails only a single allocation and
+dynamic dispatch for the entire chain.</p>
+
+<h3 id="impl-trait"><a href="#impl-trait"><code>impl Trait</code></a></h3>
+
+<p>In an ideal world, however, we can have our cake and eat it too with a new
+language feature called <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>. This language feature will allow, for
+example:</p>
+
+<pre><code class="language-rust,ignore">fn add_10&lt;F&gt;(f: F) -&gt; impl Future&lt;Item = i32, Error = F::Error&gt;
+    where F: Future&lt;Item = i32&gt;,
+{
+    f.map(|i| i + 10)
+}
+</code></pre>
+
+<p>Here we&rsquo;re indicating that the return type is &ldquo;something that implements
+<code>Future</code>&rdquo; with the given associated types. Other than that we just use the
+future combinators as we normally would.</p>
+
+<p>The upsides to this approach are that it is zero overhead with no <code>Box</code>
+necessary, it&rsquo;s maximally flexible to future implementations as the actual
+return type is hidden, and it&rsquo;s ergonomic to write as it&rsquo;s similar to the nice
+<code>Box</code> example above.</p>
+
+<p>The downside to this approach is only that it&rsquo;s only on versions of Rust later
+than 1.26 (released May 7th, 2018), and using a <code>Box</code> is still more flexible &ndash;
+if you might return two different types of <code>Future</code>, then you must still return
+<code>Box&lt;Future&lt;Item = F::Item, Error = F::Error&gt;</code> instead of
+<code>impl Future&lt;Item = F::Item, Error = F::Error&gt;</code>.  The good news however is that
+this case is rare; in general, it should be a backwards-compatible extension to
+change return types from <code>Box</code> to <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>.</p>
+
+<h3 id="named-types"><a href="#named-types">Named types</a></h3>
+
+<p>If you wouldn&rsquo;t like to return a <code>Box</code> and want to stick with older versions of
+Rust, another option is to write the return type directly:</p>
+
+<pre><code class="language-rust"># extern crate futures;
+# use futures::Future;
+# use futures::future::Map;
+# fn main() {}
+fn add_10&lt;F&gt;(f: F) -&gt; Map&lt;F, fn(i32) -&gt; i32&gt;
+    where F: Future&lt;Item = i32&gt;,
+{
+    fn do_map(i: i32) -&gt; i32 { i + 10 }
+    f.map(do_map)
+}
+</code></pre>
+
+<p>Here we name the return type exactly as the compiler sees it. The <code>map</code>
+function returns the <a href="https://docs.rs/futures/0.1/futures/future/struct.Map.html"><code>Map</code></a> struct which internally contains the future and the
+function to perform the map.</p>
+
+<p>The upside to this approach is that it doesn&rsquo;t have the runtime overhead of
+<code>Box</code> from before, and works on Rust versions pre-1.26.</p>
+
+<p>The downside, however, is that it&rsquo;s often quite difficult to name the type.
+Sometimes the types can get quite large or be unnameable altogether. Here we&rsquo;re
+using a function pointer (<code>fn(i32) -&gt; i32</code>), but we would ideally use a closure.
+Unfortunately, the return type cannot name the closure, for now. It also leads to
+very verbose signatures, and leaks implementation details to clients.</p>
+
+<h3 id="custom-types"><a href="#custom-types">Custom types</a></h3>
+
+<p>Finally, you can wrap the concrete return type in a new type, and implement
+future for it. For example:</p>
+
+<pre><code class="language-rust,ignore">struct MyFuture {
+    inner: Sender&lt;i32&gt;,
+}
+
+fn foo() -&gt; MyFuture {
+    let (tx, rx) = oneshot::channel();
+    // ...
+    MyFuture { inner: tx }
+}
+
+impl Future for MyFuture {
+    // ...
+}
+</code></pre>
+
+<p>In this example we&rsquo;re returning a custom type, <code>MyFuture</code>, and we implement the
+<code>Future</code> trait directly for it. This implementation leverages an underlying
+<code>Oneshot&lt;i32&gt;</code>, but any other kind of protocol can also be implemented here as
+well.</p>
+
+<p>The upside to this approach is that it won&rsquo;t require a <code>Box</code> allocation and it&rsquo;s
+still maximally flexible. The implementation details of <code>MyFuture</code> are hidden to
+the outside world so it can change without breaking others.</p>
+
+<p>The downside to this approach, however, is that this is the least ergonomic way
+to return futures.</p>
+
+        
+        <div class="tk-next"><b>Next up</b>: <a href = /docs/going-deeper/frames/>
+         Working with framed streams</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <footer class="tk-footer">
+      <div class="text-muted tk-footer-gray d-flex justify-content-between">
+        <div class="tk-footer-info">
+          版权所有 © 2018 <a href="https://tokio.rs">Tokio 项目</a> & <a href="https://hltj.me">灰蓝天际</a> 
+        </div>
+        <div class="tk-footer-social">
+          <a href="https://twitter.com/tokio_rs" class="text-muted"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+          <a href="https://github.com/tokio-rs/tokio" class="text-muted"><i class="fa fa-github" aria-hidden="true"></i></a>
+        </div>
+      </div>
+    </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
+    <script src="https://tokio-cn.github.io/js/bootstrap.min.js"></script>
+    <script src="https://tokio-cn.github.io/js/highlight.js"></script>
+    <script>
+      $(function () {
+        $("pre code").each(function(i, block) {
+          
+          if (block.className.indexOf('language-rust') >= 0) {
+            var new_content = '';
+            var lines = block.textContent.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+              if (lines[i].indexOf('# ') == 0 || lines[i] == '#') {
+                continue
+              }
+              new_content += lines[i].trimRight() + '\n';
+            }
+            block.textContent = new_content.replace(/\n\n\n/g, "\n\n").trimRight();
+          }
+          hljs.highlightBlock(block);
+        });
+      });
+    </script>
+    
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-122396021-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+  </body>
+</html>
+

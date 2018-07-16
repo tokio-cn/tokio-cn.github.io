@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <link rel="apple-touch-icon" sizes="120x120" href="https://tokio-cn.github.io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://tokio-cn.github.io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://tokio-cn.github.io/favicon-16x16.png">
+    <link rel="manifest" href="https://tokio-cn.github.io/manifest.json">
+    <link rel="mask-icon" href="https://tokio-cn.github.io/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#ffffff">
+
+    
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/bootstrap-reboot.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/bootstrap.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/tokio.css">
+
+    
+    <link rel="alternate" type="application/rss+xml" href="https://tokio-cn.github.io/blog/index.xml" />
+
+    <title>Tasks</title>
+  </head>
+  <body>
+    <header class="navbar navbar-light navbar-toggleable-md bd-navbar">
+      <nav class="tk-main-nav">
+        <div class="d-flex justify-content-between hidden-lg-up">
+            <a href="https://tokio-cn.github.io/" class="navbar-brand">
+              <img src="https://tokio-cn.github.io/img/logo.png" class="align-middle" alt="">
+            </a>
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#tk-main-nav" aria-label="Toggle navigation" aria-controls="tk-main-nav" aria-expanded="false">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+        <div class="navbar-collapse collapse" id="tk-main-nav">
+          <ul class="nav navbar-nav">
+            <li class="nav-item hd-lg-down">
+              <a class="navbar-brand" href="https://tokio-cn.github.io/"><img src="https://tokio-cn.github.io/img/logo.png" class="align-middle" alt=""></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/">首页 <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/docs/getting-started/hello-world/">文档</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/community/">社区</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/blog/2018-05-tokio-fs/">博客</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+
+
+<div class="tk-pageheader">
+  <div class="container">
+    <h1 class="display-4">Tasks</h1>
+    <p class="lead"></p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+
+      <nav class="leftnav">
+        <div class="" id="">
+          <h5>入门</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/hello-world/" class="text-muted">Hello World!</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/" class="text-muted">Runtime Model</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="text-muted">Futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/tasks/" >Tasks</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/io/" class="text-muted">I/O with Tokio</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/getting-started/chat/" class="text-muted">Example: A Chat Server</a>
+              </li>
+              
+            </ul>
+          </div>
+
+          <h5>深入</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/timers/" class="text-muted">Timers</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/futures-mechanics/" class="text-muted">Essential combinators</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="text-muted">Returning futures</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/frames/" class="text-muted">Working with framed streams</a>
+              </li>
+              
+              <li class="active">
+                <a href="https://tokio-cn.github.io/docs/going-deeper/building-runtime/" class="text-muted">Building a runtime</a>
+              </li>
+              
+            </ul>
+          </div>
+
+          <br/>
+          <h5>参考</h5>
+          <hr/>
+
+          <div class="" id="">
+            <ul class="nav">
+              <li class="active">
+                <a href="https://docs.rs/tokio" class="text-muted"><code>tokio</code> API docs</a>
+              </li>
+              <li class="active">
+                <a href="https://docs.rs/futures/0.1" class="text-muted"><code>futures</code> API docs</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+    </div>
+    <div class="col-md-9">
+      <div class="tk-content">
+        <div class="github-edit">
+            <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/getting-started/tasks.md"> 在 GitHub 上编辑</a>
+        </div>
+        
+
+<p>Tasks are the application&rsquo;s &ldquo;unit of logic&rdquo;. They are similar to <a href="https://www.golang-book.com/books/intro/10">Go&rsquo;s
+goroutine</a> and <a href="http://erlang.org/doc/reference_manual/processes.html">Erlang&rsquo;s process</a>, but asynchronous. In other words, tasks are
+asynchronous green threads.</p>
+
+<p>Given that a task runs an asynchronous bit of logic, they are represented by the
+<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a> trait. The task&rsquo;s future implementation completes with a <code>()</code> value
+once the task is done processing.</p>
+
+<p>Tasks are passed to <a href="#">executors</a>, which handle scheduling the task. An executor
+usually is scheduling many tasks across a single or small set of threads.
+<strong>Tasks must not perform computation heavy logic or they will prevent other
+tasks from executing</strong>. So don&rsquo;t try to compute the fibonacci sequence as a
+task.</p>
+
+<p>Tasks are implemented by either implementing the <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a> trait directly or by
+building up a future using the various combinator functions available in the
+<a href="https://docs.rs/futures/0.1/futures"><code>futures</code></a> and <a href="https://docs.rs/tokio/0.1/tokio"><code>tokio</code></a> crates.</p>
+
+<p>Here is an example that fetches the value from a URI using an HTTP get and
+caches the result.</p>
+
+<p>The logic is as follows:</p>
+
+<ol>
+<li>Check the cache to see if there is an entry for the URI.</li>
+<li>If there is no entry, perform the HTTP get.</li>
+<li>Store the response in the cache.</li>
+<li>Return the response.</li>
+</ol>
+
+<p>The entire sequence of events is also wrapped with a timeout in order to prevent
+unbounded execution time.</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate futures;
+# use futures::prelude::*;
+# use futures::future::{self, Either};
+# use std::time::Duration;
+# fn docx() {
+#
+# pub struct Timeout;
+# impl Timeout {
+#     pub fn new&lt;T&gt;(_: T, _: Duration) -&gt; Box&lt;Future&lt;Item = (), Error = ()&gt;&gt; {
+#         unimplemented!();
+#     }
+# }
+# pub struct MyExecutor;
+# impl MyExecutor {
+#     fn spawn&lt;T&gt;(&amp;self, _: T) {
+#         unimplemented!();
+#     }
+# }
+# pub struct Error;
+
+// The functions here all return `Box&lt;Future&lt;...&gt;&gt;`. This is one
+// of a number of ways to return futures. For more details on
+// returning futures, see the &quot;Returning futures&quot; section in
+// &quot;Going deeper: Futures&quot;.
+
+/// Get a URI from some remote cache.
+fn cache_get(uri: &amp;str)
+    -&gt; Box&lt;Future&lt;Item = Option&lt;String&gt;, Error = Error&gt;&gt;
+# { unimplemented!() } /*
+{ ... }
+# */
+
+fn cache_put(uri: &amp;str, val: String)
+    -&gt; Box&lt;Future&lt;Item = (), Error = Error&gt;&gt;
+# { unimplemented!() } /*
+{ ... }
+# */
+
+/// Do a full HTTP get to a remote URL
+fn http_get(uri: &amp;str)
+    -&gt; Box&lt;Future&lt;Item = String, Error = Error&gt;&gt;
+# { unimplemented!() } /*
+{ ... }
+# */
+#
+# let my_executor = MyExecutor;
+
+fn fetch_and_cache(url: &amp;str)
+    -&gt; Box&lt;Future&lt;Item = String, Error = Error&gt;&gt;
+{
+    // The URL has to be converted to a string so that it can be
+    // moved into the closure. Given futures are asynchronous,
+    // the stack is not around anymore by the time the closure is called.
+    let url = url.to_string();
+
+    let response = http_get(&amp;url)
+        .and_then(move |response| {
+            cache_put(&amp;url, response.clone())
+                .map(|_| response)
+        });
+
+    Box::new(response)
+}
+
+let url = &quot;https://example.com&quot;;
+
+let response = cache_get(url)
+  .and_then(|resp| {
+      // `Either` is a utility provided by the `futures` crate
+      // that enables returning different futures from a single
+      // closure without boxing.
+      match resp {
+          Some(resp) =&gt; Either::A(future::ok(resp)),
+          None =&gt; {
+              Either::B(fetch_and_cache(url))
+          }
+      }
+  });
+
+// Only let the task run for up to 20 seconds.
+//
+// This uses a fictional timer API. Use the `tokio-timer` crate for
+// all your actual timer needs.
+let task = Timeout::new(response, Duration::from_secs(20));
+
+my_executor.spawn(task);
+# }
+# fn main() {}
+</code></pre>
+
+<p>Because the steps are all necessary for the task to complete, it makes sense to
+group them all within the same task.</p>
+
+<p>However, if instead of updating the cache on a cache-miss, we wanted to update
+the cache value on an interval, then it would make sense to split that into
+multiple tasks as the steps are no longer directly related.</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate futures;
+# use futures::prelude::*;
+# use futures::future::{self, Either};
+# use std::time::Duration;
+# fn docx() {
+#
+# pub struct Timeout;
+# impl Timeout {
+#     pub fn new&lt;T&gt;(_: T, _: Duration) -&gt; Box&lt;Future&lt;Item = (), Error = ()&gt;&gt; {
+#         unimplemented!();
+#     }
+# }
+# pub struct Interval;
+# impl Interval {
+#     pub fn new(_: Duration) -&gt; Box&lt;Stream&lt;Item = (), Error = Error&gt;&gt; {
+#         unimplemented!();
+#     }
+# }
+# pub struct MyExecutor;
+# impl MyExecutor {
+#     fn spawn&lt;T&gt;(&amp;self, _: T) {
+#         unimplemented!();
+#     }
+# }
+# pub struct Error;
+#
+# fn cache_get(uri: &amp;str)
+#     -&gt; Box&lt;Future&lt;Item = Option&lt;String&gt;, Error = Error&gt;&gt;
+# { unimplemented!() }
+# fn cache_put(uri: &amp;str, val: String)
+#     -&gt; Box&lt;Future&lt;Item = (), Error = Error&gt;&gt;
+# { unimplemented!() }
+# fn http_get(uri: &amp;str)
+#     -&gt; Box&lt;Future&lt;Item = String, Error = Error&gt;&gt;
+# { unimplemented!() }
+# fn fetch_and_cache(url: &amp;str)
+#     -&gt; Box&lt;Future&lt;Item = String, Error = Error&gt;&gt;
+# { unimplemented!() }
+# let my_executor = MyExecutor;
+
+let url = &quot;https://example.com&quot;;
+
+// An Interval is a stream that yields `()` on a fixed interval.
+let update_cache = Interval::new(Duration::from_secs(60))
+    // On each tick of the interval, update the cache. This is done
+    // by using the same function from the previous snippet.
+    .for_each(|_| {
+        fetch_and_cache(url)
+            .map(|resp| println!(&quot;updated cache with {}&quot;, resp))
+    });
+
+// Spawn the cache update task so that it runs in the background
+my_executor.spawn(update_cache);
+
+// Now, only get from the cache.
+// (NB: see next section about ensuring the cache is up to date.)
+let response = cache_get(url);
+let task = Timeout::new(response, Duration::from_secs(20));
+
+my_executor.spawn(task);
+# }
+# fn main() {}
+</code></pre>
+
+<h2 id="message-passing"><a href="#message-passing">Message Passing</a></h2>
+
+<p>Just as with Go and Erlang, tasks can communicate using message passing. In
+fact, it will be very common to use message passing to coordinate multiple
+tasks. This allows independent tasks to still interact.</p>
+
+<p>The <a href="https://docs.rs/futures/0.1/futures"><code>futures</code></a> crate provides a <a href="https://docs.rs/futures/0.1/futures/sync/index.html"><code>sync</code></a> module which contains some channel
+types that are ideal for message passing across tasks.</p>
+
+<ul>
+<li><a href="https://docs.rs/futures/0.1/futures/sync/oneshot/index.html"><code>oneshot</code></a> is a channel for sending exactly one value.</li>
+<li><a href="https://docs.rs/futures/0.1/futures/sync/mpsc/index.html"><code>mpsc</code></a> is a channel for sending many (zero or more) values.</li>
+</ul>
+
+<p>The previous example isn&rsquo;t exactly correct. Given that tasks are executed
+concurrently, there is no guarantee that the cache updating task will have
+written the first value to the cache by the time the other task tries to read
+from the cache.</p>
+
+<p>This is a perfect situation to use message passing. The cache updating task can
+send a message notifying the other task that it has primed the cache with an
+initial value.</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate futures;
+# use futures::prelude::*;
+# use futures::future::{self, Either};
+# use futures::sync::oneshot;
+# use std::time::Duration;
+# fn docx() {
+#
+# pub struct Timeout;
+# impl Timeout {
+#     pub fn new&lt;T&gt;(_: T, _: Duration) -&gt; Box&lt;Future&lt;Item = (), Error = ()&gt;&gt; {
+#         unimplemented!();
+#     }
+# }
+# pub struct Interval;
+# impl Interval {
+#     pub fn new(_: Duration) -&gt; Box&lt;Stream&lt;Item = (), Error = Error&gt;&gt; {
+#         unimplemented!();
+#     }
+# }
+# pub struct MyExecutor;
+# impl MyExecutor {
+#     fn spawn&lt;T&gt;(&amp;self, _: T) {
+#         unimplemented!();
+#     }
+# }
+# pub struct Error;
+#
+# fn cache_get(uri: &amp;str)
+#     -&gt; Box&lt;Future&lt;Item = Option&lt;String&gt;, Error = Error&gt;&gt;
+# { unimplemented!() }
+# fn cache_put(uri: &amp;str, val: String)
+#     -&gt; Box&lt;Future&lt;Item = (), Error = Error&gt;&gt;
+# { unimplemented!() }
+# fn http_get(uri: &amp;str)
+#     -&gt; Box&lt;Future&lt;Item = String, Error = Error&gt;&gt;
+# { unimplemented!() }
+# fn fetch_and_cache(url: &amp;str)
+#     -&gt; Box&lt;Future&lt;Item = String, Error = Error&gt;&gt;
+# { unimplemented!() }
+# let my_executor = MyExecutor;
+
+let url = &quot;https://example.com&quot;;
+
+let (primed_tx, primed_rx) = oneshot::channel();
+
+let update_cache = fetch_and_cache(url)
+    // Now, notify the other task that the cache is primed
+    .then(|_| primed_tx.send(()))
+    // Then we can start refreshing the cache on an interval
+    .then(|_| {
+        Interval::new(Duration::from_secs(60))
+            .for_each(|_| {
+                fetch_and_cache(url)
+                    .map(|resp| println!(&quot;updated cache with {}&quot;, resp))
+            })
+    });
+
+// Spawn the cache update task so that it runs in the background
+my_executor.spawn(update_cache);
+
+// First, wait for the cache to primed
+let response = primed_rx
+    .then(|_| cache_get(url));
+
+let task = Timeout::new(response, Duration::from_secs(20));
+
+my_executor.spawn(task);
+# }
+# fn main() {}
+</code></pre>
+
+<h2 id="task-notification"><a href="#task-notification">Task Notification</a></h2>
+
+<p>An application built with Tokio is structured as a set of concurrently running
+tasks. Here is the basic structure of a server:</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate tokio;
+#
+# use tokio::io;
+# use tokio::net::{TcpListener, TcpStream};
+# use tokio::prelude::*;
+#
+# pub fn process(socket: TcpStream) -&gt; Box&lt;Future&lt;Item = (), Error = ()&gt; + Send&gt; {
+# unimplemented!();
+# }
+#
+# fn docx() {
+#     let addr = &quot;127.0.0.1:6142&quot;.parse().unwrap();
+#     let listener = TcpListener::bind(&amp;addr).unwrap();
+let server = listener.incoming().for_each(|socket| {
+    // Spawn a task to process the connection
+    tokio::spawn(process(socket));
+
+    Ok(())
+})
+.map_err(|_| ()); // Just drop the error
+
+tokio::run(server);
+# }
+# pub fn main() {}
+</code></pre>
+
+<p>In this case, we spawn a task for each inbound server socket. However, it is
+also possible to implement a server future that processes all inbound
+connections on the same socket:</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate futures;
+# extern crate tokio;
+# use futures::prelude::*;
+# use tokio::net::*;
+# use std::io;
+pub struct Server {
+    listener: TcpListener,
+    connections: Vec&lt;Box&lt;Future&lt;Item = (), Error = io::Error&gt; + Send&gt;&gt;,
+}
+# pub fn process(socket: TcpStream) -&gt; Box&lt;Future&lt;Item = (), Error = io::Error&gt; + Send&gt; {
+# unimplemented!();
+# }
+
+impl Future for Server {
+    type Item = ();
+    type Error = io::Error;
+
+    fn poll(&amp;mut self) -&gt; Result&lt;Async&lt;()&gt;, io::Error&gt; {
+        // First, accept all new connections
+        loop {
+            match self.listener.poll_accept()? {
+                Async::Ready((socket, _)) =&gt; {
+                    let connection = process(socket);
+                    self.connections.push(connection);
+                }
+                Async::NotReady =&gt; break,
+            }
+        }
+
+        // Now, poll all connection futures.
+        let len = self.connections.len();
+
+        for i in (0..len).rev() {
+            match self.connections[i].poll()? {
+                Async::Ready(_) =&gt; {
+                    self.connections.remove(i);
+                }
+                Async::NotReady =&gt; {}
+            }
+        }
+
+        // `NotReady` is returned here because the future never actually
+        // completes. The server runs until it is dropped.
+        Ok(Async::NotReady)
+    }
+}
+# pub fn main() {}
+</code></pre>
+
+<p>These two strategies are functionally equivalent, but have significantly
+different runtime characteristics.</p>
+
+<p>Notifications happens at the task level. The task does not know which
+sub future triggered the notification. So, whenever the task is polled, it has
+to try polling all sub futures.</p>
+
+
+<figure >
+    
+        <img src="https://tokio-cn.github.io/img/diagrams/task-layout.png" alt="Layout of a task" />
+    
+    
+    <figcaption>
+        <p>
+        Layout of a task
+        
+            
+        
+        </p> 
+    </figcaption>
+    
+</figure>
+
+
+<p>In this task, there are three sub futures that can get polled. If a resource
+contained by one of the sub futures transitions to &ldquo;ready&rdquo;, the task itself gets
+notified and it will try to poll all three of its sub futures. One of them will
+advance, which in turn advances the internal state of the task.</p>
+
+<p>The key is to try to keep tasks small, doing as little as possible per task.
+This is why servers spawn new tasks for each connection instead of processing
+the connections in the same task as the listener.</p>
+
+<p>Ok, there actually is a way for the task to know which sub future triggered the
+notification using <a href="https://docs.rs/futures/0.1/futures/stream/futures_unordered/struct.FuturesUnordered.html"><code>FuturesUnordered</code></a>, but usually the right thing to do is to
+spawn a new task.</p>
+
+        
+        <div class="tk-next"><b>Next up</b>: <a href = /docs/getting-started/io/>
+         I/O with Tokio</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <footer class="tk-footer">
+      <div class="text-muted tk-footer-gray d-flex justify-content-between">
+        <div class="tk-footer-info">
+          版权所有 © 2018 <a href="https://tokio.rs">Tokio 项目</a> & <a href="https://hltj.me">灰蓝天际</a> 
+        </div>
+        <div class="tk-footer-social">
+          <a href="https://twitter.com/tokio_rs" class="text-muted"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+          <a href="https://github.com/tokio-rs/tokio" class="text-muted"><i class="fa fa-github" aria-hidden="true"></i></a>
+        </div>
+      </div>
+    </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
+    <script src="https://tokio-cn.github.io/js/bootstrap.min.js"></script>
+    <script src="https://tokio-cn.github.io/js/highlight.js"></script>
+    <script>
+      $(function () {
+        $("pre code").each(function(i, block) {
+          
+          if (block.className.indexOf('language-rust') >= 0) {
+            var new_content = '';
+            var lines = block.textContent.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+              if (lines[i].indexOf('# ') == 0 || lines[i] == '#') {
+                continue
+              }
+              new_content += lines[i].trimRight() + '\n';
+            }
+            block.textContent = new_content.replace(/\n\n\n/g, "\n\n").trimRight();
+          }
+          hljs.highlightBlock(block);
+        });
+      });
+    </script>
+    
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-122396021-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+  </body>
+</html>
+

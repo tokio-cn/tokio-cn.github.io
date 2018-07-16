@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <link rel="apple-touch-icon" sizes="120x120" href="https://tokio-cn.github.io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://tokio-cn.github.io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://tokio-cn.github.io/favicon-16x16.png">
+    <link rel="manifest" href="https://tokio-cn.github.io/manifest.json">
+    <link rel="mask-icon" href="https://tokio-cn.github.io/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#ffffff">
+
+    
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/bootstrap-reboot.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/bootstrap.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/tokio.css">
+
+    
+    <link rel="alternate" type="application/rss+xml" href="https://tokio-cn.github.io/blog/index.xml" />
+
+    <title>New Timer implementation</title>
+  </head>
+  <body>
+    <header class="navbar navbar-light navbar-toggleable-md bd-navbar">
+      <nav class="tk-main-nav">
+        <div class="d-flex justify-content-between hidden-lg-up">
+            <a href="https://tokio-cn.github.io/" class="navbar-brand">
+              <img src="https://tokio-cn.github.io/img/logo.png" class="align-middle" alt="">
+            </a>
+            <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target="#tk-main-nav" aria-label="Toggle navigation" aria-controls="tk-main-nav" aria-expanded="false">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+        <div class="navbar-collapse collapse" id="tk-main-nav">
+          <ul class="nav navbar-nav">
+            <li class="nav-item hd-lg-down">
+              <a class="navbar-brand" href="https://tokio-cn.github.io/"><img src="https://tokio-cn.github.io/img/logo.png" class="align-middle" alt=""></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/">首页 <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/docs/getting-started/hello-world/">文档</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/community/">社区</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://tokio-cn.github.io/blog/2018-05-tokio-fs/">博客</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+
+
+
+<div class="tk-pageheader">
+  <div class="container">
+    <h1 class="display-4">New Timer implementation</h1>
+    <p class="lead">30 March 2018</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-3">
+
+      <nav class="leftnav">
+        <div class="" id="">
+          <ul class="nav">
+            
+            <li class="active">
+              <a href="https://tokio-cn.github.io/blog/2018-05-tokio-fs/" class="text-muted">New Tokio release, now with filesystem support</a>
+            </li>
+            
+            <li class="active">
+              <a href="https://tokio-cn.github.io/blog/2018-03-timers/" >New Timer implementation</a>
+            </li>
+            
+            <li class="active">
+              <a href="https://tokio-cn.github.io/blog/2018-03-tokio-runtime/" class="text-muted">Announcing the Tokio runtime</a>
+            </li>
+            
+            <li class="active">
+              <a href="https://tokio-cn.github.io/blog/2018-02-tokio-reform-shipped/" class="text-muted">Tokio Reform is Shipped and the Road to 0.2</a>
+            </li>
+            
+            <li class="active">
+              <a href="https://tokio-cn.github.io/blog/2017-09-tokio-reform/" class="text-muted">An RFC for a Tokio revamp</a>
+            </li>
+            
+            <li class="active">
+              <a href="https://tokio-cn.github.io/blog/2017-03-tokio-io/" class="text-muted">Announcing the tokio-io Crate</a>
+            </li>
+            
+            <li class="active">
+              <a href="https://tokio-cn.github.io/blog/2017-01-tokio-0-1/" class="text-muted">Announcing Tokio 0.1</a>
+            </li>
+            
+          </ul>
+        </div>
+      </nav>
+
+    </div>
+    <div class="col-md-9">
+      <div class="tk-content">
+        
+
+<p>Happy Friday all!</p>
+
+<p>To close out a great week, there is a <a href="https://crates.io/crates/tokio/0.1.5">new release</a> of Tokio. This release
+includes a brand new timer implementation.</p>
+
+<h2 id="timers">Timers</h2>
+
+<p>Sometimes (often), one wants to execute code in relation to time. Maybe a
+function needs to run at a specific instant. Maybe a read needs to be limited
+to a fixed duration. For working with time, one needs access to a timer!</p>
+
+<h2 id="some-history">Some history</h2>
+
+<p>The <code>tokio-timer</code> crate has been around for a while. It was originally built
+using a <a href="http://www.cs.columbia.edu/~nahum/w6998/papers/sosp87-timing-wheels.pdf">hashed timer wheel</a> (pdf warning). It had a granularity of 100
+milliseconds, so any timeout set with a resolution of less than 100 milliseconds
+would get rounded up. Usually, in the context of network based applications,
+this is fine. Timeouts are usually at least 30 seconds and do not require high
+precision.</p>
+
+<p>However, there are cases for which 100 milliseconds is too coarse. Also, the
+original implementation of Tokio timer had a number of annoying bugs and did not
+handle edge cases super well due to the implementation strategy it took.</p>
+
+<h2 id="a-new-beginning">A new beginning</h2>
+
+<p>The timer has been rewritten from scratch and released as <a href="https://crates.io/crates/tokio-timer/0.2.0"><code>tokio-timer</code>
+0.2</a>. For the most part, the API is pretty similar, but implementation is
+completely different.</p>
+
+<p>Instead of just using a single hashed timer wheel implementation, it uses a
+hierarchical approach (also described in the paper linked above).</p>
+
+<p>The timer uses six separate levels. Each level is a hashed wheel containing 64
+slots. Slots in the lowest level represent one millisecond. The
+next level up represents 64 milliseconds (1 x 64 slots) and so on. So, a slot on
+each level covers an equal amount of time as the entire level below.</p>
+
+<p>When a timeout is set, if it is within 64 milliseconds from the current instant,
+it goes in the lowest level. If the timeout is within 64 milliseconds and 4,096
+milliseconds, it goes in the second level, and so on.</p>
+
+<p>As time advances, timeouts in the lowest level are fired. Once the end of the
+lowest level is reached, all timeouts in the next level up are removed from that
+level and moved to the lowest level.</p>
+
+<p>Using this strategy, all timer operations (creating a timeout, canceling a
+timeout, firing a timeout) are constant. This results in very good performance
+even with a very large number of outstanding timeouts.</p>
+
+<h2 id="a-quick-look-at-the-api">A quick look at the API.</h2>
+
+<p>As mentioned above, the API has not really changed. There are three primary
+types:</p>
+
+<ul>
+<li><a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Delay.html"><code>Delay</code></a>: A future that completes at a set instant in time.</li>
+<li><a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Deadline.html"><code>Deadline</code></a>: Decorates a future ensuring it completes before the
+deadline is reached.</li>
+<li><a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Interval.html"><code>Interval</code></a>: A stream that yields values at a fixed intervals.</li>
+</ul>
+
+<p>And a quick example:</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate tokio;
+#
+use tokio::prelude::*;
+use tokio::timer::Delay;
+
+use std::time::{Duration, Instant};
+
+fn main() {
+    let when = Instant::now() + Duration::from_millis(100);
+    let task = Delay::new(when)
+        .and_then(|_| {
+            println!(&quot;Hello world!&quot;);
+            Ok(())
+        })
+        .map_err(|e| panic!(&quot;delay errored; err={:?}&quot;, e));
+
+    tokio::run(task);
+}
+</code></pre>
+
+<p>The above example creates a new <code>Delay</code> instance that will complete 100
+milliseconds in the future. The <code>new</code> function takes an <code>Instant</code>, so we compute
+<code>when</code> to be the instant 100 milliseconds from now.</p>
+
+<p>Once the instant is reached, the <code>Delay</code> future completes, resulting in the
+<code>and_then</code> block to be executed.</p>
+
+<p>This release comes with a short <a href="https://tokio-cn.github.io/docs/going-deeper/timers/">guide</a> explaining how to use timers and <a href="https://docs.rs/tokio/0.1/tokio/timer/index.html">API
+documentation</a>.</p>
+
+<h2 id="integrated-in-the-runtime">Integrated in the Runtime</h2>
+
+<p>Using the timer API requires a timer instance to be running. The Tokio <a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">runtime</a>
+takes care of all that setup for you.</p>
+
+<p>When the runtime is started with <code>tokio::run</code> or by calling <code>Runtime::new</code>
+directly, a thread pool is started. Each worker thread will get one timer
+instance. So, this means that if the runtime starts 4 worker threads, there will
+be 4 timer instances, one per thread. Doing this allows using the timer without
+paying a synchronization cost since the timer will be located on the same thread
+as the code that uses the various timer types (<code>Delay</code>, <code>Deadline</code>, <code>Interval</code>).</p>
+
+<p>And with that, have a great weekend!</p>
+
+<div style="text-align:right">&mdash;Carl Lerche</div>
+
+        
+        <div class="tk-next"><b>Next up</b>: <a href = /blog/2018-03-tokio-runtime/>
+         Announcing the Tokio runtime</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <footer class="tk-footer">
+      <div class="text-muted tk-footer-gray d-flex justify-content-between">
+        <div class="tk-footer-info">
+          版权所有 © 2018 <a href="https://tokio.rs">Tokio 项目</a> & <a href="https://hltj.me">灰蓝天际</a> 
+        </div>
+        <div class="tk-footer-social">
+          <a href="https://twitter.com/tokio_rs" class="text-muted"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+          <a href="https://github.com/tokio-rs/tokio" class="text-muted"><i class="fa fa-github" aria-hidden="true"></i></a>
+        </div>
+      </div>
+    </footer>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
+    <script src="https://tokio-cn.github.io/js/bootstrap.min.js"></script>
+    <script src="https://tokio-cn.github.io/js/highlight.js"></script>
+    <script>
+      $(function () {
+        $("pre code").each(function(i, block) {
+          
+          if (block.className.indexOf('language-rust') >= 0) {
+            var new_content = '';
+            var lines = block.textContent.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+              if (lines[i].indexOf('# ') == 0 || lines[i] == '#') {
+                continue
+              }
+              new_content += lines[i].trimRight() + '\n';
+            }
+            block.textContent = new_content.replace(/\n\n\n/g, "\n\n").trimRight();
+          }
+          hljs.highlightBlock(block);
+        });
+      });
+    </script>
+    
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-122396021-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+  </body>
+</html>
+
