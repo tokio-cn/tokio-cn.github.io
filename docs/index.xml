@@ -16,25 +16,25 @@
       <guid>https://tokio-cn.github.io/docs/getting-started/hello-world/</guid>
       <description>
 
-&lt;p&gt;To kick off our tour of Tokio, we will start with the obligatory &amp;ldquo;hello world&amp;rdquo;
-example. This server will listen for incoming connections. Once a connection is
-received, it will write &amp;ldquo;hello world&amp;rdquo; to the client and close the connection.&lt;/p&gt;
+&lt;p&gt;为了开始我们的 Tokio 之旅，我们会以惯例“hello world”开始&lt;!--
+--&gt;。这个服务器会监听接入的连接。收到连接&lt;!--
+--&gt;后，它会向客户端写入“hello world”并关闭连接。&lt;/p&gt;
 
-&lt;p&gt;Let&amp;rsquo;s get started.&lt;/p&gt;
+&lt;p&gt;让我们开始吧。&lt;/p&gt;
 
-&lt;p&gt;First, generate a new crate.&lt;/p&gt;
+&lt;p&gt;首先，生成一个新的 crate。&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-shell&#34;&gt;$ cargo new --bin hello-world
 $ cd hello-world
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Next, add the necessary dependencies:&lt;/p&gt;
+&lt;p&gt;接下来，添加必要的依赖项：&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-toml&#34;&gt;[dependencies]
 tokio = &amp;quot;0.1&amp;quot;
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;and the crates and types into scope in &lt;code&gt;main.rs&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;还有 &lt;code&gt;main.rs&lt;/code&gt; 中的 crate 与类型：&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
 extern crate tokio;
@@ -45,10 +45,10 @@ use tokio::prelude::*;
 # fn main() {}
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h2 id=&#34;writing&#34;&gt;&lt;a href=&#34;#writing&#34;&gt;Writing the server&lt;/a&gt;&lt;/h2&gt;
+&lt;h2 id=&#34;writing&#34;&gt;&lt;a href=&#34;#writing&#34;&gt;编写服务器&lt;/a&gt;&lt;/h2&gt;
 
-&lt;p&gt;The first step is to bind a &lt;code&gt;TcpListener&lt;/code&gt; to a local port. We use the
-&lt;code&gt;TcpListener&lt;/code&gt; implementation provided by Tokio.&lt;/p&gt;
+&lt;p&gt;第一步是将 &lt;code&gt;TcpListener&lt;/code&gt; 绑定到本地端口。我们使用
+Tokio 提供的 &lt;code&gt;TcpListener&lt;/code&gt; 实现。&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
 # extern crate tokio;
@@ -60,12 +60,12 @@ fn main() {
     let addr = &amp;quot;127.0.0.1:6142&amp;quot;.parse().unwrap();
     let listener = TcpListener::bind(&amp;amp;addr).unwrap();
 
-    // Following snippets come here...
+    // 后续片段写到这里……
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Next, we define the server task. This asynchronous task will listen for incoming
-connections on the bound listener and process each accepted connection.&lt;/p&gt;
+&lt;p&gt;接下来，我们定义服务器任务。这个异步任务会监听&lt;!--
+--&gt;在已绑定的监听器上接入的连接，并处理每个已接受连接。&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
 # extern crate tokio;
@@ -79,44 +79,44 @@ connections on the bound listener and process each accepted connection.&lt;/p&gt
 let server = listener.incoming().for_each(|socket| {
     println!(&amp;quot;accepted socket; addr={:?}&amp;quot;, socket.peer_addr().unwrap());
 
-    // Process socket here.
+    // 这里处理套接字。
 
     Ok(())
 })
 .map_err(|err| {
-    // All tasks must have an `Error` type of `()`. This forces error
-    // handling and helps avoid silencing failures.
+    // 所有任务必须具有 `()` 类型的 `Error`。这会强制进行
+    // 错误处理，并且有助于避免静默故障。
     //
-    // In our example, we are only going to log the error to STDOUT.
+    // 在本例中，只是将错误记录到 STDOUT（标准输出）。
     println!(&amp;quot;accept error = {:?}&amp;quot;, err);
 });
 # }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Combinator functions are used to define asynchronous tasks. The call to
-&lt;code&gt;listener.incoming()&lt;/code&gt; returns a &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html&#34;&gt;&lt;code&gt;Stream&lt;/code&gt;&lt;/a&gt; of accepted connections. A &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html&#34;&gt;&lt;code&gt;Stream&lt;/code&gt;&lt;/a&gt;
-is kind of like an asynchronous iterator.&lt;/p&gt;
+&lt;p&gt;这些组合子函数用于定义异步任务。对
+&lt;code&gt;listener.incoming()&lt;/code&gt; 的调用返回一个已接受连接的 &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html&#34;&gt;&lt;code&gt;Stream&lt;/code&gt;&lt;/a&gt;。&lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html&#34;&gt;&lt;code&gt;Stream&lt;/code&gt;&lt;/a&gt;
+有点像异步迭代器。&lt;/p&gt;
 
-&lt;p&gt;Each combinator function takes ownership of necessary state as well as the
-callback to perform and returns a new &lt;code&gt;Future&lt;/code&gt; or &lt;code&gt;Stream&lt;/code&gt; that has the
-additional &amp;ldquo;step&amp;rdquo; sequenced.&lt;/p&gt;
+&lt;p&gt;每个组合子函数都获得必要状态的所有权以及用&lt;!--
+--&gt;以执行的回调，并返回一个新的 &lt;code&gt;Future&lt;/code&gt; 或者是有附加“步骤”顺次排入的 &lt;code&gt;Stream&lt;/code&gt;&lt;!--
+--&gt;。&lt;/p&gt;
 
-&lt;p&gt;Returned futures and streams are lazy, i.e., no work is performed when calling
-the combinator. Instead, once all the asynchronous steps are sequenced, the
-final &lt;code&gt;Future&lt;/code&gt; (representing the task) is spawned on an executor. This is when
-the work that was previously defined starts getting run.&lt;/p&gt;
+&lt;p&gt;返回的那些 future 与 stream 都是惰性的，也就是说，在调用该组合子时不执行任何操作&lt;!--
+--&gt;。相反，一旦所有异步步骤都已顺次排入，
+最终的 &lt;code&gt;Future&lt;/code&gt;（代表该任务）就会在执行子上产生。这是&lt;!--
+--&gt;之前定义的工作开始运行的时候。&lt;/p&gt;
 
-&lt;p&gt;We will be digging into futures and streams later on.&lt;/p&gt;
+&lt;p&gt;我们稍后会深入探讨这些 future 与 stream。&lt;/p&gt;
 
-&lt;h2 id=&#34;spawning&#34;&gt;&lt;a href=&#34;#spawning&#34;&gt;Spawning the task&lt;/a&gt;&lt;/h2&gt;
+&lt;h2 id=&#34;spawning&#34;&gt;&lt;a href=&#34;#spawning&#34;&gt;产生任务&lt;/a&gt;&lt;/h2&gt;
 
-&lt;p&gt;Executors are responsible for scheduling asynchronous tasks, driving them to
-completion. There are a number of executor implementations to choose from, each have
-different pros and cons. In this example, we will use the &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/runtime/index.html&#34;&gt;Tokio runtime&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;执行子负责调度异步任务，使其&lt;!--
+--&gt;完成。有很多执行子的实现可供选择，每个都有&lt;!--
+--&gt;不同的优缺点。在本例中，我们会使用 &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/runtime/index.html&#34;&gt;Tokio 运行时&lt;/a&gt;。&lt;/p&gt;
 
-&lt;p&gt;The Tokio runtime is a pre-configured runtime for asynchronous applications. It
-includes a thread pool as the default executor. This thread pool is tuned for
-usage in asynchronous applications.&lt;/p&gt;
+&lt;p&gt;Tokio 运行时是为异步应用程序预配置的运行时。它&lt;!--
+--&gt;包含一个线程池作为默认执行子。该线程池已经为&lt;!--
+--&gt;在异步应用程序中使用而调整好。&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
 # extern crate tokio;
@@ -134,23 +134,23 @@ tokio::run(server);
 # }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;code&gt;tokio::run&lt;/code&gt; starts the runtime, blocking the current thread until
-all spawned tasks have completed and all resources (like TCP sockets) have been
-dropped. Spawning a task using &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/fn.spawn.html&#34;&gt;&lt;code&gt;tokio::spawn&lt;/code&gt;&lt;/a&gt; &lt;strong&gt;must&lt;/strong&gt; happen from within the
-context of a &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/runtime/index.html&#34;&gt;runtime&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;tokio::run&lt;/code&gt; 会启动该运行时，阻塞当前进程直到&lt;!--
+--&gt;所有已产生的任务都已完成并且所有资源（如 TCP 套接字）都已&lt;!--
+--&gt;释放。使用 &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/fn.spawn.html&#34;&gt;&lt;code&gt;tokio::spawn&lt;/code&gt;&lt;/a&gt; 产生的任务&lt;strong&gt;必须&lt;/strong&gt;来自&lt;!--
+--&gt;&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/runtime/index.html&#34;&gt;运行时&lt;/a&gt;的上下文。&lt;/p&gt;
 
-&lt;p&gt;So far, we only have a single task running on the executor, so the &lt;code&gt;server&lt;/code&gt; task
-is the only one blocking &lt;code&gt;run&lt;/code&gt; from returning.&lt;/p&gt;
+&lt;p&gt;至此，我们仅仅在执行子上执行了单个任务，因此 &lt;code&gt;server&lt;/code&gt; 任务&lt;!--
+--&gt;是阻塞 &lt;code&gt;run&lt;/code&gt; 返回的唯一任务。&lt;/p&gt;
 
-&lt;p&gt;Next, we will process the inbound sockets.&lt;/p&gt;
+&lt;p&gt;接下来，我们会处理入站套接字。&lt;/p&gt;
 
-&lt;h2 id=&#34;writing-data&#34;&gt;&lt;a href=&#34;#writing-data&#34;&gt;Writing Data&lt;/a&gt;&lt;/h2&gt;
+&lt;h2 id=&#34;writing-data&#34;&gt;&lt;a href=&#34;#writing-data&#34;&gt;写数据&lt;/a&gt;&lt;/h2&gt;
 
-&lt;p&gt;Our goal is to write &lt;code&gt;&amp;quot;hello world\n&amp;quot;&lt;/code&gt; on each accepted socket. We will do this
-by defining a new asynchronous task to do the write and spawning that task on
-the same &lt;code&gt;current_thread&lt;/code&gt; executor.&lt;/p&gt;
+&lt;p&gt;我们的目标是对每个已接受的套接字写入 &lt;code&gt;&amp;quot;hello world\n&amp;quot;&lt;/code&gt;。我们会这样做：&lt;!--
+--&gt;通过定义一个新的异步任务来执行写操作，并在&lt;!--
+--&gt;同一 &lt;code&gt;current_thread&lt;/code&gt; 执行子上产生该任务。&lt;/p&gt;
 
-&lt;p&gt;Going back to the &lt;code&gt;incoming().for_each&lt;/code&gt; block.&lt;/p&gt;
+&lt;p&gt;回到 &lt;code&gt;incoming().for_each&lt;/code&gt; 块。&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
 # extern crate tokio;
@@ -170,7 +170,7 @@ let server = listener.incoming().for_each(|socket| {
             Ok(())
         });
 
-    // Spawn a new task that processes the socket:
+    // 产生一个处理该套接字的新任务：
     tokio::spawn(connection);
 
     Ok(())
@@ -179,30 +179,30 @@ let server = listener.incoming().for_each(|socket| {
 # }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;We are defining another asynchronous task. This task will take ownership of the
-socket, write the message on that socket, then complete. The &lt;code&gt;connection&lt;/code&gt;
-variable holds the final task. Again, no work has yet been performed.&lt;/p&gt;
+&lt;p&gt;我们正在定义另一个异步任务。这个任务会取得该套接字的所有权&lt;!--
+--&gt;、对该套接字写入信息，然后完成。&lt;code&gt;connection&lt;/code&gt;
+变量保存了其最终任务。同样，此时还没有完成任何工作。&lt;/p&gt;
 
-&lt;p&gt;&lt;code&gt;tokio::spawn&lt;/code&gt; is used to spawn the task on the runtime. Because the
-&lt;code&gt;server&lt;/code&gt; future is running on the runtime, we are able to spawn further tasks.
-&lt;code&gt;tokio::spawn&lt;/code&gt; will panic if called from outside of the runtime.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;tokio::spawn&lt;/code&gt; 用于在运行时产生任务。因为
+&lt;code&gt;server&lt;/code&gt; future 会在运行时上运行，所以我们可以产生更多任务。
+如果在运行时外部调用 &lt;code&gt;tokio::spawn&lt;/code&gt;，它会恐慌（panic）。&lt;/p&gt;
 
-&lt;p&gt;The &lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/io/fn.write_all.html&#34;&gt;&lt;code&gt;io::write_all&lt;/code&gt;&lt;/a&gt; function takes ownership of &lt;code&gt;socket&lt;/code&gt;, returning a
-&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html&#34;&gt;&lt;code&gt;Future&lt;/code&gt;&lt;/a&gt; that completes once the entire message has been written to the
-socket. &lt;code&gt;then&lt;/code&gt; is used to sequence a step that gets run once the write has
-completed. In our example, we just write a message to &lt;code&gt;STDOUT&lt;/code&gt; indicating that
-the write has completed.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/io/fn.write_all.html&#34;&gt;&lt;code&gt;io::write_all&lt;/code&gt;&lt;/a&gt; 函数获取 &lt;code&gt;socket&lt;/code&gt; 的所有权并返回一个
+&lt;a href=&#34;https://docs.rs/futures/0.1/futures/future/trait.Future.html&#34;&gt;&lt;code&gt;Future&lt;/code&gt;&lt;/a&gt;，一旦整个消息都已写入到该套接字中，这个 future 就会完成&lt;!--
+--&gt;。&lt;code&gt;then&lt;/code&gt; 用于排入当写操作完成后运行的步骤&lt;!--
+--&gt;。在本例中，我们只向 &lt;code&gt;STDOUT&lt;/code&gt; 写一条消息，表明&lt;!--
+--&gt;写操作已完成。&lt;/p&gt;
 
-&lt;p&gt;Note that &lt;code&gt;res&lt;/code&gt; is a &lt;code&gt;Result&lt;/code&gt; that contains the original socket. This allows us
-to sequence additional reads or writes on the same socket. However, we have
-nothing more to do, so we just drop the socket, which closes it.&lt;/p&gt;
+&lt;p&gt;请注意 &lt;code&gt;res&lt;/code&gt; 是一个包含原始套接字的 &lt;code&gt;Result&lt;/code&gt;。这让我们可以&lt;!--
+--&gt;在同一个套接字上顺次排入附加的读取或写入。然而，我们并&lt;!--
+--&gt;没有任何事情可做，所有我们只是释放该套接字，即可关闭该套接字。&lt;/p&gt;
 
-&lt;p&gt;You can find the full example &lt;a href=&#34;https://github.com/tokio-rs/tokio/blob/master/examples/hello_world.rs&#34;&gt;here&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;可以在&lt;a href=&#34;https://github.com/tokio-rs/tokio/blob/master/examples/hello_world.rs&#34;&gt;这里&lt;/a&gt;找到完整的示例&lt;/p&gt;
 
-&lt;h2 id=&#34;next-steps&#34;&gt;&lt;a href=&#34;#next-steps&#34;&gt;Next steps&lt;/a&gt;&lt;/h2&gt;
+&lt;h2 id=&#34;next-steps&#34;&gt;&lt;a href=&#34;#next-steps&#34;&gt;下一步&lt;/a&gt;&lt;/h2&gt;
 
-&lt;p&gt;We&amp;rsquo;ve only dipped our toes in Tokio and its asynchronous model. The next page in
-the guide, will start digging deeper into the Tokio runtime model.&lt;/p&gt;
+&lt;p&gt;我们这里只是对 Tokio 及其异步模型小试牛刀。本指南的下一页&lt;!--
+--&gt;会开始深入探讨 Tokio 运行时模型。&lt;/p&gt;
 </description>
     </item>
     
@@ -1735,7 +1735,7 @@ impl Lines {
     fn poll_flush(&amp;amp;mut self) -&amp;gt; Poll&amp;lt;(), io::Error&amp;gt; {
         // As long as there is buffered data to write, try to write it.
         while !self.wr.is_empty() {
-            // Try to read some bytes from the socket
+            // Try to write some bytes to the socket
             let n = try_ready!(self.socket.poll_write(&amp;amp;self.wr));
 
             // As long as the wr is not empty, a successful write should
@@ -2565,12 +2565,12 @@ to return futures.&lt;/p&gt;
       <guid>https://tokio-cn.github.io/docs/going-deeper/frames/</guid>
       <description>
 
-&lt;p&gt;Tokio has helpers to transform a stream of bytes into a stream frames. Examples
+&lt;p&gt;Tokio has helpers to transform a stream of bytes into a stream of frames. Examples
 of byte streams include TCP connections, pipes, file objects and the standard
 input and output file descriptors. In Rust, streams are easily identified
 because they implement the &lt;code&gt;Read&lt;/code&gt; and &lt;code&gt;Write&lt;/code&gt; traits.&lt;/p&gt;
 
-&lt;p&gt;One of the simplest form of framed message is the line delimited message.
+&lt;p&gt;One of the simplest forms of framed message is the line delimited message.
 Each message ends with a &lt;code&gt;\n&lt;/code&gt; character. Let&amp;rsquo;s look at how one would implement
 a stream of line delimited messages with tokio.&lt;/p&gt;
 
@@ -2705,7 +2705,7 @@ around a codec that implements automatic buffering. The &lt;code&gt;Framed&lt;/c
 a &lt;code&gt;Stream&lt;/code&gt; and a &lt;code&gt;Sink&lt;/code&gt;. Thus, you can receive frames from it and send frames
 to it.&lt;/p&gt;
 
-&lt;p&gt;You can create a &lt;code&gt;Framed&lt;/code&gt; struct using any type that implement the &lt;code&gt;AsyncRead&lt;/code&gt;
+&lt;p&gt;You can create a &lt;code&gt;Framed&lt;/code&gt; struct using any type that implements the &lt;code&gt;AsyncRead&lt;/code&gt;
 and &lt;code&gt;AsyncWrite&lt;/code&gt; traits using the &lt;code&gt;AsyncRead::framed&lt;/code&gt; method.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# extern crate futures;
@@ -2771,7 +2771,7 @@ things onto each other.&lt;/p&gt;
 &lt;p&gt;We definitely need a &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/reactor/struct.Reactor.html&#34;&gt;&lt;code&gt;Reactor&lt;/code&gt;&lt;/a&gt; to accept external events (like network sockets
 being readable) from the OS. It does so by blocking on &lt;code&gt;epoll&lt;/code&gt;, &lt;code&gt;kqueue&lt;/code&gt; or
 other OS-dependent primitive, through the &lt;a href=&#34;https://crates.io/crates/mio&#34;&gt;mio&lt;/a&gt; crate. This can&amp;rsquo;t delegate the
-waiting to anything else, so reactor goes to the bottom of our stack.&lt;/p&gt;
+waiting to anything else, so the reactor goes to the bottom of our stack.&lt;/p&gt;
 
 &lt;p&gt;The reactor is able to notify our futures of data coming over the network and
 similar events, but we need an executor to actually run them. We&amp;rsquo;ll be using the
@@ -2890,7 +2890,7 @@ let result = tokio_reactor::with_default(
 # }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;There are few things of note. First, the &lt;code&gt;enter&lt;/code&gt; thing just ensures that we
+&lt;p&gt;There are a few things of note. First, the &lt;code&gt;enter&lt;/code&gt; thing just ensures that we
 don&amp;rsquo;t run multiple executors on the same thread at the same time. Running
 multiple executors would get one of them blocked, which would act in a very not
 useful way, therefore this is footgun prevention.&lt;/p&gt;

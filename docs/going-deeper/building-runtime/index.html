@@ -141,10 +141,10 @@
           <div class="" id="">
             <ul class="nav">
               <li class="active">
-                <a href="https://docs.rs/tokio" class="text-muted"><code>tokio</code> API docs</a>
+                <a href="https://docs.rs/tokio" class="text-muted"><code>tokio</code> API 文档</a>
               </li>
               <li class="active">
-                <a href="https://docs.rs/futures/0.1" class="text-muted"><code>futures</code> API docs</a>
+                <a href="https://docs.rs/futures/0.1" class="text-muted"><code>futures</code> API 文档</a>
               </li>
             </ul>
           </div>
@@ -195,7 +195,7 @@ things onto each other.</p>
 <p>We definitely need a <a href="https://docs.rs/tokio/0.1/tokio/reactor/struct.Reactor.html"><code>Reactor</code></a> to accept external events (like network sockets
 being readable) from the OS. It does so by blocking on <code>epoll</code>, <code>kqueue</code> or
 other OS-dependent primitive, through the <a href="https://crates.io/crates/mio">mio</a> crate. This can&rsquo;t delegate the
-waiting to anything else, so reactor goes to the bottom of our stack.</p>
+waiting to anything else, so the reactor goes to the bottom of our stack.</p>
 
 <p>The reactor is able to notify our futures of data coming over the network and
 similar events, but we need an executor to actually run them. We&rsquo;ll be using the
@@ -314,7 +314,7 @@ let result = tokio_reactor::with_default(
 # }
 </code></pre>
 
-<p>There are few things of note. First, the <code>enter</code> thing just ensures that we
+<p>There are a few things of note. First, the <code>enter</code> thing just ensures that we
 don&rsquo;t run multiple executors on the same thread at the same time. Running
 multiple executors would get one of them blocked, which would act in a very not
 useful way, therefore this is footgun prevention.</p>
@@ -345,7 +345,7 @@ also <code>executor.run</code> which can be executed afterwards.</p>
     <footer class="tk-footer">
       <div class="text-muted tk-footer-gray d-flex justify-content-between">
         <div class="tk-footer-info">
-          版权所有 © 2018 <a href="https://tokio.rs">Tokio 项目</a> & <a href="https://hltj.me">灰蓝天际</a> 
+          版权所有 © 2018 <a href="https://tokio.rs">Tokio 项目（作）</a> & <a href="https://hltj.me">灰蓝天际（译）</a>
         </div>
         <div class="tk-footer-social">
           <a href="https://twitter.com/tokio_rs" class="text-muted"><i class="fa fa-twitter" aria-hidden="true"></i></a>
