@@ -304,14 +304,13 @@ and <code>AsyncWrite</code> traits using the <code>AsyncRead::framed</code> meth
 
 <pre><code class="language-rust"># extern crate futures;
 # extern crate tokio;
-# extern crate tokio_io;
+# extern crate tokio_codec;
 # use futures::prelude::*;
 # use tokio::net::TcpStream;
-# use tokio_io::AsyncRead;
-# use tokio_io::codec::LinesCodec;
+# use tokio_codec::{Framed, LinesCodec};
 # let addr = &quot;127.0.0.1:5000&quot;.parse().expect(&quot;invalid socket address&quot;);
 TcpStream::connect(&amp;addr).and_then(|sock| {
-    let framed_sock = sock.framed(LinesCodec::new());
+    let framed_sock = Framed::new(sock, LinesCodec::new());
     framed_sock.for_each(|line| {
         println!(&quot;Received line {}&quot;, line);
         Ok(())

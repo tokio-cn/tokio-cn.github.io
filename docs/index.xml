@@ -2710,14 +2710,13 @@ and &lt;code&gt;AsyncWrite&lt;/code&gt; traits using the &lt;code&gt;AsyncRead::
 
 &lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# extern crate futures;
 # extern crate tokio;
-# extern crate tokio_io;
+# extern crate tokio_codec;
 # use futures::prelude::*;
 # use tokio::net::TcpStream;
-# use tokio_io::AsyncRead;
-# use tokio_io::codec::LinesCodec;
+# use tokio_codec::{Framed, LinesCodec};
 # let addr = &amp;quot;127.0.0.1:5000&amp;quot;.parse().expect(&amp;quot;invalid socket address&amp;quot;);
 TcpStream::connect(&amp;amp;addr).and_then(|sock| {
-    let framed_sock = sock.framed(LinesCodec::new());
+    let framed_sock = Framed::new(sock, LinesCodec::new());
     framed_sock.for_each(|line| {
         println!(&amp;quot;Received line {}&amp;quot;, line);
         Ok(())
