@@ -1,5 +1,55 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/overview/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/blog/2018-08-async-await/</loc>
+    <lastmod>2018-08-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/blog/2018-08-incremental-improvements/</loc>
+    <lastmod>2018-08-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/blog/2018-05-tokio-fs/</loc>
+    <lastmod>2018-05-02T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/blog/2018-03-timers/</loc>
+    <lastmod>2018-03-30T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/blog/2018-03-tokio-runtime/</loc>
+    <lastmod>2018-03-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/blog/2018-02-tokio-reform-shipped/</loc>
+    <lastmod>2018-02-07T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/blog/2017-09-tokio-reform/</loc>
+    <lastmod>2017-09-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/blog/2017-03-tokio-io/</loc>
+    <lastmod>2017-03-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/blog/2017-01-tokio-0-1/</loc>
+    <lastmod>2017-01-10T00:00:00+00:00</lastmod>
+  </url>
   
   <url>
     <loc>https://tokio-cn.github.io/docs/getting-started/hello-world/</loc>
@@ -46,57 +96,31 @@
   </url>
   
   <url>
-    <loc>https://tokio-cn.github.io/blog/2018-05-tokio-fs/</loc>
-    <lastmod>2018-05-02T00:00:00+00:00</lastmod>
+    <loc>https://tokio-cn.github.io/docs/internals/intro/</loc>
   </url>
   
   <url>
-    <loc>https://tokio-cn.github.io/blog/2018-03-timers/</loc>
-    <lastmod>2018-03-30T00:00:00+00:00</lastmod>
+    <loc>https://tokio-cn.github.io/docs/internals/runtime-model/</loc>
   </url>
   
   <url>
-    <loc>https://tokio-cn.github.io/blog/2018-03-tokio-runtime/</loc>
-    <lastmod>2018-03-08T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/blog/2018-02-tokio-reform-shipped/</loc>
-    <lastmod>2018-02-07T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/blog/2017-09-tokio-reform/</loc>
-    <lastmod>2017-09-19T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/blog/2017-03-tokio-io/</loc>
-    <lastmod>2017-03-17T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/blog/2017-01-tokio-0-1/</loc>
-    <lastmod>2017-01-10T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/going-deeper-tokio/architecture/</loc>
+    <loc>https://tokio-cn.github.io/docs/internals/net/</loc>
   </url>
   
   <url>
     <loc>https://tokio-cn.github.io/blog/</loc>
-    <lastmod>2018-05-02T00:00:00+00:00</lastmod>
+    <lastmod>2018-08-27T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://tokio-cn.github.io/community/</loc>
     <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/going-deeper-tokio/handshake/</loc>
   </url>
   
   <url>
@@ -105,68 +129,12 @@
   </url>
   
   <url>
-    <loc>https://tokio-cn.github.io/legacy/going-deeper-futures/futures-mechanics/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/getting-started/pipeline-server/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/getting-started/tls/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/getting-started/simple-server/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/getting-started/db/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/getting-started/futures/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/getting-started/core/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/going-deeper-tokio/examples/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/</loc>
+    <loc>https://tokio-cn.github.io/tags/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>https://tokio-cn.github.io/legacy/going-deeper-tokio/core-low-level/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/going-deeper-tokio/multiplex/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/going-deeper-futures/returning/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/going-deeper-tokio/streaming/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/getting-started/streams-and-sinks/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/going-deeper-futures/synchronization/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/going-deeper-futures/tasks/</loc>
+    <loc>https://tokio-cn.github.io/community/third-party/</loc>
   </url>
   
   <url>
@@ -174,29 +142,9 @@
   </url>
   
   <url>
-    <loc>https://tokio-cn.github.io/legacy/going-deeper-futures/futures-model/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/going-deeper-tokio/third-party/</loc>
-  </url>
-  
-  <url>
     <loc>https://tokio-cn.github.io/</loc>
-    <lastmod>2018-05-02T00:00:00+00:00</lastmod>
+    <lastmod>2018-08-27T00:00:00+00:00</lastmod>
     <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/getting-started/reactor/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/getting-started/tokio/</loc>
-  </url>
-  
-  <url>
-    <loc>https://tokio-cn.github.io/legacy/going-deeper-tokio/transports/</loc>
   </url>
   
 </urlset>

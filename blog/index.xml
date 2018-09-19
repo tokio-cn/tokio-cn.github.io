@@ -1,13 +1,36 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Blogs on Tokio</title>
-    <link>https://tokio-cn.github.io/blog/index.xml</link>
-    <description>Recent content in Blogs on Tokio</description>
+    <title>Blogs on Tokio——Rust 编程语言的异步运行时。</title>
+    <link>https://tokio-cn.github.io/blog/</link>
+    <description>Recent content in Blogs on Tokio——Rust 编程语言的异步运行时。</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Wed, 02 May 2018 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://tokio-cn.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 27 Aug 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://tokio-cn.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Experimental async / await support for Tokio</title>
+      <link>https://tokio-cn.github.io/blog/2018-08-async-await/</link>
+      <pubDate>Mon, 27 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/blog/2018-08-async-await/</guid>
+      <description>Happy Monday!
+In case you haven&amp;rsquo;t heard, async / await is a big new feature that is being worked on for Rust. It aims to make asynchronous programming easy (well, at least a little bit easier than it is today). The work has been on going for a while and is already usable today on the Rust nightly channel.
+I&amp;rsquo;m happy to announce that Tokio now has experimental async / await support!</description>
+    </item>
+    
+    <item>
+      <title>Tokio 0.1.8 with many incremental improvements</title>
+      <link>https://tokio-cn.github.io/blog/2018-08-incremental-improvements/</link>
+      <pubDate>Fri, 24 Aug 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/blog/2018-08-incremental-improvements/</guid>
+      <description>It took a bit longer than I had initially hoped (as it always does), but a new Tokio version has been released. This release includes, among other features, a new set of APIs that allow performing filesystem operations from an asynchronous context, concurrency improvements, timer improvements, and more (including bug fixes, so be sure to update!).
+It has been a little bit since the last post. There haven&amp;rsquo;t been any big feature releases, but that doesn&amp;rsquo;t mean that we have been idle.</description>
+    </item>
     
     <item>
       <title>New Tokio release, now with filesystem support</title>
@@ -15,82 +38,8 @@
       <pubDate>Wed, 02 May 2018 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/blog/2018-05-tokio-fs/</guid>
-      <description>
-
-&lt;p&gt;It took a bit longer than I had initially hoped (as it always does), but a new
-Tokio version has been released. This release includes, among other features, a
-new &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/fs/index.html&#34;&gt;set of APIs&lt;/a&gt; that allow performing filesystem operations from an
-asynchronous context.&lt;/p&gt;
-
-&lt;h2 id=&#34;filesystem-apis&#34;&gt;Filesystem APIs&lt;/h2&gt;
-
-&lt;p&gt;Interacting with files (and other filesystem types) requires* blocking system
-calls and we all know that blocking and asynchronous do not mix. So,
-historically, when people ask &amp;ldquo;how do I read from and write to files?&amp;rdquo;, the
-answer is to use a thread pool. The idea is that when a blocking read or
-write must be performed, it is done on a thread pool so that it does not block
-the asynchronous reactor.&lt;/p&gt;
-
-&lt;p&gt;Requiring a separate thread pool for performing file operations requires message
-passing. The asynchronous task must send a message to the thread pool asking it
-to do a read from the file, the thread pool does the read and fills a buffer
-with the result. Then the thread pool sends the buffer back to the asynchronous
-task. Not only does this add the overhead for dispatching messages, but it also
-requires allocating buffers to send the data back and forth.&lt;/p&gt;
-
-&lt;p&gt;Now, with Tokio&amp;rsquo;s new &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/fs/index.html&#34;&gt;filesystem APIs&lt;/a&gt;, this message passing overhead is no
-longer needed. A new &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/fs/struct.File.html&#34;&gt;&lt;code&gt;File&lt;/code&gt;&lt;/a&gt; type is added. This type looks very similar to the
-type provided by &lt;code&gt;std&lt;/code&gt;, but it implements &lt;code&gt;AsyncRead&lt;/code&gt; and &lt;code&gt;AsyncWrite&lt;/code&gt;, making
-it safe to use &lt;em&gt;directly&lt;/em&gt; from an asynchronous task running on the Tokio
-runtime.&lt;/p&gt;
-
-&lt;p&gt;Because the &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/fs/struct.File.html&#34;&gt;&lt;code&gt;File&lt;/code&gt;&lt;/a&gt; type implements &lt;code&gt;AsyncRead&lt;/code&gt; and &lt;code&gt;AsyncWrite&lt;/code&gt;, it can be
-used in much the same way that a TCP socket would be used from Tokio.&lt;/p&gt;
-
-&lt;p&gt;As of today, the filesystem APIs are pretty minimal. There are many other APIs
-that need to be implemented to bring the Tokio filesystem APIs in line with
-&lt;code&gt;std&lt;/code&gt;, but those are left as an exercise to the reader to submit as PRs!&lt;/p&gt;
-
-&lt;p&gt;* Yes, there are some operating systems that provide fully asynchronous
-filesystem APIs, but these are either incomplete or not portable.&lt;/p&gt;
-
-&lt;h2 id=&#34;standard-in-and-out&#34;&gt;Standard in and out&lt;/h2&gt;
-
-&lt;p&gt;This release of Tokio also includes asynchronous &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/io/fn.stdin.html&#34;&gt;standard input&lt;/a&gt; and
-&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/io/fn.stdout.html&#34;&gt;standard output&lt;/a&gt; APIs. Because it is difficult to provide true
-asynchronous standard input and output in a portable way, the Tokio versions use
-a similar strategy as the blocking file operation APIs.&lt;/p&gt;
-
-&lt;h2 id=&#34;blocking&#34;&gt;&lt;code&gt;blocking&lt;/code&gt;&lt;/h2&gt;
-
-&lt;p&gt;These new APIs are made possible thanks to a new &lt;a href=&#34;https://docs.rs/tokio-threadpool/0.1/tokio_threadpool/fn.blocking.html&#34;&gt;&lt;code&gt;blocking&lt;/code&gt;&lt;/a&gt; API that allows
-annotating sections of code that will block the current thread. These blocking
-sections can include blocking system calls, waiting on mutexes, or CPU heavy
-computations.&lt;/p&gt;
-
-&lt;p&gt;By informing the Tokio runtime that the current thread will block, the runtime
-is able to move the event loop from the current thread to another thread,
-freeing the current thread up to permit blocking.&lt;/p&gt;
-
-&lt;p&gt;This is the opposite of using message passing to run blocking operations on a
-threadpool. Instead of moving the blocking operation to another thread, the
-entire event loop is moved.&lt;/p&gt;
-
-&lt;p&gt;In practice, moving the event loop to another thread is much cheaper than moving
-the blocking operation. Doing so only requires a few atomic operations. The
-Tokio runtime also keeps a pool of standby threads ready to allow moving the
-event loop as fast as possible.&lt;/p&gt;
-
-&lt;p&gt;This also means that using the &lt;code&gt;blocking&lt;/code&gt; annotation and &lt;code&gt;tokio-fs&lt;/code&gt; must be done
-from the context of the Tokio runtime and not other futures aware executors.&lt;/p&gt;
-
-&lt;h2 id=&#34;current-thread-runtime&#34;&gt;Current thread runtime&lt;/h2&gt;
-
-&lt;p&gt;The release also includes a &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/runtime/current_thread/index.html&#34;&gt;&amp;ldquo;current thread&amp;rdquo;&lt;/a&gt; version of the runtime
-(thanks &lt;a href=&#34;https://github.com/kpp&#34;&gt;kpp&lt;/a&gt;). This is similar to the existing runtime,
-but runs all components on the current thread. This allows running futures that
-do not implement &lt;code&gt;Send&lt;/code&gt;.&lt;/p&gt;
-</description>
+      <description>It took a bit longer than I had initially hoped (as it always does), but a new Tokio version has been released. This release includes, among other features, a new set of APIs that allow performing filesystem operations from an asynchronous context.
+Filesystem APIs Interacting with files (and other filesystem types) requires* blocking system calls and we all know that blocking and asynchronous do not mix. So, historically, when people ask &amp;ldquo;how do I read from and write to files?</description>
     </item>
     
     <item>
@@ -99,119 +48,10 @@ do not implement &lt;code&gt;Send&lt;/code&gt;.&lt;/p&gt;
       <pubDate>Fri, 30 Mar 2018 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/blog/2018-03-timers/</guid>
-      <description>
-
-&lt;p&gt;Happy Friday all!&lt;/p&gt;
-
-&lt;p&gt;To close out a great week, there is a &lt;a href=&#34;https://crates.io/crates/tokio/0.1.5&#34;&gt;new release&lt;/a&gt; of Tokio. This release
-includes a brand new timer implementation.&lt;/p&gt;
-
-&lt;h2 id=&#34;timers&#34;&gt;Timers&lt;/h2&gt;
-
-&lt;p&gt;Sometimes (often), one wants to execute code in relation to time. Maybe a
-function needs to run at a specific instant. Maybe a read needs to be limited
-to a fixed duration. For working with time, one needs access to a timer!&lt;/p&gt;
-
-&lt;h2 id=&#34;some-history&#34;&gt;Some history&lt;/h2&gt;
-
-&lt;p&gt;The &lt;code&gt;tokio-timer&lt;/code&gt; crate has been around for a while. It was originally built
-using a &lt;a href=&#34;http://www.cs.columbia.edu/~nahum/w6998/papers/sosp87-timing-wheels.pdf&#34;&gt;hashed timer wheel&lt;/a&gt; (pdf warning). It had a granularity of 100
-milliseconds, so any timeout set with a resolution of less than 100 milliseconds
-would get rounded up. Usually, in the context of network based applications,
-this is fine. Timeouts are usually at least 30 seconds and do not require high
-precision.&lt;/p&gt;
-
-&lt;p&gt;However, there are cases for which 100 milliseconds is too coarse. Also, the
-original implementation of Tokio timer had a number of annoying bugs and did not
-handle edge cases super well due to the implementation strategy it took.&lt;/p&gt;
-
-&lt;h2 id=&#34;a-new-beginning&#34;&gt;A new beginning&lt;/h2&gt;
-
-&lt;p&gt;The timer has been rewritten from scratch and released as &lt;a href=&#34;https://crates.io/crates/tokio-timer/0.2.0&#34;&gt;&lt;code&gt;tokio-timer&lt;/code&gt;
-0.2&lt;/a&gt;. For the most part, the API is pretty similar, but implementation is
-completely different.&lt;/p&gt;
-
-&lt;p&gt;Instead of just using a single hashed timer wheel implementation, it uses a
-hierarchical approach (also described in the paper linked above).&lt;/p&gt;
-
-&lt;p&gt;The timer uses six separate levels. Each level is a hashed wheel containing 64
-slots. Slots in the lowest level represent one millisecond. The
-next level up represents 64 milliseconds (1 x 64 slots) and so on. So, a slot on
-each level covers an equal amount of time as the entire level below.&lt;/p&gt;
-
-&lt;p&gt;When a timeout is set, if it is within 64 milliseconds from the current instant,
-it goes in the lowest level. If the timeout is within 64 milliseconds and 4,096
-milliseconds, it goes in the second level, and so on.&lt;/p&gt;
-
-&lt;p&gt;As time advances, timeouts in the lowest level are fired. Once the end of the
-lowest level is reached, all timeouts in the next level up are removed from that
-level and moved to the lowest level.&lt;/p&gt;
-
-&lt;p&gt;Using this strategy, all timer operations (creating a timeout, canceling a
-timeout, firing a timeout) are constant. This results in very good performance
-even with a very large number of outstanding timeouts.&lt;/p&gt;
-
-&lt;h2 id=&#34;a-quick-look-at-the-api&#34;&gt;A quick look at the API.&lt;/h2&gt;
-
-&lt;p&gt;As mentioned above, the API has not really changed. There are three primary
-types:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/timer/struct.Delay.html&#34;&gt;&lt;code&gt;Delay&lt;/code&gt;&lt;/a&gt;: A future that completes at a set instant in time.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/timer/struct.Deadline.html&#34;&gt;&lt;code&gt;Deadline&lt;/code&gt;&lt;/a&gt;: Decorates a future ensuring it completes before the
-deadline is reached.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/timer/struct.Interval.html&#34;&gt;&lt;code&gt;Interval&lt;/code&gt;&lt;/a&gt;: A stream that yields values at a fixed intervals.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;And a quick example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-rust&#34;&gt;# #![deny(deprecated)]
-# extern crate tokio;
-#
-use tokio::prelude::*;
-use tokio::timer::Delay;
-
-use std::time::{Duration, Instant};
-
-fn main() {
-    let when = Instant::now() + Duration::from_millis(100);
-    let task = Delay::new(when)
-        .and_then(|_| {
-            println!(&amp;quot;Hello world!&amp;quot;);
-            Ok(())
-        })
-        .map_err(|e| panic!(&amp;quot;delay errored; err={:?}&amp;quot;, e));
-
-    tokio::run(task);
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The above example creates a new &lt;code&gt;Delay&lt;/code&gt; instance that will complete 100
-milliseconds in the future. The &lt;code&gt;new&lt;/code&gt; function takes an &lt;code&gt;Instant&lt;/code&gt;, so we compute
-&lt;code&gt;when&lt;/code&gt; to be the instant 100 milliseconds from now.&lt;/p&gt;
-
-&lt;p&gt;Once the instant is reached, the &lt;code&gt;Delay&lt;/code&gt; future completes, resulting in the
-&lt;code&gt;and_then&lt;/code&gt; block to be executed.&lt;/p&gt;
-
-&lt;p&gt;This release comes with a short &lt;a href=&#34;https://tokio-cn.github.io/docs/going-deeper/timers/&#34;&gt;guide&lt;/a&gt; explaining how to use timers and &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/timer/index.html&#34;&gt;API
-documentation&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;integrated-in-the-runtime&#34;&gt;Integrated in the Runtime&lt;/h2&gt;
-
-&lt;p&gt;Using the timer API requires a timer instance to be running. The Tokio &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/runtime/index.html&#34;&gt;runtime&lt;/a&gt;
-takes care of all that setup for you.&lt;/p&gt;
-
-&lt;p&gt;When the runtime is started with &lt;code&gt;tokio::run&lt;/code&gt; or by calling &lt;code&gt;Runtime::new&lt;/code&gt;
-directly, a thread pool is started. Each worker thread will get one timer
-instance. So, this means that if the runtime starts 4 worker threads, there will
-be 4 timer instances, one per thread. Doing this allows using the timer without
-paying a synchronization cost since the timer will be located on the same thread
-as the code that uses the various timer types (&lt;code&gt;Delay&lt;/code&gt;, &lt;code&gt;Deadline&lt;/code&gt;, &lt;code&gt;Interval&lt;/code&gt;).&lt;/p&gt;
-
-&lt;p&gt;And with that, have a great weekend!&lt;/p&gt;
-
-&lt;div style=&#34;text-align:right&#34;&gt;&amp;mdash;Carl Lerche&lt;/div&gt;
-</description>
+      <description>Happy Friday all!
+To close out a great week, there is a new release of Tokio. This release includes a brand new timer implementation.
+Timers Sometimes (often), one wants to execute code in relation to time. Maybe a function needs to run at a specific instant. Maybe a read needs to be limited to a fixed duration. For working with time, one needs access to a timer!
+Some history The tokio-timer crate has been around for a while.</description>
     </item>
     
     <item>
@@ -220,114 +60,9 @@ as the code that uses the various timer types (&lt;code&gt;Delay&lt;/code&gt;, &
       <pubDate>Thu, 08 Mar 2018 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/blog/2018-03-tokio-runtime/</guid>
-      <description>
-
-&lt;p&gt;I&amp;rsquo;m happy to announce a new release of Tokio. This release includes the first
-iteration of the Tokio Runtime.&lt;/p&gt;
-
-&lt;h2 id=&#34;tl-dr&#34;&gt;tl;dr&lt;/h2&gt;
-
-&lt;p&gt;This is how a multi-threaded Tokio based server is now written:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-rust,ignore&#34;&gt;extern crate tokio;
-
-use tokio::net::TcpListener;
-use tokio::prelude::*;
-
-fn process(s: TcpStream)
-  -&amp;gt; impl Future&amp;lt;Item = (), Error = ()&amp;gt; + Send
-{ ... }
-
-let addr = &amp;quot;127.0.0.1:8080&amp;quot;.parse().unwrap();
-let listener = TcpListener::bind(&amp;amp;addr).unwrap();
-
-let server = listener.incoming()
-    .map_err(|e| println!(&amp;quot;error = {:?}&amp;quot;, e))
-    .for_each(|socket| {
-        tokio::spawn(process(socket))
-    });
-
-tokio::run(server);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;where &lt;code&gt;process&lt;/code&gt; represents a user defined function that takes a socket and
-returns a future that process it. In the case of an echo server, that might be
-reading all data from the socket and writing it back to the same socket.&lt;/p&gt;
-
-&lt;p&gt;The &lt;a href=&#34;https://tokio-cn.github.io/docs/getting-started/hello-world/&#34;&gt;guides&lt;/a&gt; and &lt;a href=&#34;https://github.com/tokio-rs/tokio/tree/master/examples&#34;&gt;examples&lt;/a&gt; have been updated to use the runtime.&lt;/p&gt;
-
-&lt;h2 id=&#34;what-is-the-tokio-runtime&#34;&gt;What is the Tokio Runtime?&lt;/h2&gt;
-
-&lt;p&gt;The Rust asynchronous stack is evolving to a set of loosely coupled components.
-To get a basic networking application running, you need at a minimum an
-asynchronous task executor and an instance of the Tokio reactor. Because
-everything is decoupled, there are multiple options for these various
-components, but this adds a bunch of boilerplate to all apps.&lt;/p&gt;
-
-&lt;p&gt;To help mitigate this, Tokio now provides the concept of a runtime. This is a
-pre-configured package of all the various components that are necessary for
-running the application.&lt;/p&gt;
-
-&lt;p&gt;This initial release of the runtime includes the reactor as well as a
-&lt;a href=&#34;https://en.wikipedia.org/wiki/Work_stealing&#34;&gt;work-stealing&lt;/a&gt; based thread pool for scheduling and executing the application&amp;rsquo;s
-code. This provides a multi-threaded default for applications.&lt;/p&gt;
-
-&lt;p&gt;The work-stealing default is ideal for most applications. It uses a similar
-strategy as Go, Erlang, .NET, Java (the ForkJoin pool), etc&amp;hellip; The
-implementation provided by Tokio is designed for use cases where many
-&lt;strong&gt;unrelated&lt;/strong&gt; tasks are multiplexed on a single thread pool.&lt;/p&gt;
-
-&lt;h2 id=&#34;using-the-tokio-runtime&#34;&gt;Using the Tokio Runtime&lt;/h2&gt;
-
-&lt;p&gt;As illustrated in the example above, the easiest way to use the Tokio runtime
-is with two functions:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;tokio::run&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;tokio::spawn&lt;/code&gt;.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;The first function takes a future to seed the application and starts the
-runtime. Roughly, it does the following:&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Start the reactor.&lt;/li&gt;
-&lt;li&gt;Start the thread pool.&lt;/li&gt;
-&lt;li&gt;Spawn the future onto the thread pool.&lt;/li&gt;
-&lt;li&gt;Blocks the thread until the runtime becomes idle.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;The runtime becomes idle once &lt;strong&gt;all&lt;/strong&gt; spawned futures have completed and &lt;strong&gt;all&lt;/strong&gt;
-I/O resources bound to the reactor are dropped.&lt;/p&gt;
-
-&lt;p&gt;From within the context of a runtime. The application may spawn additional
-futures onto the thread pool using &lt;code&gt;tokio::spawn&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Alternatively, the &lt;a href=&#34;#&#34;&gt;&lt;code&gt;Runtime&lt;/code&gt;&lt;/a&gt; type can be used directly. This allows for more
-flexibility around setting up and using the runtime.&lt;/p&gt;
-
-&lt;h2 id=&#34;future-improvements&#34;&gt;Future improvements&lt;/h2&gt;
-
-&lt;p&gt;This is just the initial release of the Tokio runtime. Upcoming releases will
-include additional functionality that is useful for Tokio based applications. A
-blog post will be coming soon that goes into the roadmap in more detail.&lt;/p&gt;
-
-&lt;p&gt;The goal, as mentioned before, is to release early and often. Providing new
-features to enable the community to experiment with them. Sometime in the next
-few months, there will be a breaking release of the entire Tokio stack, so any
-changes in the API need to be discovered before then.&lt;/p&gt;
-
-&lt;h2 id=&#34;tokio-core&#34;&gt;Tokio-core&lt;/h2&gt;
-
-&lt;p&gt;There has also been a new release of &lt;code&gt;tokio-core&lt;/code&gt;. This release updates
-&lt;code&gt;tokio-core&lt;/code&gt; to use &lt;code&gt;tokio&lt;/code&gt; under the hood. This enables all existing
-applications and libraries that currently depend on &lt;code&gt;tokio-core&lt;/code&gt; (like Hyper) to
-be able to use the improvements that come with the Tokio runtime without
-requiring a breaking change.&lt;/p&gt;
-
-&lt;p&gt;Given the amount of churn that is expected to happen in the next few months,
-we&amp;rsquo;re hoping to help ease the transition across releases.&lt;/p&gt;
-</description>
+      <description>I&amp;rsquo;m happy to announce a new release of Tokio. This release includes the first iteration of the Tokio Runtime.
+tl;dr This is how a multi-threaded Tokio based server is now written:
+extern crate tokio; use tokio::net::TcpListener; use tokio::prelude::*; fn process(s: TcpStream) -&amp;gt; impl Future&amp;lt;Item = (), Error = ()&amp;gt; + Send { ... } let addr = &amp;quot;127.0.0.1:8080&amp;quot;.parse().unwrap(); let listener = TcpListener::bind(&amp;amp;addr).unwrap(); let server = listener.incoming() .map_err(|e| println!(&amp;quot;error = {:?</description>
     </item>
     
     <item>
@@ -336,107 +71,12 @@ we&amp;rsquo;re hoping to help ease the transition across releases.&lt;/p&gt;
       <pubDate>Wed, 07 Feb 2018 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/blog/2018-02-tokio-reform-shipped/</guid>
-      <description>
-
-&lt;p&gt;Hi all!&lt;/p&gt;
-
-&lt;p&gt;I&amp;rsquo;m happy to announce that today, the changes proposed in the &lt;a href=&#34;https://github.com/tokio-rs/tokio-rfcs/blob/master/text/0001-tokio-reform.md&#34;&gt;reform RFC&lt;/a&gt; have
-been released to &lt;a href=&#34;https://crates.io/crates/tokio&#34;&gt;crates.io&lt;/a&gt; as &lt;code&gt;tokio&lt;/code&gt; 0.1.&lt;/p&gt;
-
-&lt;p&gt;The primary changes are:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;Add a &lt;em&gt;default&lt;/em&gt; global event loop, eliminating the need for setting up and
-managing your own event loop in the vast majority of cases.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Decouple all task execution functionality from Tokio.&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;the-new-global-event-loop&#34;&gt;The new global event loop&lt;/h2&gt;
-
-&lt;p&gt;Up until today, creating an event loop was a manual process. Even though the
-vast majority of Tokio users would setup the reactor to do the same thing,
-everyone had to do it each time. This was partially due to the fact that there
-was a significant difference between running code on the Tokio reactor&amp;rsquo;s thread
-or from another thread (like a thread pool).&lt;/p&gt;
-
-&lt;p&gt;The key insight that allowed for the Tokio reform changes is that the Tokio
-reactor doesn&amp;rsquo;t actually have to be an executor. In other words, prior to these
-changes, the Tokio reactor would both power I/O resources &lt;strong&gt;and&lt;/strong&gt; manage
-executing user submitted tasks.&lt;/p&gt;
-
-&lt;p&gt;Now, Tokio provides a reactor to drive I/O resources (like &lt;code&gt;TcpStream&lt;/code&gt; and
-&lt;code&gt;UdpSocket&lt;/code&gt;) separately from the task executor. This means that it is easy to
-create Tokio-backed networking types from &lt;em&gt;any&lt;/em&gt; thread, making it easy to create
-either single or multi threaded Tokio-backed apps.&lt;/p&gt;
-
-&lt;p&gt;For task execution, Tokio provides the &lt;a href=&#34;https://docs.rs/tokio/0.1/tokio/executor/current_thread/index.html&#34;&gt;&lt;code&gt;current_thread&lt;/code&gt;&lt;/a&gt; executor, which
-behaves similarly to how the built-in tokio-core executor did. The plan is to
-eventually move this executor into the &lt;a href=&#34;https://github.com/rust-lang-nursery/futures-rs&#34;&gt;&lt;code&gt;futures&lt;/code&gt;&lt;/a&gt; crate, but for now it is
-provided directly by Tokio.&lt;/p&gt;
-
-&lt;h2 id=&#34;the-road-to-0-2&#34;&gt;The road to 0.2&lt;/h2&gt;
-
-&lt;p&gt;The Tokio reform changes have been released as 0.1. Dependencies (&lt;a href=&#34;https://github.com/tokio-rs/tokio-io&#34;&gt;&lt;code&gt;tokio-io&lt;/code&gt;&lt;/a&gt;,
-&lt;a href=&#34;https://github.com/rust-lang-nursery/futures-rs&#34;&gt;&lt;code&gt;futures&lt;/code&gt;&lt;/a&gt;, &lt;a href=&#34;https://github.com/carllerche/mio&#34;&gt;&lt;code&gt;mio&lt;/code&gt;&lt;/a&gt;, etc&amp;hellip;) have not had their versions incremented. This
-allows the &lt;code&gt;tokio&lt;/code&gt; crate to be released with minimal ecosystem disruption.&lt;/p&gt;
-
-&lt;p&gt;The plan is to let the changes made in this release get some usage before
-committing to them. Any fixes that require breaking changes will be able to be
-done at the same time as the release to all the other crates. The goal is for
-this to happen in 6-8 weeks. So please try out the changes released today and
-provide feedback.&lt;/p&gt;
-
-&lt;h2 id=&#34;rapid-iteration&#34;&gt;Rapid iteration&lt;/h2&gt;
-
-&lt;p&gt;This is just the beginning. Tokio has ambitious goals to provide additional
-functionality to get a great &amp;ldquo;out of the box&amp;rdquo; experience building asynchronous
-I/O applications in Rust.&lt;/p&gt;
-
-&lt;p&gt;In order to reach these goals as fast as possible without causing unnecessary
-ecosystem disruption, we will be taking a few steps.&lt;/p&gt;
-
-&lt;p&gt;First, similarly to the &lt;a href=&#34;#&#34;&gt;&lt;code&gt;futures&lt;/code&gt; 0.2 release&lt;/a&gt;, the &lt;code&gt;tokio&lt;/code&gt; crate will be
-transitioned to be more of a facade. Traits and types will be broken up into a
-number of sub crates and re-exported by &lt;code&gt;tokio&lt;/code&gt;. Application authors will be
-able to depend directly on &lt;code&gt;tokio&lt;/code&gt; while library authors will pick and choose
-the specific Tokio components that they wish to use as part of their libraries.&lt;/p&gt;
-
-&lt;p&gt;Each sub crate will clearly indicate its stability level. Obviously, there is an
-upcoming breaking change with the futures 0.2 release, but after that,
-fundamental building blocks will aim to remain stable for at least a year. More
-experimental crates will reserve the right to issue breaking changes at a
-quicker pace.&lt;/p&gt;
-
-&lt;p&gt;This means that the &lt;code&gt;tokio&lt;/code&gt; crate itself will be able to iterate at a faster
-pace while the library ecosystem remains stable.&lt;/p&gt;
-
-&lt;p&gt;The pre 0.2 period will also be a period of experimentation. Additional
-functionality will be added to Tokio in an experimental capacity. Before an 0.2
-release, an RFC will be posted covering the functionality that we would like to
-include in that release.&lt;/p&gt;
-
-&lt;h2 id=&#34;open-question&#34;&gt;Open question&lt;/h2&gt;
-
-&lt;p&gt;One remaining question is what to do about &lt;code&gt;tokio-proto&lt;/code&gt;. It was released as
-part of the initial Tokio release. Since then, the focus has shifted and that
-crate has not received enough attention.&lt;/p&gt;
-
-&lt;p&gt;I posted an issue to discuss what to do with that crate
-&lt;a href=&#34;https://github.com/tokio-rs/tokio/issues/118&#34;&gt;here&lt;/a&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;looking-forward&#34;&gt;Looking Forward&lt;/h2&gt;
-
-&lt;p&gt;Please try out the changes released today. Again, the next couple of months are a period
-of experimentation before we commit on the next release. So, now is the time to try things
-out and provide feedback.&lt;/p&gt;
-
-&lt;p&gt;During this time, we&amp;rsquo;ll be integrating this work to build out higher-level
-primitives in &lt;a href=&#34;https://github.com/tower-rs/tower&#34;&gt;Tower&lt;/a&gt;, which is being driven by the production operational needs
-of the &lt;a href=&#34;https://github.com/runconduit/conduit&#34;&gt;Conduit&lt;/a&gt; project.&lt;/p&gt;
-
-&lt;div style=&#34;text-align:right&#34;&gt;&amp;mdash;Carl Lerche&lt;/div&gt;
-</description>
+      <description>Hi all!
+I&amp;rsquo;m happy to announce that today, the changes proposed in the reform RFC have been released to crates.io as tokio 0.1.
+The primary changes are:
+ Add a default global event loop, eliminating the need for setting up and managing your own event loop in the vast majority of cases.
+ Decouple all task execution functionality from Tokio.
+  The new global event loop Up until today, creating an event loop was a manual process.</description>
     </item>
     
     <item>
@@ -445,57 +85,10 @@ of the &lt;a href=&#34;https://github.com/runconduit/conduit&#34;&gt;Conduit&lt;
       <pubDate>Tue, 19 Sep 2017 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/blog/2017-09-tokio-reform/</guid>
-      <description>&lt;p&gt;Hi there, Tokio community!&lt;/p&gt;
-
-&lt;p&gt;Carl, Alex, and myself have been hard at work developing ways to simplify,
-streamline, and focus the Tokio project. As part of this effort, we have
-written the first-ever Tokio &lt;a href=&#34;https://github.com/carllerche/tokio-rfcs/pull/2&#34;&gt;RFC&lt;/a&gt;!&lt;/p&gt;
-
-&lt;p&gt;Here&amp;rsquo;s a quick run-down of what&amp;rsquo;s being proposed.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;Add a global event loop in &lt;code&gt;tokio-core&lt;/code&gt; that is managed automatically by
-default. This change eliminates the need for setting up and managing your own
-event loop in the vast majority of cases.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Moreover, remove the distinction between &lt;code&gt;Handle&lt;/code&gt; and &lt;code&gt;Remote&lt;/code&gt; in
-&lt;code&gt;tokio-core&lt;/code&gt; by making &lt;code&gt;Handle&lt;/code&gt; both &lt;code&gt;Send&lt;/code&gt; and &lt;code&gt;Sync&lt;/code&gt; and deprecating
-&lt;code&gt;Remote&lt;/code&gt;. Thus, even working with custom event loops becomes simpler.&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Decouple all task execution functionality from Tokio, instead providing it
-through a standard futures component. As with event loops, provide a default
-global thread pool that suffices for the majority of use-cases, removing the
-need for any manual setup.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Moreover, when running tasks thread-locally (for non-&lt;code&gt;Send&lt;/code&gt; futures),
-provide more fool-proof APIs that help avoid lost wakeups.&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Provide the above changes in a new &lt;code&gt;tokio&lt;/code&gt; crate, which is a slimmed down
-version of today&amp;rsquo;s &lt;code&gt;tokio-core&lt;/code&gt;, and may &lt;em&gt;eventually&lt;/em&gt; re-export the contents
-of &lt;code&gt;tokio-io&lt;/code&gt;. The &lt;code&gt;tokio-core&lt;/code&gt; crate is deprecated, but will remain available
-for backward compatibility. In the long run, most users should only need to
-depend on &lt;code&gt;tokio&lt;/code&gt; to use the Tokio stack.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Focus documentation primarily on &lt;code&gt;tokio&lt;/code&gt;, rather than on
-&lt;code&gt;tokio-proto&lt;/code&gt;. Provide a much more extensive set of cookbook-style examples
-and general guidelines, as well as a more in-depth guide to working with
-futures.&lt;/p&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Altogether, these changes, together with &lt;a href=&#34;https://internals.rust-lang.org/t/help-test-async-await-generators-coroutines/5835&#34;&gt;async/await&lt;/a&gt;, should go a long
-distance toward making Tokio a newcomer-friendly library. Please take a look at
-the &lt;a href=&#34;https://github.com/carllerche/tokio-rfcs/pull/2&#34;&gt;RFC&lt;/a&gt; and leave your feedback!&lt;/p&gt;
-
-&lt;p&gt;Once we&amp;rsquo;ve reached consensus on the RFC, we plan to form an impl period &lt;em&gt;working
-group&lt;/em&gt;, focused primarily on docs and examples. And from there, we will be
-working with the Hyper team to figure out the next chapter of that story. Stay tuned!&lt;/p&gt;
-
-&lt;div style=&#34;text-align:right&#34;&gt;&amp;mdash;Aaron Turon&lt;/div&gt;
-</description>
+      <description>Hi there, Tokio community!
+Carl, Alex, and myself have been hard at work developing ways to simplify, streamline, and focus the Tokio project. As part of this effort, we have written the first-ever Tokio RFC!
+Here&amp;rsquo;s a quick run-down of what&amp;rsquo;s being proposed.
+ Add a global event loop in tokio-core that is managed automatically by default. This change eliminates the need for setting up and managing your own event loop in the vast majority of cases.</description>
     </item>
     
     <item>
@@ -504,191 +97,8 @@ working with the Hyper team to figure out the next chapter of that story. Stay t
       <pubDate>Fri, 17 Mar 2017 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/blog/2017-03-tokio-io/</guid>
-      <description>
-
-&lt;p&gt;Today we&amp;rsquo;re happy to announce a new crate and several new tools to work with
-in the Tokio stack. This represents the culmination of a number of parallel
-updates to various bits and pieces, they just happened to conveniently land all
-around the same time! In a nutshell the improvements are:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;A new &lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; crate extracted from &lt;a href=&#34;https://crates.io/crates/tokio-core&#34;&gt;tokio-core&lt;/a&gt;, deprecating the
-&lt;a href=&#34;https://docs.rs/tokio-core/0.1/tokio_core/io/&#34;&gt;&lt;code&gt;tokio_core::io&lt;/code&gt;&lt;/a&gt; module.&lt;/li&gt;
-&lt;li&gt;Introduction of the &lt;a href=&#34;https://crates.io/crates/bytes&#34;&gt;bytes&lt;/a&gt; crate to &lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; allowing abstraction over
-buffering and leveraging underlying functionality like vectored I/O.&lt;/li&gt;
-&lt;li&gt;Addition of a new method, &lt;code&gt;close&lt;/code&gt;, to the &lt;code&gt;Sink&lt;/code&gt; trait to express graceful
-shutdown.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;These changes improve the organization and abstractions of Tokio to address
-several long-standing concerns and should provide a stable foundation for all
-future development. At the same time, the changes are not breaking since the
-old &lt;code&gt;io&lt;/code&gt; module is still available in deprecated form. You can start using all
-these crates immediately via &lt;code&gt;cargo update&lt;/code&gt; and using the most recent &lt;code&gt;0.1.*&lt;/code&gt;
-versions of the crates!&lt;/p&gt;
-
-&lt;p&gt;Let&amp;rsquo;s dive a bit more into each change in detail to see what&amp;rsquo;s available now.&lt;/p&gt;
-
-&lt;h2 id=&#34;adding-a-tokio-io-crate&#34;&gt;Adding a &lt;code&gt;tokio-io&lt;/code&gt; crate&lt;/h2&gt;
-
-&lt;p&gt;The existing &lt;a href=&#34;https://docs.rs/tokio-core/0.1/tokio_core/io/&#34;&gt;&lt;code&gt;tokio_core::io&lt;/code&gt;&lt;/a&gt; module gives a number of useful abstractions
-but they&amp;rsquo;re not specific to &lt;a href=&#34;https://crates.io/crates/tokio-core&#34;&gt;tokio-core&lt;/a&gt; itself, and the major purpose of the
-&lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; crate is to provide these core utilities without the implication of
-a runtime. With &lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; crates can depend on asynchronous I/O semantics
-without tying themselves to a particular runtime, for example &lt;a href=&#34;https://crates.io/crates/tokio-core&#34;&gt;tokio-core&lt;/a&gt;.
-The &lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; crate is intended to be similar to the &lt;a href=&#34;https://doc.rust-lang.org/std/io/&#34;&gt;&lt;code&gt;std::io&lt;/code&gt;&lt;/a&gt; standard
-library module in terms of serving a common abstraction for the asynchronous
-ecosystem. The concepts and traits set forth in &lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; are the foundation
-for all I/O done in the Tokio stack.&lt;/p&gt;
-
-&lt;p&gt;The primary contents of &lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; are the &lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncRead.html&#34;&gt;&lt;code&gt;AsyncRead&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncWrite.html&#34;&gt;&lt;code&gt;AsyncWrite&lt;/code&gt;&lt;/a&gt;
-traits. These two traits are sort of a &amp;ldquo;split &lt;a href=&#34;https://docs.rs/tokio-core/0.1/tokio_core/io/trait.Io.html&#34;&gt;&lt;code&gt;Io&lt;/code&gt;&lt;/a&gt; trait&amp;rdquo; and were chosen to
-demarcate types which implement Tokio-like read/write semantics (nonblocking
-and notifying to a future&amp;rsquo;s task). These traits then integrate with the &lt;a href=&#34;https://crates.io/crates/bytes&#34;&gt;bytes&lt;/a&gt;
-crate to provide some convenient functions and retain old functionality like
-&lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncRead.html#method.split&#34;&gt;&lt;code&gt;split&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;With a clean slate we also took the chance to refresh the &lt;a href=&#34;https://docs.rs/tokio-core/0.1/tokio_core/io/trait.Codec.html&#34;&gt;&lt;code&gt;Codec&lt;/code&gt;&lt;/a&gt; trait in the
-&lt;a href=&#34;https://crates.io/crates/tokio-core&#34;&gt;tokio-core&lt;/a&gt; crate to &lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/codec/trait.Encoder.html&#34;&gt;&lt;code&gt;Encoder&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/codec/trait.Decoder.html&#34;&gt;&lt;code&gt;Decoder&lt;/code&gt;&lt;/a&gt; traits which operate over
-types in the &lt;a href=&#34;https://crates.io/crates/bytes&#34;&gt;bytes&lt;/a&gt; crate (&lt;a href=&#34;https://docs.rs/tokio-core/0.1/tokio_core/io/struct.EasyBuf.html&#34;&gt;&lt;code&gt;EasyBuf&lt;/code&gt;&lt;/a&gt; is not present in &lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; and it&amp;rsquo;s
-now deprecated in &lt;a href=&#34;https://crates.io/crates/tokio-core&#34;&gt;tokio-core&lt;/a&gt;). These types allows you to quickly move from a
-stream of bytes to a &lt;a href=&#34;https://docs.rs/futures/0.1/futures/sink/trait.Sink.html&#34;&gt;&lt;code&gt;Sink&lt;/code&gt;&lt;/a&gt; and a &lt;a href=&#34;https://docs.rs/futures/0.1/futures/stream/trait.Stream.html&#34;&gt;&lt;code&gt;Stream&lt;/code&gt;&lt;/a&gt; ready to accept framed messages.
-A great example of this is that with &lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; we can use the new
-&lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/codec/length_delimited/index.html&#34;&gt;&lt;code&gt;length_delimited&lt;/code&gt;&lt;/a&gt; module combined with &lt;a href=&#34;https://github.com/carllerche/tokio-serde-json&#34;&gt;tokio-serde-json&lt;/a&gt; to get up and
-running with a JSON RPC server in no time as we&amp;rsquo;ll see later in this post.&lt;/p&gt;
-
-&lt;p&gt;Overall with &lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; we were also able to revisit several minor issues in
-the API designed. This in turns empowered us to &lt;a href=&#34;https://github.com/tokio-rs/tokio-core/issues/61#issuecomment-277568977&#34;&gt;close a slew of
-issues&lt;/a&gt; against &lt;a href=&#34;https://crates.io/crates/tokio-core&#34;&gt;tokio-core&lt;/a&gt;. We feel &lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; is a great addition
-to the Tokio stack moving forward. Crates can choose to be abstract over
-&lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; without pulling in runtimes such as &lt;a href=&#34;https://crates.io/crates/tokio-core&#34;&gt;tokio-core&lt;/a&gt;, if they&amp;rsquo;d like.&lt;/p&gt;
-
-&lt;h2 id=&#34;integration-with-bytes&#34;&gt;Integration with &lt;code&gt;bytes&lt;/code&gt;&lt;/h2&gt;
-
-&lt;p&gt;One longstanding wart with &lt;a href=&#34;https://crates.io/crates/tokio-core&#34;&gt;tokio-core&lt;/a&gt; is its &lt;a href=&#34;https://docs.rs/tokio-core/0.1/tokio_core/io/struct.EasyBuf.html&#34;&gt;&lt;code&gt;EasyBuf&lt;/code&gt;&lt;/a&gt; byte buffer type.
-This type is basically what it says on the tin (an &amp;ldquo;easy&amp;rdquo; buffer) but is
-unfortunately typically not what you want in high performance use cases. We&amp;rsquo;ve
-long wanted to have a better abstraction (and a better concrete implementation)
-here.&lt;/p&gt;
-
-&lt;p&gt;With &lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; you&amp;rsquo;ll find that the &lt;a href=&#34;https://crates.io/crates/bytes&#34;&gt;bytes&lt;/a&gt; crate on &lt;a href=&#34;https://crates.io&#34;&gt;crates.io&lt;/a&gt; is much more
-tightly integrated and provides the abstractions necessary for high-performance
-and &amp;ldquo;easy&amp;rdquo; buffers simultaneously. The main contents of the &lt;a href=&#34;https://crates.io/crates/bytes&#34;&gt;bytes&lt;/a&gt; crate are
-the &lt;a href=&#34;http://carllerche.github.io/bytes/bytes/trait.Buf.html&#34;&gt;&lt;code&gt;Buf&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;http://carllerche.github.io/bytes/bytes/trait.BufMut.html&#34;&gt;&lt;code&gt;BufMut&lt;/code&gt;&lt;/a&gt; traits. These two traits serve as the ability to
-abstract over arbitrary byte buffers (both readable and writable) and are
-integrated with &lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncRead.html#method.read_buf&#34;&gt;&lt;code&gt;read_buf&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncWrite.html#method.write_buf&#34;&gt;&lt;code&gt;write_buf&lt;/code&gt;&lt;/a&gt; on all asynchronous I/O objects
-now.&lt;/p&gt;
-
-&lt;p&gt;In addition to traits to abstract over many kinds of buffers the &lt;a href=&#34;https://crates.io/crates/bytes&#34;&gt;bytes&lt;/a&gt; crate
-comes with two high-quality implementations of these traits, the &lt;a href=&#34;http://carllerche.github.io/bytes/bytes/struct.Bytes.html&#34;&gt;&lt;code&gt;Bytes&lt;/code&gt;&lt;/a&gt; and
-&lt;a href=&#34;http://carllerche.github.io/bytes/bytes/struct.BytesMut.html&#34;&gt;&lt;code&gt;BytesMut&lt;/code&gt;&lt;/a&gt; type (implementing the &lt;a href=&#34;http://carllerche.github.io/bytes/bytes/trait.Buf.html&#34;&gt;&lt;code&gt;Buf&lt;/code&gt;&lt;/a&gt; and &lt;a href=&#34;http://carllerche.github.io/bytes/bytes/trait.BufMut.html&#34;&gt;&lt;code&gt;BufMut&lt;/code&gt;&lt;/a&gt; traits respectively).
-In a nutshell these types represent reference-counted buffers which allow
-zero-copy extraction of slices of data in an efficient fashion. To boot they
-also support a wide array of common operations such as tiny buffers (inline
-storage), single owners (can use a &lt;code&gt;Vec&lt;/code&gt; internally), shared owners with
-disjoint views (&lt;code&gt;BytesMut&lt;/code&gt;), and shared owners with possibly overlapping views
-(&lt;code&gt;Bytes&lt;/code&gt;).&lt;/p&gt;
-
-&lt;p&gt;Overall the &lt;a href=&#34;https://crates.io/crates/bytes&#34;&gt;bytes&lt;/a&gt; crate we hope is your one-stop-shop for byte buffer
-abstractions as well as high-quality implementations to get you running
-quickly. We&amp;rsquo;re excited to see what&amp;rsquo;s in store for the &lt;a href=&#34;https://crates.io/crates/bytes&#34;&gt;bytes&lt;/a&gt; crate!&lt;/p&gt;
-
-&lt;h2 id=&#34;addition-of-sink-close&#34;&gt;Addition of &lt;code&gt;Sink::close&lt;/code&gt;&lt;/h2&gt;
-
-&lt;p&gt;The final major change that we&amp;rsquo;ve landed recently is the addition of a new
-method on the &lt;a href=&#34;https://docs.rs/futures/0.1/futures/sink/trait.Sink.html&#34;&gt;&lt;code&gt;Sink&lt;/code&gt;&lt;/a&gt; trait, &lt;a href=&#34;https://docs.rs/futures/0.1/futures/sink/trait.Sink.html#method.close&#34;&gt;&lt;code&gt;close&lt;/code&gt;&lt;/a&gt;. Up to now there hasn&amp;rsquo;t been a great
-story around implementing &amp;ldquo;graceful shutdown&amp;rdquo; in a generic fashion because there
-was no clean way to indicate to a sink that no more items will be pushed into
-it. The new &lt;a href=&#34;https://docs.rs/futures/0.1/futures/sink/trait.Sink.html#method.close&#34;&gt;&lt;code&gt;close&lt;/code&gt;&lt;/a&gt; method is intended precisely for this purpose.&lt;/p&gt;
-
-&lt;p&gt;The &lt;a href=&#34;https://docs.rs/futures/0.1/futures/sink/trait.Sink.html#method.close&#34;&gt;&lt;code&gt;close&lt;/code&gt;&lt;/a&gt; method allows informing a sink that no more messages will be
-pushed into it. Sinks can then take this opportunity to flush messages and
-otherwise perform protocol-specific shutdown. For example a TLS connection at
-that point would initiate a shutdown operation or a proxied connection might
-issue a TCP-level shutdown. Typically this&amp;rsquo;ll end up bottoming out to the new
-&lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncWrite.html#tymethod.shutdown&#34;&gt;&lt;code&gt;AsyncWrite::shutdown&lt;/code&gt;&lt;/a&gt; method.&lt;/p&gt;
-
-&lt;h2 id=&#34;addition-of-codec-length-delimited&#34;&gt;Addition of &lt;code&gt;codec::length_delimited&lt;/code&gt;&lt;/h2&gt;
-
-&lt;p&gt;One large feature that is landing with &lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt; is the addition of
-the &lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/codec/length_delimited/index.html&#34;&gt;&lt;code&gt;length_delimited&lt;/code&gt;&lt;/a&gt; module (inspired by Netty&amp;rsquo;s
-&lt;a href=&#34;https://netty.io/4.0/api/io/netty/handler/codec/LengthFieldBasedFrameDecoder.html&#34;&gt;&lt;code&gt;LengthFieldBasedFrameDecoder&lt;/code&gt;&lt;/a&gt;). Many protocols delimit frames by using a
-frame header that includes the length of the frame. As a simple example, take a
-protocol that uses a frame header of a &lt;code&gt;u32&lt;/code&gt; to delimit the frame payload. Each
-frame on the wire looks like this:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-text&#34;&gt;+----------+--------------------------------+
-| len: u32 |          frame payload         |
-+----------+--------------------------------+
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Parsing this protocol can easily be handled with&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-rust,ignore&#34;&gt;// Bind a server socket
-let socket = TcpStream::connect(
-    &amp;amp;&amp;quot;127.0.0.1:17653&amp;quot;.parse().unwrap(),
-    &amp;amp;handle);
-
-socket.and_then(|socket| {
-    // Delimit frames using a length header
-    let transport = length_delimited::FramedWrite::new(socket);
-})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In the above example, &lt;code&gt;transport&lt;/code&gt; will be a &lt;code&gt;Sink + Stream&lt;/code&gt; of buffer
-values, where each buffer contains the frame payload. This makes
-encoding and decoding the frame to a value fairly easy to do with
-something like &lt;a href=&#34;https://serde.rs/&#34;&gt;serde&lt;/a&gt;. For example, using &lt;a href=&#34;https://github.com/carllerche/tokio-serde-json&#34;&gt;tokio-serde-json&lt;/a&gt;, we can
-quickly implement a JSON based protocol where each frame is length
-delimited and the frame payload is encoded using JSON:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-rust,ignore&#34;&gt;// Bind a server socket
-let socket = TcpStream::connect(
-    &amp;amp;&amp;quot;127.0.0.1:17653&amp;quot;.parse().unwrap(),
-    &amp;amp;handle);
-
-socket.and_then(|socket| {
-    // Delimit frames using a length header
-    let transport = length_delimited::FramedWrite::new(socket);
-
-    // Serialize frames with JSON
-    let serialized = WriteJson::new(transport);
-
-    // Send the value
-    serialized.send(json!({
-        &amp;quot;name&amp;quot;: &amp;quot;John Doe&amp;quot;,
-        &amp;quot;age&amp;quot;: 43,
-        &amp;quot;phones&amp;quot;: [
-            &amp;quot;+44 1234567&amp;quot;,
-            &amp;quot;+44 2345678&amp;quot;
-        ]
-    }))
-})
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The full example is &lt;a href=&#34;https://github.com/carllerche/tokio-serde-json/tree/master/examples&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;The &lt;a href=&#34;https://docs.rs/tokio-io/0.1/tokio_io/codec/length_delimited/index.html&#34;&gt;&lt;code&gt;length_delimited&lt;/code&gt;&lt;/a&gt; module contains enough configuration settings to
-handle parsing length delimited frames with more complex frame headers,
-like the HTTP/2.0 protocol.&lt;/p&gt;
-
-&lt;h2 id=&#34;what-s-next&#34;&gt;What&amp;rsquo;s next?&lt;/h2&gt;
-
-&lt;p&gt;All of these changes put together closes quite a large number of issues in the
-&lt;a href=&#34;https://crates.io/crates/futures&#34;&gt;futures&lt;/a&gt; and &lt;a href=&#34;https://crates.io/crates/tokio-core&#34;&gt;tokio-core&lt;/a&gt; crates and we feel positions Tokio precisely where
-we&amp;rsquo;d like it for common I/O and buffering abstractions. As always we&amp;rsquo;d love to
-hear feedback on issue trackers and are more than willing to merge PRs if you
-find a problem! Otherwise we look forward to seeing all of these changes in
-practice!&lt;/p&gt;
-
-&lt;p&gt;With the foundations of &lt;a href=&#34;https://crates.io/crates/tokio-core&#34;&gt;tokio-core&lt;/a&gt;, &lt;a href=&#34;https://crates.io/crates/tokio-io&#34;&gt;tokio-io&lt;/a&gt;, &lt;a href=&#34;https://crates.io/crates/tokio-service&#34;&gt;tokio-service&lt;/a&gt;, and
-&lt;a href=&#34;https://crates.io/crates/tokio-proto&#34;&gt;tokio-proto&lt;/a&gt; solidifying the Tokio team is looking forward to accommodating
-and implementing more ambitious protocols such as HTTP/2. We&amp;rsquo;re working closely
-with &lt;a href=&#34;https://github.com/seanmonstar&#34;&gt;@seanmonstar&lt;/a&gt; and &lt;a href=&#34;https://github.com/hyperium/hyper&#34;&gt;Hyper&lt;/a&gt; to develop these foundational HTTP
-libraries as well. Finally we&amp;rsquo;re looking to expand the middleware story in the
-near future with relation to both HTTP and generic &lt;a href=&#34;https://crates.io/crates/tokio-service&#34;&gt;tokio-service&lt;/a&gt;
-implementations. More on this coming soon!&lt;/p&gt;
-</description>
+      <description>Today we&amp;rsquo;re happy to announce a new crate and several new tools to work with in the Tokio stack. This represents the culmination of a number of parallel updates to various bits and pieces, they just happened to conveniently land all around the same time! In a nutshell the improvements are:
+ A new tokio-io crate extracted from tokio-core, deprecating the tokio_core::io module. Introduction of the bytes crate to tokio-io allowing abstraction over buffering and leveraging underlying functionality like vectored I/O.</description>
     </item>
     
     <item>
@@ -697,61 +107,8 @@ implementations. More on this coming soon!&lt;/p&gt;
       <pubDate>Tue, 10 Jan 2017 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/blog/2017-01-tokio-0-1/</guid>
-      <description>&lt;p&gt;Today we are publishing the preliminary version of the Tokio stack, 0.1!&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Tokio is a platform for writing fast networking code in Rust.&lt;/strong&gt; It&amp;rsquo;s built on
-futures,
-&lt;a href=&#34;http://aturon.github.io/blog/2016/08/11/futures/&#34;&gt;a zero-cost abstraction for asynchronous programming in Rust&lt;/a&gt;.
-It provides a suite of basic tools, &lt;code&gt;tokio-core&lt;/code&gt;, for asynchronous I/O with
-futures.  It also provides a higher-level layer, &lt;code&gt;tokio-proto&lt;/code&gt;, for easily
-building sophisticated servers and clients; all you have to do is handle message
-serialization. You can use the Tokio stack to handle a wide range of protocols,
-including streaming and multiplexed protocols, as well as more specialized
-servers like proxies.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Tokio is primarily intended as a foundation for other libraries&lt;/strong&gt;, in
-particular for high performance protocol implementations. Over time, we expect
-Tokio to grow a rich middleware ecosystem and ultimately to support various web
-and application frameworks. &lt;a href=&#34;http://hyper.rs/&#34;&gt;Hyper&lt;/a&gt;, for example, has been adding Tokio
-integration, and there&amp;rsquo;s a &lt;a href=&#34;https://tokio-cn.github.io/legacy/going-deeper-tokio/third-party/&#34;&gt;growing list&lt;/a&gt; of other protocol implementations as
-well.&lt;/p&gt;
-
-&lt;p&gt;Along with this initial release, &lt;strong&gt;we&amp;rsquo;re publishing
-&lt;a href=&#34;https://tokio-cn.github.io/legacy/getting-started/tokio/&#34;&gt;documentation&lt;/a&gt;&lt;/strong&gt; on this web site, ranging from
-getting started guides to meatier examples to deep dives into the implementation
-of the stack. Please take a look, and
-&lt;a href=&#34;https://github.com/tokio-rs/website/issues&#34;&gt;let us know&lt;/a&gt; what needs to be
-improved!&lt;/p&gt;
-
-&lt;p&gt;The 0.1 release is a &lt;strong&gt;beta quality&lt;/strong&gt; release. The stack has undergone a fair
-amount of testing, usage, and feedback, but it&amp;rsquo;s still early days, and we don&amp;rsquo;t
-have a lot of production use under our belt yet. Intrepid users are welcomed to
-work toward production usage, but you should expect bugs and limitations. The
-&lt;a href=&#34;https://gitter.im/tokio-rs/tokio&#34;&gt;gitter channel&lt;/a&gt; is active and helpful for both learning and debugging.&lt;/p&gt;
-
-&lt;p&gt;This release also represents a point of &lt;strong&gt;relative stability&lt;/strong&gt; for the library,
-which has been undergoing frequent breaking changes up until now. While we do
-intend to eventually publish a 0.2 release with breaking changes, we will take
-steps to make migration easy and plan to maintain the 0.1 release in parallel
-for some time. Potential areas of breakage are flagged under the 0.2 milestone
-in our repositories; please take a look and leave your thoughts on those issues!&lt;/p&gt;
-
-&lt;p&gt;Looking ahead, there are several major areas we&amp;rsquo;re hoping to pursue after this
-release:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Starting to build out a middleware ecosystem, built on top of &lt;a href=&#34;https://github.com/tokio-rs/tokio-service&#34;&gt;tokio-service&lt;/a&gt;.&lt;/li&gt;
-&lt;li&gt;Resolving remaining questions about backpressure.&lt;/li&gt;
-&lt;li&gt;Providing richer customization for server and client builders, and in general
-providing more tools for clients.&lt;/li&gt;
-&lt;li&gt;Completing a full HTTP/2 implementation.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;And in general, we are eager to support the growing Tokio ecosystem. Come kick
-the tires, try to build something, and let us know what can be improved!&lt;/p&gt;
-
-&lt;div style=&#34;text-align:right&#34;&gt;&amp;mdash;Carl Lerche, Alex Crichton, and Aaron Turon&lt;/div&gt;
-</description>
+      <description>Today we are publishing the preliminary version of the Tokio stack, 0.1!
+Tokio is a platform for writing fast networking code in Rust. It&amp;rsquo;s built on futures, a zero-cost abstraction for asynchronous programming in Rust. It provides a suite of basic tools, tokio-core, for asynchronous I/O with futures. It also provides a higher-level layer, tokio-proto, for easily building sophisticated servers and clients; all you have to do is handle message serialization.</description>
     </item>
     
   </channel>

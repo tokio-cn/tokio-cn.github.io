@@ -27,7 +27,7 @@
 
     <title>
       
-        Returning futures · Tokio 中文站
+        概述 · Tokio 中文站
       
     </title>
   </head>
@@ -133,7 +133,7 @@
           
             
               
-              <div class="tk-toc-item active">
+              <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/timers/">
                   深入
                 </a>
@@ -143,7 +143,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/futures-mechanics/" class="">Essential combinators</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="active">Returning futures</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="">Returning futures</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/frames/" class="">Working with framed streams</a></li>
                 
@@ -185,155 +185,210 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
+<li><a href="#fast">Fast</a>
+<ul>
+<li><a href="#zero-cost-abstractions">Zero-cost abstractions</a></li>
+<li><a href="#concurrency">Concurrency</a></li>
+<li><a href="#non-blocking-i-o">Non-blocking I/O</a></li>
+</ul></li>
+<li><a href="#reliable">Reliable</a>
+<ul>
+<li><a href="#ownership-and-type-system">Ownership and type system</a></li>
+<li><a href="#backpressure">Backpressure</a></li>
+<li><a href="#cancellation">Cancellation</a></li>
+</ul></li>
+<li><a href="#lightweight">Lightweight</a>
+<ul>
+<li><a href="#no-garbage-collector">No garbage collector</a></li>
+<li><a href="#modular">Modular</a></li>
+</ul></li>
+<li><a href="#example">Example</a></li>
 </ul>
 </nav>
       </div>
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">Returning futures</h1>
+      <h1 class="tk-title">概述</h1>
       <div class="github-edit">
-        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/going-deeper/returning.md"> 在 GitHub 上编辑</a>
+        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/overview.md"> 在 GitHub 上编辑</a>
       </div>
       
 
-<p>When working with futures, one of the first things you&rsquo;re likely to need to do
-is to return a <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>. As with <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a>s, however, doing so can be a little tricky.
-There are several options, listed from most to least ergonomic:</p>
+<p>Tokio is an event-driven, non-blocking I/O platform for writing
+asynchronous applications with the Rust programming language. At a high
+level, it provides a few major components:</p>
 
 <ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
+<li>A multithreaded, work-stealing based task <a href="https://tokio-rs.github.io/tokio/tokio/runtime/index.html">scheduler</a>.</li>
+<li>A <a href="https://docs.rs/tokio/0.1/tokio/reactor/index.html">reactor</a> backed by the operating system&rsquo;s event queue (epoll, kqueue,
+IOCP, etc&hellip;).</li>
+<li>Asynchronous <a href="https://docs.rs/tokio/0.1/tokio/net/index.html">TCP and UDP</a> sockets.</li>
 </ul>
 
-<h1 id="trait-objects">Trait objects</h1>
+<p>These components provide the runtime components necessary for building
+an asynchronous application.</p>
 
-<p>First, you always have the option of returning a boxed <a href="https://doc.rust-lang.org/book/trait-objects.html">trait object</a>:</p>
+<h1 id="fast">Fast</h1>
 
-<pre><code class="language-rust"># extern crate futures;
-# use std::io;
-# use futures::Future;
-# fn main() {}
-fn foo() -&gt; Box&lt;Future&lt;Item = u32, Error = io::Error&gt;&gt; {
-    // ...
-# loop {}
+<p>Tokio is built on the Rust programming language, which is in of itself very
+fast. Applications built with Tokio will get those same benefits. Tokio&rsquo;s design
+is also geared towards enabling applications to be as fast as possible.</p>
+
+<h2 id="zero-cost-abstractions">Zero-cost abstractions</h2>
+
+<p>Tokio is built around <a href="https://tokio-cn.github.io/docs/getting-started/futures/">futures</a>. Futures aren&rsquo;t a new idea, but the way Tokio
+uses them is <a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/#polling-model">unique</a>. Unlike futures from other languages, Tokio&rsquo;s
+futures compile down to a state machine. There is no added overhead from
+synchronization, allocation, or other costs common with future implementations.</p>
+
+<p>Note that providing zero-cost abstractions does not mean that Tokio itself has
+no cost. It means that using Tokio results in an end product with equivalent
+overhead to not using Tokio.</p>
+
+<h2 id="concurrency">Concurrency</h2>
+
+<p>Out of the box, Tokio provides a multi-threaded, <a href="https://en.wikipedia.org/wiki/Work_stealing">work-stealing</a>, scheduler. So,
+when you start your appication with <code>tokio::run</code>, you are already using all of
+your computer&rsquo;s  CPU cores.</p>
+
+<p>Modern computers increase their performance by adding cores, so being able to
+utilize many cores is critical for writing fast applications.</p>
+
+<h2 id="non-blocking-i-o">Non-blocking I/O</h2>
+
+<p>When hitting the network, Tokio will used the most efficient system available to
+the operating system. On Linux this means <a href="http://man7.org/linux/man-pages/man7/epoll.7.html">epoll</a>, *bsd platforms provide <a href="https://www.freebsd.org/cgi/man.cgi?query=kqueue&amp;sektion=2">kqueue</a>,
+and Windows has <a href="https://docs.microsoft.com/en-us/windows/desktop/fileio/i-o-completion-ports">I/O completion ports</a>.</p>
+
+<p>This allows multiplexing many sockets on a single thread and receiving
+operating system notifications in batches, thus reducing system calls. All this
+leads to less overhead for the application.</p>
+
+<h1 id="reliable">Reliable</h1>
+
+<p>While Tokio cannot prevent all bugs, it is designed to minimize them. It does
+this by providing APIs that are hard to misuse. At the end of the day, you can
+ship applications to production with confidence.</p>
+
+<h2 id="ownership-and-type-system">Ownership and type system</h2>
+
+<p>Rust&rsquo;s ownership model and type system enables implementing system level
+applications without the fear of memory unsafety. It is prevents classic bugs
+such as accessing uninitialized memory and use after free. It does this without
+adding any run-time overhead.</p>
+
+<p>Further, APIs are able to leverage the type system to provide hard to misuse
+APIs. For example, <code>Mutex</code> does not require the user to explicitly unlock:</p>
+
+<pre><code>use std::sync::Mutex;
+
+# let foo = &quot;&quot;.to_string();
+let data = Mutex::new(foo);
+
+let locked = data.lock().unwrap();
+println!(&quot;locked data: {}&quot;, &amp;locked[..]);
+
+// The lock is automatically released here when `locked` goes out of scope.
+</code></pre>
+
+<h2 id="backpressure">Backpressure</h2>
+
+<p>In push based systems, when a producer produces data faster than the consumer
+can process, data will start backing up. Pending data is stored in memory.
+Unless the producer stops producing, the system will eventually run out of
+memory and crash. The ability for a consumer to inform the producer to slow down
+is backpressure.</p>
+
+<p>Because Tokio uses a <a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/#polling-model">poll</a> based model, the problem mostly just goes away.
+Producers are lazy by default. They will not produce any data unless the
+consumer asks them to. This is built into Tokio&rsquo;s foundation.</p>
+
+<h2 id="cancellation">Cancellation</h2>
+
+<p>Because of Tokio&rsquo;s <a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/#polling-model">poll</a> based model, computations do no work unless they are
+polled. Dependents of that computation hold a <a href="https://tokio-cn.github.io/docs/getting-started/futures/">future</a> representing the
+result of that computation. If the result is no longer needed, the future is
+dropped. At this point, the computation will no longer be polled and thus
+perform no more work.</p>
+
+<p>Thanks to Rust&rsquo;s ownership model, the computation is able to implement <code>drop</code>
+handles to detect the future being droped. This allows it to perform any
+necessary cleanup work.</p>
+
+<h1 id="lightweight">Lightweight</h1>
+
+<p>Tokio scales well without adding overhead to the application, allowing it to
+thrive in resource constrained environments.</p>
+
+<h2 id="no-garbage-collector">No garbage collector</h2>
+
+<p>Because Tokio is built on Rust, the compiled executable includes minimal
+language run-time. The end product is similar to what C++ would produce. This
+means, no garbage collector, no virtual machine, no JIT compilation, and no
+stack manipulation. Write your server applications without fear of
+<a href="https://en.wikipedia.org/wiki/Garbage_collection_(computer_science)#Disadvantages">stop-the-world</a> pauses.</p>
+
+<p>It is possible to use Tokio without incurring any runtime allocations, making it
+a good fit for <a href="https://en.wikipedia.org/wiki/Real-time_computing">real-time</a> use cases.</p>
+
+<h2 id="modular">Modular</h2>
+
+<p>While Tokio provides a lot out of the box, it is all organized very modularly.
+Each component lives in a separate library. If needed, applications may opt to
+pick and choose the needed components and avoid pulling in the rest.</p>
+
+<h1 id="example">Example</h1>
+
+<p>A basic TCP echo server with Tokio:</p>
+
+<pre><code class="language-rust">extern crate tokio;
+
+use tokio::prelude::*;
+use tokio::io::copy;
+use tokio::net::TcpListener;
+
+fn main() {
+# }
+# fn hax() {
+    // Bind the server's socket.
+    let addr = &quot;127.0.0.1:12345&quot;.parse().unwrap();
+    let listener = TcpListener::bind(&amp;addr)
+        .expect(&quot;unable to bind TCP listener&quot;);
+
+    // Pull out a stream of sockets for incoming connections
+    let server = listener.incoming()
+        .map_err(|e| eprintln!(&quot;accept failed = {:?}&quot;, e))
+        .for_each(|sock| {
+            // Split up the reading and writing parts of the
+            // socket.
+            let (reader, writer) = sock.split();
+
+            // A future that echos the data and returns how
+            // many bytes were copied...
+            let bytes_copied = copy(reader, writer);
+
+            // ... after which we'll print what happened.
+            let handle_conn = bytes_copied.map(|amt| {
+                println!(&quot;wrote {:?} bytes&quot;, amt)
+            }).map_err(|err| {
+                eprintln!(&quot;IO error {:?}&quot;, err)
+            });
+
+            // Spawn the future as a concurrent task.
+            tokio::spawn(handle_conn)
+        });
+
+    // Start the Tokio runtime
+    tokio::run(server);
 }
 </code></pre>
 
-<p>The upside of this strategy is that it&rsquo;s easy to write down (just a <a href="https://doc.rust-lang.org/std/boxed/struct.Box.html"><code>Box</code></a>) and
-easy to create. This is also maximally flexible in terms of future changes to
-the method as <em>any</em> type of future can be returned as an opaque, boxed <code>Future</code>.</p>
-
-<p>The downside of this approach is that it requires a runtime allocation when the
-future is constructed, and dynamic dispatch when using that future. The <code>Box</code>
-needs to be allocated on the heap and the future itself is then placed
-inside. Note, though that this is the <em>only</em> allocation here, otherwise while
-the future is being executed no allocations will be made.</p>
-
-<p>It&rsquo;s often possible to mitigate that cost by boxing only at the end of a long
-chain of futures you want to return, which entails only a single allocation and
-dynamic dispatch for the entire chain.</p>
-
-<h1 id="impl-trait"><code>impl Trait</code></h1>
-
-<p>If you are using a version of Rust greater than 1.26, then you can use the
-language feature <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>. This language feature will allow, for
-example:</p>
-
-<pre><code class="language-rust,ignore">fn add_10&lt;F&gt;(f: F) -&gt; impl Future&lt;Item = i32, Error = F::Error&gt;
-    where F: Future&lt;Item = i32&gt;,
-{
-    f.map(|i| i + 10)
-}
-</code></pre>
-
-<p>Here we&rsquo;re indicating that the return type is &ldquo;something that implements
-<code>Future</code>&rdquo; with the given associated types. Other than that we just use the
-future combinators as we normally would.</p>
-
-<p>The upsides to this approach are that it is zero overhead with no <code>Box</code>
-necessary, it&rsquo;s maximally flexible to future implementations as the actual
-return type is hidden, and it&rsquo;s ergonomic to write as it&rsquo;s similar to the nice
-<code>Box</code> example above.</p>
-
-<p>The downside to this approach is only that using a <code>Box</code> is still more
-flexible &ndash; if you might return two different types of <code>Future</code>, then you
-must still return <code>Box&lt;Future&lt;Item = F::Item, Error = F::Error&gt;</code> instead of
-<code>impl Future&lt;Item = F::Item, Error = F::Error&gt;</code>. The good news however is
-that this case is rare; in general, it should be a backwards-compatible
-extension to change return types from <code>Box</code> to <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>.</p>
-
-<h1 id="named-types">Named types</h1>
-
-<p>If you wouldn&rsquo;t like to return a <code>Box</code> and want to stick with older versions of
-Rust, another option is to write the return type directly:</p>
-
-<pre><code class="language-rust"># extern crate futures;
-# use futures::Future;
-# use futures::future::Map;
-# fn main() {}
-fn add_10&lt;F&gt;(f: F) -&gt; Map&lt;F, fn(i32) -&gt; i32&gt;
-    where F: Future&lt;Item = i32&gt;,
-{
-    fn do_map(i: i32) -&gt; i32 { i + 10 }
-    f.map(do_map)
-}
-</code></pre>
-
-<p>Here we name the return type exactly as the compiler sees it. The <code>map</code>
-function returns the <a href="https://docs.rs/futures/0.1/futures/future/struct.Map.html"><code>Map</code></a> struct which internally contains the future and the
-function to perform the map.</p>
-
-<p>The upside to this approach is that it doesn&rsquo;t have the runtime overhead of
-<code>Box</code> from before, and works on Rust versions pre-1.26.</p>
-
-<p>The downside, however, is that it&rsquo;s often quite difficult to name the type.
-Sometimes the types can get quite large or be unnameable altogether. Here we&rsquo;re
-using a function pointer (<code>fn(i32) -&gt; i32</code>), but we would ideally use a closure.
-Unfortunately, the return type cannot name the closure, for now. It also leads to
-very verbose signatures, and leaks implementation details to clients.</p>
-
-<h1 id="custom-types">Custom types</h1>
-
-<p>Finally, you can wrap the concrete return type in a new type, and implement
-future for it. For example:</p>
-
-<pre><code class="language-rust,ignore">struct MyFuture {
-    inner: Sender&lt;i32&gt;,
-}
-
-fn foo() -&gt; MyFuture {
-    let (tx, rx) = oneshot::channel();
-    // ...
-    MyFuture { inner: tx }
-}
-
-impl Future for MyFuture {
-    // ...
-}
-</code></pre>
-
-<p>In this example we&rsquo;re returning a custom type, <code>MyFuture</code>, and we implement the
-<code>Future</code> trait directly for it. This implementation leverages an underlying
-<code>Oneshot&lt;i32&gt;</code>, but any other kind of protocol can also be implemented here as
-well.</p>
-
-<p>The upside to this approach is that it won&rsquo;t require a <code>Box</code> allocation and it&rsquo;s
-still maximally flexible. The implementation details of <code>MyFuture</code> are hidden to
-the outside world so it can change without breaking others.</p>
-
-<p>The downside to this approach, however, is that this is the least ergonomic way
-to return futures.</p>
+<p>More examples can be found <a href="examples">here</a>.</p>
 
       
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/docs/going-deeper/frames/">Working with framed streams</a>
+          <b>下一篇</b>：<a href ="/docs/getting-started/hello-world/">Hello World!</a>
         </div>
       
     </main>

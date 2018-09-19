@@ -27,7 +27,7 @@
 
     <title>
       
-        New Timer implementation · Tokio 中文站
+        Experimental async / await support for Tokio · Tokio 中文站
       
     </title>
   </head>
@@ -85,7 +85,7 @@
     <div class="col-12 col-md-3 col-xl-2 tk-sidebar">
       
       <div class="tk-docs-toggle d-md-none p-0 d-flex ml-3 collapsed align-item-center">
-        <h1 class="tk-title">New Timer implementation</h1>
+        <h1 class="tk-title">Experimental async / await support for Tokio</h1>
         <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#tk-docs-nav" aria-controls="tk-docs-nav" aria-expanded="false" aria-label="Toggle docs navigation">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30" focusable="false"><title>Menu</title><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M4 7h22M4 15h22M4 23h22"></path></svg>
         </button>
@@ -98,13 +98,13 @@
             <ul class="nav tk-sidenav">
               
               
-                  <li><a href="https://tokio-cn.github.io/blog/2018-08-async-await/" class="">Experimental async / await support for Tokio</a></li>
+                  <li><a href="https://tokio-cn.github.io/blog/2018-08-async-await/" class="active">Experimental async / await support for Tokio</a></li>
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-08-incremental-improvements/" class="">Tokio 0.1.8 with many incremental improvements</a></li>
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-05-tokio-fs/" class="">New Tokio release, now with filesystem support</a></li>
               
-                  <li><a href="https://tokio-cn.github.io/blog/2018-03-timers/" class="active">New Timer implementation</a></li>
+                  <li><a href="https://tokio-cn.github.io/blog/2018-03-timers/" class="">New Timer implementation</a></li>
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-03-tokio-runtime/" class="">Announcing the Tokio runtime</a></li>
               
@@ -126,11 +126,9 @@
 <ul>
 <li>
 <ul>
-<li><a href="#timers">Timers</a></li>
-<li><a href="#some-history">Some history</a></li>
-<li><a href="#a-new-beginning">A new beginning</a></li>
-<li><a href="#a-quick-look-at-the-api">A quick look at the API.</a></li>
-<li><a href="#integrated-in-the-runtime">Integrated in the Runtime</a></li>
+<li><a href="#getting-started">Getting started</a></li>
+<li><a href="#going-deeper">Going deeper</a></li>
+<li><a href="#some-notes">Some notes</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -138,118 +136,163 @@
 
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">New Timer implementation</h1>
+      <h1 class="tk-title">Experimental async / await support for Tokio</h1>
       
       
 
-<p>Happy Friday all!</p>
+<p>Happy Monday!</p>
 
-<p>To close out a great week, there is a <a href="https://crates.io/crates/tokio/0.1.5">new release</a> of Tokio. This release
-includes a brand new timer implementation.</p>
+<p>In case you haven&rsquo;t heard, <code>async</code> / <code>await</code> is a big new feature that is being
+worked on for Rust. It aims to make asynchronous programming easy (well, at
+least a little bit easier than it is today). The work has been on going for a
+while and is already usable today on the Rust nightly channel.</p>
 
-<h2 id="timers">Timers</h2>
+<p>I&rsquo;m happy to announce that Tokio now has experimental async / await support!
+Let&rsquo;s dig in a bit.</p>
 
-<p>Sometimes (often), one wants to execute code in relation to time. Maybe a
-function needs to run at a specific instant. Maybe a read needs to be limited
-to a fixed duration. For working with time, one needs access to a timer!</p>
+<h2 id="getting-started">Getting started</h2>
 
-<h2 id="some-history">Some history</h2>
+<p>First, Tokio async/await support is provided by a new crate, creatively named
+<a href="https://crates.io/crates/tokio-async-await"><code>tokio-async-await</code></a>. This crate is a shim on top of <code>tokio</code>. It contains all of
+the same types and functions as <code>tokio</code> (as re-exports) as well as additional
+helpers to work with <code>async</code> / <code>await</code>.</p>
 
-<p>The <code>tokio-timer</code> crate has been around for a while. It was originally built
-using a <a href="http://www.cs.columbia.edu/~nahum/w6998/papers/sosp87-timing-wheels.pdf">hashed timer wheel</a> (pdf warning). It had a granularity of 100
-milliseconds, so any timeout set with a resolution of less than 100 milliseconds
-would get rounded up. Usually, in the context of network based applications,
-this is fine. Timeouts are usually at least 30 seconds and do not require high
-precision.</p>
+<p>To use <a href="https://crates.io/crates/tokio-async-await"><code>tokio-async-await</code></a>, you need to depend on it from a crate that is
+configured to use Rust&rsquo;s 2018 edition. It also only works with recent Rust
+nightly releases.</p>
 
-<p>However, there are cases for which 100 milliseconds is too coarse. Also, the
-original implementation of Tokio timer had a number of annoying bugs and did not
-handle edge cases super well due to the implementation strategy it took.</p>
+<p>In your application&rsquo;s <code>Cargo.toml</code>, add the following:</p>
 
-<h2 id="a-new-beginning">A new beginning</h2>
+<pre><code class="language-toml"># At the very top of the file
+cargo-features = [&quot;edition&quot;]
 
-<p>The timer has been rewritten from scratch and released as <a href="https://crates.io/crates/tokio-timer/0.2.0"><code>tokio-timer</code>
-0.2</a>. For the most part, the API is pretty similar, but implementation is
-completely different.</p>
+# In the `[packages]` section
+edition = &quot;2018&quot;
 
-<p>Instead of just using a single hashed timer wheel implementation, it uses a
-hierarchical approach (also described in the paper linked above).</p>
+# In the `[dependencies]` section
+tokio-async-await = &quot;0.1.0&quot;
+</code></pre>
 
-<p>The timer uses six separate levels. Each level is a hashed wheel containing 64
-slots. Slots in the lowest level represent one millisecond. The
-next level up represents 64 milliseconds (1 x 64 slots) and so on. So, a slot on
-each level covers an equal amount of time as the entire level below.</p>
+<p>Then, in your application, do the following:</p>
 
-<p>When a timeout is set, if it is within 64 milliseconds from the current instant,
-it goes in the lowest level. If the timeout is within 64 milliseconds and 4,096
-milliseconds, it goes in the second level, and so on.</p>
+<pre><code class="language-rust,ignore">// The nightly features that are commonly needed with async / await
+#![feature(await_macro, async_await, futures_api)]
 
-<p>As time advances, timeouts in the lowest level are fired. Once the end of the
-lowest level is reached, all timeouts in the next level up are removed from that
-level and moved to the lowest level.</p>
-
-<p>Using this strategy, all timer operations (creating a timeout, canceling a
-timeout, firing a timeout) are constant. This results in very good performance
-even with a very large number of outstanding timeouts.</p>
-
-<h2 id="a-quick-look-at-the-api">A quick look at the API.</h2>
-
-<p>As mentioned above, the API has not really changed. There are three primary
-types:</p>
-
-<ul>
-<li><a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Delay.html"><code>Delay</code></a>: A future that completes at a set instant in time.</li>
-<li><a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Deadline.html"><code>Deadline</code></a>: Decorates a future ensuring it completes before the
-deadline is reached.</li>
-<li><a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Interval.html"><code>Interval</code></a>: A stream that yields values at a fixed intervals.</li>
-</ul>
-
-<p>And a quick example:</p>
-
-<pre><code class="language-rust"># #![deny(deprecated)]
-# extern crate tokio;
-#
-use tokio::prelude::*;
-use tokio::timer::Delay;
-
-use std::time::{Duration, Instant};
+// This pulls in the `tokio-async-await` crate. While Rust 2018
+// doesn't require `extern crate`, we need to pull in the macros.
+#[macro_use]
+extern crate tokio;
 
 fn main() {
-    let when = Instant::now() + Duration::from_millis(100);
-    let task = Delay::new(when)
-        .and_then(|_| {
-            println!(&quot;Hello world!&quot;);
-            Ok(())
-        })
-        .map_err(|e| panic!(&quot;delay errored; err={:?}&quot;, e));
-
-    tokio::run(task);
+    // And we are async...
+    tokio::run_async(async {
+        println!(&quot;Hello&quot;);
+    });
 }
 </code></pre>
 
-<p>The above example creates a new <code>Delay</code> instance that will complete 100
-milliseconds in the future. The <code>new</code> function takes an <code>Instant</code>, so we compute
-<code>when</code> to be the instant 100 milliseconds from now.</p>
+<p>and run it (with nightly):</p>
 
-<p>Once the instant is reached, the <code>Delay</code> future completes, resulting in the
-<code>and_then</code> block to be executed.</p>
+<pre><code class="language-txt">cargo +nightly run
+</code></pre>
 
-<p>This release comes with a short <a href="https://tokio-cn.github.io/docs/going-deeper/timers/">guide</a> explaining how to use timers and <a href="https://docs.rs/tokio/0.1/tokio/timer/index.html">API
-documentation</a>.</p>
+<p>and you are using Tokio + <code>async</code> / <code>await</code>!</p>
 
-<h2 id="integrated-in-the-runtime">Integrated in the Runtime</h2>
+<p>Note that, to spawn <code>async</code> blocks, the <code>tokio::run_async</code> function should be
+used (instead of <code>tokio::run</code>).</p>
 
-<p>Using the timer API requires a timer instance to be running. The Tokio <a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">runtime</a>
-takes care of all that setup for you.</p>
+<h2 id="going-deeper">Going deeper</h2>
 
-<p>When the runtime is started with <code>tokio::run</code> or by calling <code>Runtime::new</code>
-directly, a thread pool is started. Each worker thread will get one timer
-instance. So, this means that if the runtime starts 4 worker threads, there will
-be 4 timer instances, one per thread. Doing this allows using the timer without
-paying a synchronization cost since the timer will be located on the same thread
-as the code that uses the various timer types (<code>Delay</code>, <code>Deadline</code>, <code>Interval</code>).</p>
+<p>Now, let&rsquo;s build something simple: an echo server (yay).</p>
 
-<p>And with that, have a great weekend!</p>
+<pre><code class="language-rust,ignore">// Somewhere towards the top
+
+#[macro_use]
+extern crate tokio;
+
+use tokio::net::{TcpListener, TcpStream};
+use tokio::prelude::*;
+
+// more to come...
+
+// The main function
+fn main() {
+  let addr: SocketAddr = &quot;127.0.0.1:8080&quot;.parse().unwrap();
+  let listener = TcpListener::bind(&amp;addr).unwrap();
+
+    tokio::run_async(async {
+        let mut incoming = listener.incoming();
+
+        while let Some(stream) = await!(incoming.next()) {
+            let stream = stream.unwrap();
+            handle(stream);
+        }
+    });
+}
+</code></pre>
+
+<p>In this example, <code>incoming</code> is a stream of accepted <code>TcpStream</code> values. We are
+using <code>async</code> / <code>await</code> to iterate the stream. Currently, there is only syntax
+for awaiting on a single value (future), so we use the <code>next</code> combinator to get
+a future of the next value in the stream. This lets us iterate the stream with
+<code>while</code> syntax.</p>
+
+<p>Once we get the stream, it is passed to the <code>handle</code> function to process. Lets
+see how that is implemented.</p>
+
+<pre><code class="language-rust,ignore">fn handle(mut stream: TcpStream) {
+    tokio::spawn_async(async move {
+        let mut buf = [0; 1024];
+
+        loop {
+            match await!(stream.read_async(&amp;mut buf)).unwrap() {
+                0 =&gt; break, // Socket closed
+                n =&gt; {
+                    // Send the data back
+                    await!(stream.write_all_async(&amp;buf[0..n])).unwrap();
+                }
+            }
+        }
+    });
+}
+</code></pre>
+
+<p>Just like <code>run_async</code>, there is a <code>spawn_async</code> function to spawn async blocks
+as tasks.</p>
+
+<p>Then, to perform the echo logic, we read from the socket into a buffer and
+write the data back to the same socket. Because we are using <code>async</code> / <code>await</code>,
+we can use an array that looks stack allocated (it actually ends up in the
+heap).</p>
+
+<p>Note that <code>TcpStream</code> has <code>read_async</code> and <code>write_all_async</code> functions. These
+functions perform the same logic as the synchronous equivalents that exist on the
+<code>Read</code> and <code>Write</code> traits in <code>std</code>. The difference, they return futures that can
+be awaited on.</p>
+
+<p>The <code>*_async</code> functions are defined in the <code>tokio-async-await</code> crate by using
+extension traits. These traits got imported with the <code>use tokio::prelude::*;</code>
+line.</p>
+
+<p>This is just a start, check the <a href="https://github.com/tokio-rs/tokio/blob/master/tokio-async-await/examples">examples</a> directory in the repository for more.
+There even is one using <a href="https://github.com/tokio-rs/tokio/blob/master/tokio-async-await/examples/hyper.rs">hyper</a>.</p>
+
+<h2 id="some-notes">Some notes</h2>
+
+<p>First, the <code>tokio-async-await</code> crate only provides compatibility for <code>async</code> /
+<code>await</code> syntax. It does <strong>not</strong> provide support for the <code>futures</code> 0.3 crate. It
+is expected that users continue using futures 0.1 to remain compatible with
+Tokio.</p>
+
+<p>To make this work, the <code>tokio-async-await</code> crate defines its own <code>await!</code> macro.
+This macro is a shim on top of the one provided by <code>std</code> that enables waiting
+for <code>futures</code> 0.1 futures. This is how the compatibility layer is able to stay
+<strong>lightweight</strong> and <strong>boilerplate</strong> free.</p>
+
+<p>This is just a start. The <code>async</code> / <code>await</code> support will continue to evolve and
+improve over time, but this is enough to get everyone going!</p>
+
+<p>And with that, have a great week!</p>
 
 <div style="text-align:right">&mdash;Carl Lerche</div>
 
@@ -257,7 +300,7 @@ as the code that uses the various timer types (<code>Delay</code>, <code>Deadlin
 
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/blog/2018-03-tokio-runtime/">Announcing the Tokio runtime</a>
+          <b>下一篇</b>：<a href ="/blog/2018-08-incremental-improvements/">Tokio 0.1.8 with many incremental improvements</a>
         </div>
       
     </main>

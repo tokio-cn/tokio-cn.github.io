@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
   <head>
-	<meta name="generator" content="Hugo 0.48" />
     
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -28,7 +27,7 @@
 
     <title>
       
-        Tokio——Rust 编程语言的异步运行时。
+        Third-party crates · Tokio 中文站
       
     </title>
   </head>
@@ -40,7 +39,7 @@
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link  active " href="https://tokio-cn.github.io/">首页</a>
+            <a class="nav-link " href="https://tokio-cn.github.io/">首页</a>
           </li>
           <li class="nav-item">
             
@@ -50,7 +49,7 @@
           </li>
           <li class="nav-item">
             
-            <a class="nav-link " href="https://tokio-cn.github.io/community/">社区</a>
+            <a class="nav-link  active " href="https://tokio-cn.github.io/community/">社区</a>
           </li>
           <li class="nav-item">
             
@@ -80,128 +79,45 @@
     </header>
 
 
-<main class="tk-masthead">
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-5 mx-auto col-md-5 order-md-2">
-        <img class="img-fluid mb-3 mb-md-0 tk-logo" src="https://tokio-cn.github.io/img/Tokio_Mark_Large.png" alt="">
-      </div>
-      <div class="col-md-7 order-md-1 text-center text-md-left pr-md-5">
-        <h1 class="mb-3 tk-text-big">Tokio</h1>
-        <p class="lead">
-          Rust 编程语言的异步运行时。
-        </p>
-        <p class="lead mb-4">
-          Tokio 是一个开源库，它提供了异步、事件驱动的平台，可用于构建快速、可靠且轻量的网络应用。它利用 Rust 的所有权与并发模型来确保线程安全。
-        </p>
-        <div class="d-flex flex-column flex-md-row lead mb-3">
-          <a href="https://tokio-cn.github.io/docs/getting-started/hello-world/" class="btn btn-lg btn-tk-primary mb-3 mb-md-0 mr-md-3">入门</a>
-        </div>
-      </div>
-    </div>
+<header class="d-flex flex-column flex-md-row align-items-md-center p-5 bg-light tk-lead">
+  <div class="pt-md-3 tk-single">
+    <h1 class="tk-title mt-0">Third-party crates</h1>
+    <p></p>
   </div>
-</main>
+</header>
 
-<div class="masthead-followup row m-0 border border-white">
-  <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
-    <h3>
-      <i class="fa fa-rocket" aria-hidden="true"></i>
-      快速
-    </h3>
+<main class="tk-content p-5 tk-single">
+  <p>Currently the <a href="https://github.com/alexcrichton/futures-rs"><code>futures</code></a>, <a href="https://github.com/tokio-rs/tokio-core"><code>tokio-core</code></a>, <a href="https://github.com/tokio-rs/tokio-service"><code>tokio-service</code></a>, and <a href="https://github.com/tokio-rs/tokio-proto"><code>tokio-proto</code></a> crates provide
+the foundation for the Tokio ecosystem. There&rsquo;s a growing set of crates outside
+of Tokio itself, however, filling in more functionality!</p>
 
-    <p>
-      Tokio 构建于 Rust 之上，提供了极速的性能，
-      使其成为高性能服务器应用的理想选择。
-    </p>
+<ul>
+<li><a href="https://github.com/tokio-rs/tokio-curl"><code>tokio-curl</code></a> is an HTTP client library backed by the libcurl C library.</li>
+<li><a href="https://github.com/tokio-rs/tokio-timer"><code>tokio-timer</code></a> is a timer library providing finer-grained control over timers
+and helpful timeout facilities over the types in <a href="https://github.com/tokio-rs/tokio-core"><code>tokio-core</code></a>.</li>
+<li><a href="https://github.com/tokio-rs/tokio-tls"><code>tokio-tls</code></a> is a library for TLS streams backed by <a href="https://github.com/sfackler/rust-native-tls"><code>native-tls</code></a>.</li>
+<li><a href="https://github.com/alexcrichton/tokio-openssl"><code>tokio-openssl</code></a> is similar to <a href="https://github.com/tokio-rs/tokio-tls"><code>tokio-tls</code></a> but hardwired to OpenSSL.</li>
+<li><a href="https://github.com/tokio-rs/tokio-uds"><code>tokio-uds</code></a> is a Unix library for supporting Unix Domain Sockets in the same
+way that <code>tokio_core::net</code> works with TCP sockets</li>
+<li><a href="https://github.com/dermesser/tokio-inotify"><code>tokio-inotify</code></a> maps inotify file descriptors to a <code>Stream</code>.</li>
+<li><a href="https://github.com/alexcrichton/tokio-signal"><code>tokio-signal</code></a> maps Unix signals to a <code>Stream</code>.</li>
+<li><a href="https://github.com/berkowski/tokio-serial/"><code>tokio-serial</code></a> is a (Unix-only) serial port I/O library.</li>
+<li><a href="https://github.com/alexcrichton/tokio-process"><code>tokio-process</code></a> enables asynchronous process managment, both for child
+processes exiting as well as I/O pipes to children.</li>
+<li><a href="http://trust-dns.org/"><code>trust-dns</code></a> is an asynchronous DNS client and server, supporting features
+like DNSSec as well</li>
+<li><a href="https://github.com/dwrensha/capnproto-rust"><code>capnproto-rust</code></a> is an implementation of Cap&rsquo;n Proto for Rust which has the
+ability to work with futures as well</li>
+<li><a href="https://crates.io/crates/tk-sendfile"><code>tk-sendfile</code></a> allows using the <code>sendfile</code> syscall with Tokio</li>
+<li><a href="https://crates.io/crates/tokio-postgres"><code>tokio-postgres</code></a> is an asynchronous PostgreSQL driver</li>
+<li><a href="https://github.com/srijs/rust-tokio-retry"><code>tokio-retry</code></a> provides extensible asynchronous retry behaviours</li>
+<li><a href="https://crates.io/crates/couchbase"><code>couchbase</code></a> is an asynchronous driver for Couchbase, exposing Futures and Streams as first class response types.</li>
+</ul>
 
-    <p>
-      <b>零开销抽象</b><br>
-      与完全手工编写的同等系统相比，
-      Tokio 运行时模型不会增加任何额外开销。
-    </p>
+<p>If you&rsquo;ve got your own crate or know of others that should be present on this
+list, please feel free to send a PR!</p>
 
-    <p>
-      <b>并发</b><br>
-      在以 Tokio 构建的应用中，并发是开箱即用的。Tokio
-      提供了已为异步网络工作负载调整好的多线程、工作窃取（work-stealing）与任务调度器。
-    </p>
-
-    <p>
-      <b>非阻塞 I/O</b><br>
-      Tokio 依靠操作系统提供的非阻塞、事件化、IO 栈。
-    </p>
-
-    <hr class="half-rule">
-    <a class="btn btn-outline-primary" href="https://tokio-cn.github.io/docs/overview/#fast">了解更多</a>
-  </div>
-
-  
-  <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
-    <h3>
-      <i class="fa fa-shield" aria-hidden="true"></i>
-      可靠
-    </h3>
-
-    <p>
-      虽然 Tokio 无法预防所有 bug，但它旨在将其最小化。
-      当用于关键任务应用时，Tokio 带来了安心。
-    </p>
-
-    <p>
-      <b>所有权与类型系统</b><br>
-      Tokio 利用 Rust 的类型系统来提供很难误用的 API。
-    </p>
-
-    <p>
-      <b>反压</b><br>
-      反压（backpressure）处理开箱即用，无需使用任何复杂的 API。
-    <p>
-
-    <p>
-      <b>撤销</b><br>
-      Rust 的所有权模型让 Tokio 可以自动检测到何时不再需要计算。Tokio 会自动撤销之而无需用户调用 <code>cancel</code> 函数。
-    </p>
-
-    <hr class="half-rule">
-    <a class="btn btn-outline-primary" href="https://tokio-cn.github.io/docs/overview/#reliable">了解更多</a>
-  </div>
-
-  <div class="col-12 col-md-4 p-3 p-md-5 bg-light border border-white">
-    <h3>
-      <i class="fa fa-dashboard" aria-hidden="true"></i>
-      轻量
-    </h3>
-
-    <p>
-      Tokio 可以在不增加应用开销的情况下很好地伸缩，从而使其在资源受限的环境中蓬勃发展。
-    </p>
-
-    <p>
-      <b>无垃圾回收器</b><br>
-      因为 Tokio 使用 Rust，所以不含垃圾回收器或者其他的语言运行时。
-    <p>
-
-    <p>
-      <b>模块化</b><br>
-      Tokio 已构建为一些小组件的集合。用户可以选择最适合手头应用的部件，而无需为没有用到的特性付出代价。
-    </p>
-
-    <hr class="half-rule">
-    <a class="btn btn-outline-primary" href="https://tokio-cn.github.io/docs/overview/#lightweight">了解更多</a>
-  </div>
 </div>
-
-<footer class="tk-footer text-muted">
-  <div class="container-fluid p-3 p-md-5">
-    <ul class="tk-footer-links">
-      <li><a href="https://github.com/tokio-rs/tokio">GitHub</a></li>
-      <li><a href="https://twitter.com/tokio_rs">Twitter</a></li>
-      <li><a href="https://github.com/tokio-rs/tokio/tree/master/examples"> 示例</a></li>
-      <li><a href="https://tokio-cn.github.io/docs/overview/">关于</a></li>
-    </ul>
-    <p><a href="https://twitter.com/carllerche" target="_blank" rel="noopener">@carllerche</a> 在<a href="https://github.com/tokio-rs/tokio/graphs/contributors">项目贡献者</a>的帮助下倾情打造。本站由<a href="https://hltj.me">灰蓝天际</a>翻译。</p>
-  </div>
-</footer>
 
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
