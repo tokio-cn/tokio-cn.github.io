@@ -60,6 +60,15 @@
       </div>
 
       <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+        <li class="nav-item dropdown">
+          <a class="nav-item nav-link dropdown-toggle mr-md-2" href="#" id="tk-langs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            English
+          </a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="tk-langs">
+            <a class="dropdown-item active" href="#">English</a>
+            <a class="dropdown-item" href="https://tokio-zh.github.io/" rel="nofollow">中文</a>
+          </div>
+        </li>
         <li class="nav-item">
           <a class="nav-link p-2" href="https://github.com/tokio-rs/tokio" target="_blank" rel="noopener" aria-label="GitHub">
             <svg class="navbar-nav-svg" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 512 499.36" focusable="false"><title>GitHub</title><path d="M256 0C114.64 0 0 114.61 0 256c0 113.09 73.34 209 175.08 242.9 12.8 2.35 17.47-5.56 17.47-12.34 0-6.08-.22-22.18-.35-43.54-71.2 15.49-86.2-34.34-86.2-34.34-11.64-29.57-28.42-37.45-28.42-37.45-23.27-15.84 1.73-15.55 1.73-15.55 25.69 1.81 39.21 26.38 39.21 26.38 22.84 39.12 59.92 27.82 74.5 21.27 2.33-16.54 8.94-27.82 16.25-34.22-56.84-6.43-116.6-28.43-116.6-126.49 0-27.95 10-50.8 26.35-68.69-2.63-6.48-11.42-32.5 2.51-67.75 0 0 21.49-6.88 70.4 26.24a242.65 242.65 0 0 1 128.18 0c48.87-33.13 70.33-26.24 70.33-26.24 14 35.25 5.18 61.27 2.55 67.75 16.41 17.9 26.31 40.75 26.31 68.69 0 98.35-59.85 120-116.88 126.32 9.19 7.9 17.38 23.53 17.38 47.41 0 34.22-.31 61.83-.31 70.23 0 6.85 4.61 14.81 17.6 12.31C438.72 464.97 512 369.08 512 256.02 512 114.62 397.37 0 256 0z" fill="currentColor" fill-rule="evenodd"/></svg>
@@ -186,7 +195,7 @@
         <nav id="TableOfContents">
 <ul>
 <li><a href="#编写服务器">编写服务器</a></li>
-<li><a href="#产生任务">产生任务</a></li>
+<li><a href="#运行服务器">运行服务器</a></li>
 <li><a href="#写数据">写数据</a>
 <ul>
 <li><a href="#下一步">下一步</a></li>
@@ -279,9 +288,10 @@ let server = listener.incoming().for_each(|socket| {
 # }
 </code></pre>
 
-<p>这些组合子函数用于定义异步任务。对
-<code>listener.incoming()</code> 的调用返回一个已接受连接的 <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code></a>。<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code></a>
-有点像异步迭代器。</p>
+<p>调用 <code>listener.incoming()</code> 会返回一个已接受连接的 <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code></a>。
+<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code></a> 有点像异步迭代器。每次接受套接字时，<code>for_each</code> 方法都会产生<!--
+-->新的套接字。<code>for_each</code> 是组合子函数的一个示例，
+它定义了如何处理异步作业。</p>
 
 <p>每个组合子函数都获得必要状态的所有权以及用<!--
 -->以执行的回调，并返回一个新的 <code>Future</code> 或者是有附加“步骤”顺次排入的 <code>Stream</code><!--
@@ -289,12 +299,15 @@ let server = listener.incoming().for_each(|socket| {
 
 <p>返回的那些 future 与 stream 都是惰性的，也就是说，在调用该组合子时不执行任何操作<!--
 -->。相反，一旦所有异步步骤都已顺次排入，
-最终的 <code>Future</code>（代表该任务）就会在执行子上产生。这是<!--
--->之前定义的工作开始运行的时候。</p>
+最终的 <code>Future</code>（代表该任务）就会“产生”。这是<!--
+-->之前定义的作业开始运行的时候。</p>
 
 <p>我们稍后会深入探讨这些 future 与 stream。</p>
 
-<h1 id="产生任务">产生任务</h1>
+<h1 id="运行服务器">运行服务器</h1>
+
+<p>到目前为止，我们有一个表示服务器会完成的作业的 future，但是我们<!--
+-->需要一种方式来产生（即运行）该作业。我们需要一个执行子。</p>
 
 <p>执行子负责调度异步任务，使其<!--
 -->完成。有很多执行子的实现可供选择，每个都有<!--
@@ -322,8 +335,7 @@ tokio::run(server);
 
 <p><code>tokio::run</code> 会启动该运行时，阻塞当前进程直到<!--
 -->所有已产生的任务都已完成并且所有资源（如 TCP 套接字）都已<!--
--->释放。使用 <a href="https://docs.rs/tokio/0.1/tokio/fn.spawn.html"><code>tokio::spawn</code></a> 产生的任务<strong>必须</strong>来自<!--
---><a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">运行时</a>的上下文。</p>
+-->释放。</p>
 
 <p>至此，我们仅仅在执行子上执行了单个任务，因此 <code>server</code> 任务<!--
 -->是阻塞 <code>run</code> 返回的唯一任务。</p>
@@ -334,7 +346,7 @@ tokio::run(server);
 
 <p>我们的目标是对每个已接受的套接字写入 <code>&quot;hello world\n&quot;</code>。我们会这样做：<!--
 -->通过定义一个新的异步任务来执行写操作，并在<!--
--->同一 <code>current_thread</code> 执行子上产生该任务。</p>
+-->同一执行子上产生该任务。</p>
 
 <p>回到 <code>incoming().for_each</code> 块。</p>
 
@@ -367,7 +379,7 @@ let server = listener.incoming().for_each(|socket| {
 
 <p>我们正在定义另一个异步任务。这个任务会取得该套接字的所有权<!--
 -->、对该套接字写入信息，然后完成。<code>connection</code>
-变量保存了其最终任务。同样，此时还没有完成任何工作。</p>
+变量保存了其最终任务。同样，此时还没有执行任何作业。</p>
 
 <p><code>tokio::spawn</code> 用于在运行时产生任务。因为
 <code>server</code> future 会在运行时上运行，所以我们可以产生更多任务。

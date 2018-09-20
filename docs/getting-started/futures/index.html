@@ -60,6 +60,15 @@
       </div>
 
       <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+        <li class="nav-item dropdown">
+          <a class="nav-item nav-link dropdown-toggle mr-md-2" href="#" id="tk-langs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            English
+          </a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="tk-langs">
+            <a class="dropdown-item active" href="#">English</a>
+            <a class="dropdown-item" href="https://tokio-zh.github.io/" rel="nofollow">中文</a>
+          </div>
+        </li>
         <li class="nav-item">
           <a class="nav-link p-2" href="https://github.com/tokio-rs/tokio" target="_blank" rel="noopener" aria-label="GitHub">
             <svg class="navbar-nav-svg" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 512 499.36" focusable="false"><title>GitHub</title><path d="M256 0C114.64 0 0 114.61 0 256c0 113.09 73.34 209 175.08 242.9 12.8 2.35 17.47-5.56 17.47-12.34 0-6.08-.22-22.18-.35-43.54-71.2 15.49-86.2-34.34-86.2-34.34-11.64-29.57-28.42-37.45-28.42-37.45-23.27-15.84 1.73-15.55 1.73-15.55 25.69 1.81 39.21 26.38 39.21 26.38 22.84 39.12 59.92 27.82 74.5 21.27 2.33-16.54 8.94-27.82 16.25-34.22-56.84-6.43-116.6-28.43-116.6-126.49 0-27.95 10-50.8 26.35-68.69-2.63-6.48-11.42-32.5 2.51-67.75 0 0 21.49-6.88 70.4 26.24a242.65 242.65 0 0 1 128.18 0c48.87-33.13 70.33-26.24 70.33-26.24 14 35.25 5.18 61.27 2.55 67.75 16.41 17.9 26.31 40.75 26.31 68.69 0 98.35-59.85 120-116.88 126.32 9.19 7.9 17.38 23.53 17.38 47.41 0 34.22-.31 61.83-.31 70.23 0 6.85 4.61 14.81 17.6 12.31C438.72 464.97 512 369.08 512 256.02 512 114.62 397.37 0 256 0z" fill="currentColor" fill-rule="evenodd"/></svg>
@@ -298,10 +307,6 @@ the asynchronous code by hand.</p>
 }
 </code></pre>
 
-<p>You may notice that this is the exact same trait that was used to implement an
-asynchronous task. This is because asynchronous tasks are &ldquo;just&rdquo; futures that
-complete with a value of <code>()</code> once the computation has completed.</p>
-
 <p>Usually, when you implement a <code>Future</code>, you will be defining a computation that
 is a composition of sub (or inner) futures. In this case, the future implementation tries
 to call the inner future(s) and returns <code>NotReady</code> if the inner futures are not
@@ -371,13 +376,14 @@ fn poll(&amp;mut self) -&gt; Result&lt;Async&lt;usize&gt;, T::Error&gt; {
 
 <h1 id="returning-notready">Returning <code>NotReady</code></h1>
 
-<p>The last section handwaved a bit and said that when a task returns <code>NotReady</code>,
-once it transitioned to the ready state, the executor is notifed. This enables
-the executor to be efficient in scheduling tasks.</p>
+<p>The last section handwaved a bit and said that once a Future transitioned to the
+ready state, the executor is notifed. This enables the executor to be efficient
+in scheduling tasks.</p>
 
-<p>When a function returns <code>Async::NotReady</code>, it is critical that the executor is
-notified when the state transitions to &ldquo;ready&rdquo;. Otherwise, the task will hang
-infinitely, never getting run again.</p>
+<p>When a function returns Async::NotReady, it signals that it is currently not in
+a ready state and is unable to complete the operation. It is critical that the
+executor is notified when the state transitions to &ldquo;ready&rdquo;. Otherwise, the task
+will hang infinitely, never getting run again.</p>
 
 <p>For most future implementations, this is done transitively. When a future
 implementation is a combination of sub futures, the outer future only returns
@@ -390,18 +396,13 @@ inner future will notify the executor when it becomes ready.</p>
 notifying the executor. This is done by calling <a href="https://docs.rs/futures/0.1/futures/executor/trait.Notify.html#tymethod.notify"><code>notify</code></a> on the task returned
 by <a href="https://docs.rs/futures/0.1/futures/task/fn.current.html"><code>task::current()</code></a>.</p>
 
-<p>Before an executor calls <code>poll</code> on a task, it sets the task context to a
-thread-local variable. The inner most future then accesses the context from the
-thread-local so that it is able to notify the task once its readiness state
-changes.</p>
-
 <p>We will be exploring implementing resources and the task system in more depth in
 a later section. The key take away here is <strong>do not return <code>NotReady</code> unless you
 got <code>NotReady</code> from an inner future</strong>.</p>
 
 <h1 id="a-more-complicated-future">A More Complicated Future</h1>
 
-<p>Lets look at a slightly more complicated future implementation. In this case, we
+<p>Let&rsquo;s look at a slightly more complicated future implementation. In this case, we
 will implement a future that takes a host name, does DNS resolution, then
 establishes a connection to the remote host. We assume a <code>resolve</code> function
 exists that looks like this:</p>
@@ -493,6 +494,8 @@ impl Future for ResolveAndConnect {
                 }
             };
 
+            // If we reach here, the state was `Resolving`
+            // and the call to the inner Future returned `Ready`
             let connecting = TcpStream::connect(&amp;addr);
             self.state = Connecting(connecting);
         }
@@ -512,8 +515,8 @@ can be in either of two states:</p>
 <p>Each time <code>poll</code> is called, we try to advance the state machine to the next
 state.</p>
 
-<p>Now, the future we just implemented is basically <a href="https://docs.rs/futures/0.1/futures/future/struct.AndThen.html"><code>AndThen</code></a>, so we would
-probably just use that combinator instead of re-implementing it.</p>
+<p>Now, the future is basically a re-implementation of the combinator <a href="https://docs.rs/futures/0.1/futures/future/struct.AndThen.html"><code>AndThen</code></a>, so we would
+probably just use that combinator.</p>
 
 <pre><code class="language-rust"># #![deny(deprecated)]
 # #[macro_use]
@@ -540,7 +543,7 @@ resolve(my_host)
 # pub fn main() {}
 </code></pre>
 
-<p>which is much shorter.</p>
+<p>This is much shorter and does the same thing.</p>
 
       
       
