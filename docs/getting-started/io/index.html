@@ -245,9 +245,9 @@ mandated properties:</p>
 <ul>
 <li>Calls to <code>read</code> or <code>write</code> are <strong>nonblocking</strong>, they never block the calling
 thread.</li>
-<li>If a call would otherwise block then an error is returned with the kind of
-<code>WouldBlock</code>. If this happens then the current future&rsquo;s task is scheduled to
-receive a notification (an unpark) when the I/O is ready again.</li>
+<li>If a call would otherwise block then the function returns a value indicating so.
+If this happens then the current future&rsquo;s task is scheduled to receive a
+notification when the I/O is ready again.</li>
 </ul>
 
 <p>Note that users of <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html"><code>AsyncRead</code></a> and <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncWrite.html"><code>AsyncWrite</code></a> types should use

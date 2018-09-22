@@ -583,7 +583,7 @@ fn main() {}
 <p>The caller queues up all lines by calling <code>buffer</code>. This appends the line to the
 internal <code>wr</code> buffer. Then, once all data is queued up, the caller calls
 <code>poll_flush</code>, which does the actual writing to the socket. <code>poll_flush</code> only
-returns <code>Ready</code> once all the queued data has been succesfully written to the
+returns <code>Ready</code> once all the queued data has been successfully written to the
 socket.</p>
 
 <p>Similar to the read half, <code>NotReady</code> is only returned when the function
@@ -891,12 +891,12 @@ to use <code>Peer</code>.</p>
 # extern crate futures;
 # use tokio::io;
 # use tokio::prelude::*;
-# use futures::future::{self, Either};
+# use futures::future::{self, Either, empty};
 # type Lines = Box&lt;Stream&lt;Item = (), Error = io::Error&gt;&gt;;
 # struct Peer;
 # impl Peer {
-#     fn new(_: (), state: (), lines: Lines) -&gt; Box&lt;Future&lt;Item = (), Error = io::Error&gt;&gt; {
-#         unimplemented!();
+#     fn new(_: (), state: (), lines: Lines) -&gt; impl Future&lt;Item = (), Error = io::Error&gt; {
+#         empty()
 #     }
 # }
 # fn dox(lines: Lines) {

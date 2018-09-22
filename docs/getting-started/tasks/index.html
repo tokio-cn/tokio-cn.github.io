@@ -244,14 +244,14 @@ unbounded execution time.</p>
 <pre><code class="language-rust"># #![deny(deprecated)]
 # extern crate futures;
 # use futures::prelude::*;
-# use futures::future::{self, Either};
+# use futures::future::{self, Either, empty};
 # use std::time::Duration;
 # fn docx() {
 #
 # pub struct Timeout;
 # impl Timeout {
-#     pub fn new&lt;T&gt;(_: T, _: Duration) -&gt; Box&lt;Future&lt;Item = (), Error = ()&gt;&gt; {
-#         unimplemented!();
+#     pub fn new&lt;T&gt;(_: T, _: Duration) -&gt; impl Future&lt;Item = (), Error = ()&gt; {
+#         empty()
 #     }
 # }
 # pub struct MyExecutor;
@@ -262,35 +262,35 @@ unbounded execution time.</p>
 # }
 # pub struct Error;
 
-// The functions here all return `Box&lt;Future&lt;...&gt;&gt;`. This is one
+// The functions here all return `impl Future&lt;...&gt;`. This is one
 // of a number of ways to return futures. For more details on
 // returning futures, see the &quot;Returning futures&quot; section in
 // &quot;Going deeper: Futures&quot;.
 
 /// Get a URI from some remote cache.
 fn cache_get(uri: &amp;str)
-    -&gt; Box&lt;Future&lt;Item = Option&lt;String&gt;, Error = Error&gt;&gt;
-# { unimplemented!() } /*
+    -&gt; impl Future&lt;Item = Option&lt;String&gt;, Error = Error&gt;
+# { empty() } /*
 { ... }
 # */
 
 fn cache_put(uri: &amp;str, val: String)
-    -&gt; Box&lt;Future&lt;Item = (), Error = Error&gt;&gt;
-# { unimplemented!() } /*
+    -&gt; impl Future&lt;Item = (), Error = Error&gt;
+# { empty() } /*
 { ... }
 # */
 
 /// Do a full HTTP get to a remote URL
 fn http_get(uri: &amp;str)
-    -&gt; Box&lt;Future&lt;Item = String, Error = Error&gt;&gt;
-# { unimplemented!() } /*
+    -&gt; impl Future&lt;Item = String, Error = Error&gt;
+# { empty() } /*
 { ... }
 # */
 #
 # let my_executor = MyExecutor;
 
 fn fetch_and_cache(url: &amp;str)
-    -&gt; Box&lt;Future&lt;Item = String, Error = Error&gt;&gt;
+    -&gt; impl Future&lt;Item = String, Error = Error&gt;
 {
     // The URL has to be converted to a string so that it can be
     // moved into the closure. Given futures are asynchronous,
@@ -342,14 +342,14 @@ multiple tasks as the steps are no longer directly related.</p>
 <pre><code class="language-rust"># #![deny(deprecated)]
 # extern crate futures;
 # use futures::prelude::*;
-# use futures::future::{self, Either};
+# use futures::future::{self, Either, empty};
 # use std::time::Duration;
 # fn docx() {
 #
 # pub struct Timeout;
 # impl Timeout {
-#     pub fn new&lt;T&gt;(_: T, _: Duration) -&gt; Box&lt;Future&lt;Item = (), Error = ()&gt;&gt; {
-#         unimplemented!();
+#     pub fn new&lt;T&gt;(_: T, _: Duration) -&gt; impl Future&lt;Item = (), Error = ()&gt; {
+#         empty()
 #     }
 # }
 # pub struct Interval;
@@ -367,17 +367,17 @@ multiple tasks as the steps are no longer directly related.</p>
 # pub struct Error;
 #
 # fn cache_get(uri: &amp;str)
-#     -&gt; Box&lt;Future&lt;Item = Option&lt;String&gt;, Error = Error&gt;&gt;
-# { unimplemented!() }
+#     -&gt; impl Future&lt;Item = Option&lt;String&gt;, Error = Error&gt;
+# { empty() }
 # fn cache_put(uri: &amp;str, val: String)
-#     -&gt; Box&lt;Future&lt;Item = (), Error = Error&gt;&gt;
-# { unimplemented!() }
+#     -&gt; impl Future&lt;Item = (), Error = Error&gt;
+# { empty() }
 # fn http_get(uri: &amp;str)
-#     -&gt; Box&lt;Future&lt;Item = String, Error = Error&gt;&gt;
-# { unimplemented!() }
+#     -&gt; impl Future&lt;Item = String, Error = Error&gt;
+# { empty() }
 # fn fetch_and_cache(url: &amp;str)
-#     -&gt; Box&lt;Future&lt;Item = String, Error = Error&gt;&gt;
-# { unimplemented!() }
+#     -&gt; impl Future&lt;Item = String, Error = Error&gt;
+# { empty() }
 # let my_executor = MyExecutor;
 
 let url = &quot;https://example.com&quot;;
@@ -430,15 +430,15 @@ initial value.</p>
 <pre><code class="language-rust"># #![deny(deprecated)]
 # extern crate futures;
 # use futures::prelude::*;
-# use futures::future::{self, Either};
+# use futures::future::{self, Either, empty};
 # use futures::sync::oneshot;
 # use std::time::Duration;
 # fn docx() {
 #
 # pub struct Timeout;
 # impl Timeout {
-#     pub fn new&lt;T&gt;(_: T, _: Duration) -&gt; Box&lt;Future&lt;Item = (), Error = ()&gt;&gt; {
-#         unimplemented!();
+#     pub fn new&lt;T&gt;(_: T, _: Duration) -&gt; impl Future&lt;Item = (), Error = ()&gt; {
+#         empty()
 #     }
 # }
 # pub struct Interval;
@@ -456,17 +456,17 @@ initial value.</p>
 # pub struct Error;
 #
 # fn cache_get(uri: &amp;str)
-#     -&gt; Box&lt;Future&lt;Item = Option&lt;String&gt;, Error = Error&gt;&gt;
-# { unimplemented!() }
+#     -&gt; impl Future&lt;Item = Option&lt;String&gt;, Error = Error&gt;
+# { empty() }
 # fn cache_put(uri: &amp;str, val: String)
-#     -&gt; Box&lt;Future&lt;Item = (), Error = Error&gt;&gt;
-# { unimplemented!() }
+#     -&gt; impl Future&lt;Item = (), Error = Error&gt;
+# { empty() }
 # fn http_get(uri: &amp;str)
-#     -&gt; Box&lt;Future&lt;Item = String, Error = Error&gt;&gt;
-# { unimplemented!() }
+#     -&gt; impl Future&lt;Item = String, Error = Error&gt;
+# { empty() }
 # fn fetch_and_cache(url: &amp;str)
-#     -&gt; Box&lt;Future&lt;Item = String, Error = Error&gt;&gt;
-# { unimplemented!() }
+#     -&gt; impl Future&lt;Item = String, Error = Error&gt;
+# { empty() }
 # let my_executor = MyExecutor;
 
 let url = &quot;https://example.com&quot;;
@@ -505,14 +505,16 @@ my_executor.spawn(task);
 tasks. Here is the basic structure of a server:</p>
 
 <pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate futures;
 # extern crate tokio;
 #
 # use tokio::io;
 # use tokio::net::{TcpListener, TcpStream};
 # use tokio::prelude::*;
+# use futures::future::empty;
 #
-# pub fn process(socket: TcpStream) -&gt; Box&lt;Future&lt;Item = (), Error = ()&gt; + Send&gt; {
-# unimplemented!();
+# pub fn process(socket: TcpStream) -&gt; impl Future&lt;Item = (), Error = ()&gt; + Send {
+#   empty()
 # }
 #
 # fn docx() {
@@ -541,12 +543,14 @@ connections on the same socket:</p>
 # use futures::prelude::*;
 # use tokio::net::*;
 # use std::io;
+# use futures::future::empty;
+
 pub struct Server {
     listener: TcpListener,
     connections: Vec&lt;Box&lt;Future&lt;Item = (), Error = io::Error&gt; + Send&gt;&gt;,
 }
-# pub fn process(socket: TcpStream) -&gt; Box&lt;Future&lt;Item = (), Error = io::Error&gt; + Send&gt; {
-# unimplemented!();
+# pub fn process(socket: TcpStream) -&gt; impl Future&lt;Item = (), Error = io::Error&gt; + Send {
+#   empty()
 # }
 
 impl Future for Server {
@@ -559,7 +563,7 @@ impl Future for Server {
             match self.listener.poll_accept()? {
                 Async::Ready((socket, _)) =&gt; {
                     let connection = process(socket);
-                    self.connections.push(connection);
+                    self.connections.push(Box::new(connection));
                 }
                 Async::NotReady =&gt; break,
             }

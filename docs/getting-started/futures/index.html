@@ -300,7 +300,7 @@ the asynchronous code by hand.</p>
     /// The type of the value returned when the future completes.
     type Item;
 
-    /// The type representing errors that occured while processing the
+    /// The type representing errors that occurred while processing the
     /// computation.
     type Error;
 
@@ -350,7 +350,7 @@ future is ready, then the <code>Doubler</code> future doubles the return value a
 
 <p>Because the matching pattern above is common, the <a href="https://docs.rs/futures/0.1/futures"><code>futures</code></a> crate provides a
 macro: <code>try_ready!</code>. It is similar to <code>try!</code> or <code>?</code>, but it also returns on
-<code>NotReady</code>. The above <code>poll</code> function can be rewriten using <code>try_ready!</code> as
+<code>NotReady</code>. The above <code>poll</code> function can be rewritten using <code>try_ready!</code> as
 follows:</p>
 
 <pre><code class="language-rust"># #![deny(deprecated)]
@@ -378,7 +378,7 @@ fn poll(&amp;mut self) -&gt; Result&lt;Async&lt;usize&gt;, T::Error&gt; {
 <h1 id="returning-notready">Returning <code>NotReady</code></h1>
 
 <p>The last section handwaved a bit and said that once a Future transitioned to the
-ready state, the executor is notifed. This enables the executor to be efficient
+ready state, the executor is notified. This enables the executor to be efficient
 in scheduling tasks.</p>
 
 <p>When a function returns Async::NotReady, it signals that it is currently not in
