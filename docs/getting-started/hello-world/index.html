@@ -216,9 +216,9 @@
 -->。这个服务器会监听接入的连接。收到连接<!--
 -->后，它会向客户端写入“hello world”并关闭连接。</p>
 
-<p>Before we begin you should have a basic understanding of how TCP sockets work. Having
-an understanding of Rust&rsquo;s <a href="https://doc.rust-lang.org/std/net/struct.TcpListener.html">standard library implementation</a> is also
-helpful.</p>
+<p>在开始之前，你应该对 TCP 套接字的工作原理有基本的了解。
+了解 Rust 的<a href="https://doc.rust-lang.org/std/net/struct.TcpListener.html">标准库实现</a>也<!--
+-->很有帮助。</p>
 
 <p>我们开始吧。</p>
 
@@ -294,15 +294,15 @@ let server = listener.incoming().for_each(|socket| {
 </code></pre>
 
 <p>调用 <code>listener.incoming()</code> 会返回一个已接受连接的 <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code></a>。
-We&rsquo;ll learn more about [<code>Streams</code>] later in the guide, but for now you can think of
-a <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code></a> as an asynchronous iterator. 每次接受套接字时，
+我们会在指南的后续部分学习更多关于 [<code>Streams</code>] 的内容，不过现在你可以将
+<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code></a> 看作异步的迭代器。每次接受套接字时，
 <code>for_each</code> 方法都会产生新的套接字。<code>for_each</code> 是组合子函数的一个示例，
 它定义了如何处理异步作业。</p>
 
 <p>每个组合子函数都获得必要状态的所有权以及用<!--
 -->以执行的回调，并返回一个新的 <code>Stream</code> 或者是有附加“步骤”顺次排入的 <code>Future</code><!--
--->。A <code>Future</code> is a value representing some computation
-that will complete at some point in the future</p>
+-->。<code>Future</code> 是表示会在未来的某个时刻完成的<!--
+-->某些计算的值</p>
 
 <p>返回的那些 future 与 stream 都是惰性的，也就是说，在调用该组合子时不执行任何操作<!--
 -->。相反，一旦所有异步步骤都已顺次排入，
@@ -318,8 +318,8 @@ that will complete at some point in the future</p>
 
 <p>执行子负责调度异步任务，使其<!--
 -->完成。有很多执行子的实现可供选择，每个都有<!--
--->不同的优缺点。在本例中，我们会使用 <a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">Tokio 运行时</a>
-which comes with a set executor implementation.</p>
+-->不同的优缺点。在本例中，我们会使用 <a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">Tokio 运行时</a>，
+它有一组执行子的实现。</p>
 
 <p>Tokio 运行时是为异步应用程序预配置的运行时。它<!--
 -->包含一个线程池作为默认执行子。该线程池已经为<!--
