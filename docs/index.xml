@@ -11,14 +11,13 @@
     
     
     <item>
-      <title>概述</title>
+      <title>Tokio 是什么？</title>
       <link>https://tokio-cn.github.io/docs/overview/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/docs/overview/</guid>
-      <description>Tokio is an event-driven, non-blocking I/O platform for writing asynchronous applications with the Rust programming language. At a high level, it provides a few major components:
- A multithreaded, work-stealing based task scheduler. A reactor backed by the operating system&amp;rsquo;s event queue (epoll, kqueue, IOCP, etc&amp;hellip;). Asynchronous TCP and UDP sockets.  These components provide the runtime components necessary for building an asynchronous application.
-Fast Tokio is built on the Rust programming language, which is in of itself very fast.</description>
+      <description>Tokio allows developers to write asynchronous programs in the Rust programming language. Instead of synchronously waiting for long-running operations like reading a file or waiting for a timer to complete before moving on to the next thing, Tokio allows developers to write programs where execution continues while the long-running operations are in progress.
+More specifically, Tokio is an event-driven, non-blocking I/O platform for writing asynchronous applications with Rust. At a high level, it provides a few major components:</description>
     </item>
     
     <item>
@@ -28,12 +27,12 @@ Fast Tokio is built on the Rust programming language, which is in of itself very
       
       <guid>https://tokio-cn.github.io/docs/getting-started/hello-world/</guid>
       <description>为了开始我们的 Tokio 之旅，我们会以惯例“hello world”开始。这个服务器会监听接入的连接。收到连接后，它会向客户端写入“hello world”并关闭连接。
-让我们开始吧。
+Before we begin you should have a basic understanding of how TCP sockets work. Having an understanding of Rust&amp;rsquo;s standard library implementation is also helpful.
+我们开始吧。
 首先，生成一个新的 crate。
 $ cargo new --bin hello-world $ cd hello-world  接下来，添加必要的依赖项：
 [dependencies] tokio = &amp;quot;0.1&amp;quot;  还有 main.rs 中的 crate 与类型：
-# #![deny(deprecated)] extern crate tokio; use tokio::io; use tokio::net::TcpListener; use tokio::prelude::*; # fn main() {}  编写服务器 第一步是将 TcpListener 绑定到本地端口。我们使用 Tokio 提供的 TcpListener 实现。
-# #![deny(deprecated)] # extern crate tokio; # # use tokio::io; # use tokio::net::TcpListener; # use tokio::prelude::*; fn main() { let addr = &amp;quot;127.</description>
+# #![deny(deprecated)] extern crate tokio; use tokio::io; use tokio::net::TcpListener; use tokio::prelude::*; # fn main() {}  编写服务器 第一步是将 TcpListener 绑定到本地端口。我们使用 Tokio 提供的 TcpListener 实现。</description>
     </item>
     
     <item>

@@ -54,7 +54,7 @@
           <li class="nav-item">
             
             
-            <a class="nav-link " href="https://tokio-cn.github.io/blog/2018-08-async-await/">博客</a>
+            <a class="nav-link " href="https://tokio-cn.github.io/blog/2018-10-doc-blitz/">博客</a>
           </li>
         </ul>
       </div>
@@ -112,7 +112,7 @@
             
               <div class="tk-toc-item">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/overview/">
-                  概述
+                  Tokio 是什么？
                 </a>
               </div>
             
@@ -216,7 +216,11 @@
 -->。这个服务器会监听接入的连接。收到连接<!--
 -->后，它会向客户端写入“hello world”并关闭连接。</p>
 
-<p>让我们开始吧。</p>
+<p>Before we begin you should have a basic understanding of how TCP sockets work. Having
+an understanding of Rust&rsquo;s <a href="https://doc.rust-lang.org/std/net/struct.TcpListener.html">standard library implementation</a> is also
+helpful.</p>
+
+<p>我们开始吧。</p>
 
 <p>首先，生成一个新的 crate。</p>
 
@@ -270,7 +274,7 @@ fn main() {
 # use tokio::net::TcpListener;
 # use tokio::prelude::*;
 # fn main() {
-#     let addr = &quot;127.0.0.1:6142&quot;.parse().unwrap();
+#     let addr = &quot;127.0.0.1:0&quot;.parse().unwrap();
 #     let listener = TcpListener::bind(&amp;addr).unwrap();
 let server = listener.incoming().for_each(|socket| {
     println!(&quot;accepted socket; addr={:?}&quot;, socket.peer_addr().unwrap());
@@ -290,29 +294,32 @@ let server = listener.incoming().for_each(|socket| {
 </code></pre>
 
 <p>调用 <code>listener.incoming()</code> 会返回一个已接受连接的 <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code></a>。
-<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code></a> 有点像异步迭代器。每次接受套接字时，<code>for_each</code> 方法都会产生<!--
--->新的套接字。<code>for_each</code> 是组合子函数的一个示例，
+We&rsquo;ll learn more about [<code>Streams</code>] later in the guide, but for now you can think of
+a <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code></a> as an asynchronous iterator. 每次接受套接字时，
+<code>for_each</code> 方法都会产生新的套接字。<code>for_each</code> 是组合子函数的一个示例，
 它定义了如何处理异步作业。</p>
 
 <p>每个组合子函数都获得必要状态的所有权以及用<!--
--->以执行的回调，并返回一个新的 <code>Future</code> 或者是有附加“步骤”顺次排入的 <code>Stream</code><!--
--->。</p>
+-->以执行的回调，并返回一个新的 <code>Stream</code> 或者是有附加“步骤”顺次排入的 <code>Future</code><!--
+-->。A <code>Future</code> is a value representing some computation
+that will complete at some point in the future</p>
 
 <p>返回的那些 future 与 stream 都是惰性的，也就是说，在调用该组合子时不执行任何操作<!--
 -->。相反，一旦所有异步步骤都已顺次排入，
-最终的 <code>Future</code>（代表该任务）就会“产生”。这是<!--
+最终的 <code>Future</code>（代表整个任务）就会“产生”（即运行）。这是<!--
 -->之前定义的作业开始运行的时候。</p>
 
 <p>我们稍后会深入探讨这些 future 与 stream。</p>
 
 <h1 id="运行服务器">运行服务器</h1>
 
-<p>到目前为止，我们有一个表示服务器会完成的作业的 future，但是我们<!--
--->需要一种方式来产生（即运行）该作业。我们需要一个执行子。</p>
+<p>到目前为止，我们有一个表示服务器会完成的作业的 <code>Future</code>，但是我们<!--
+-->需要一种方式来产生该作业。我们需要一个执行子。</p>
 
 <p>执行子负责调度异步任务，使其<!--
 -->完成。有很多执行子的实现可供选择，每个都有<!--
--->不同的优缺点。在本例中，我们会使用 <a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">Tokio 运行时</a>。</p>
+-->不同的优缺点。在本例中，我们会使用 <a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">Tokio 运行时</a>
+which comes with a set executor implementation.</p>
 
 <p>Tokio 运行时是为异步应用程序预配置的运行时。它<!--
 -->包含一个线程池作为默认执行子。该线程池已经为<!--
@@ -349,7 +356,7 @@ tokio::run(server);
 -->通过定义一个新的异步任务来执行写操作，并在<!--
 -->同一执行子上产生该任务。</p>
 
-<p>回到 <code>incoming().for_each</code> 块。</p>
+<p>回到 <code>incoming().for_each</code> 块：</p>
 
 <pre><code class="language-rust"># #![deny(deprecated)]
 # extern crate tokio;
@@ -358,7 +365,7 @@ tokio::run(server);
 # use tokio::net::TcpListener;
 # use tokio::prelude::*;
 # fn main() {
-#     let addr = &quot;127.0.0.1:6142&quot;.parse().unwrap();
+#     let addr = &quot;127.0.0.1:0&quot;.parse().unwrap();
 #     let listener = TcpListener::bind(&amp;addr).unwrap();
 let server = listener.incoming().for_each(|socket| {
     println!(&quot;accepted socket; addr={:?}&quot;, socket.peer_addr().unwrap());
@@ -396,7 +403,7 @@ let server = listener.incoming().for_each(|socket| {
 -->在同一个套接字上顺次排入附加的读取或写入。然而，我们并<!--
 -->没有任何事情可做，所有我们只是释放该套接字，即可关闭该套接字。</p>
 
-<p>可以在<a href="https://github.com/tokio-rs/tokio/blob/master/examples/hello_world.rs">这里</a>找到完整的示例</p>
+<p>可以在<a href="https://github.com/tokio-rs/tokio/blob/master/examples/hello_world.rs">这里</a>找到完整的示例。</p>
 
 <h2 id="下一步">下一步</h2>
 

@@ -6,10 +6,21 @@
     <description>Recent content in Blogs on Tokio——Rust 编程语言的异步运行时。</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Mon, 27 Aug 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 04 Oct 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://tokio-cn.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Announcing the Tokio Doc Push (we need you!)</title>
+      <link>https://tokio-cn.github.io/blog/2018-10-doc-blitz/</link>
+      <pubDate>Thu, 04 Oct 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/blog/2018-10-doc-blitz/</guid>
+      <description>In the past, there has been reoccurring feedback that Tokio is hard to understand. I believe a lack of good documentation plays a significant part. It&amp;rsquo;s time to fix this problem.
+And because Tokio is open source, it is on us (the community) to make this happen! 👏
+But don&amp;rsquo;t worry, this isn&amp;rsquo;t an aimless request to contribute documentation. It does, however, require participation. There are ways to get involved at any level of prior Tokio experience.</description>
+    </item>
     
     <item>
       <title>Experimental async / await support for Tokio</title>

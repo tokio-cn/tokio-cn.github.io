@@ -27,7 +27,7 @@
 
     <title>
       
-        Announcing the Tokio runtime · Tokio 中文站
+        Announcing the Tokio Doc Push (we need you!) · Tokio 中文站
       
     </title>
   </head>
@@ -95,7 +95,7 @@
     <div class="col-12 col-md-3 col-xl-2 tk-sidebar">
       
       <div class="tk-docs-toggle d-md-none p-0 d-flex ml-3 collapsed align-item-center">
-        <h1 class="tk-title">Announcing the Tokio runtime</h1>
+        <h1 class="tk-title">Announcing the Tokio Doc Push (we need you!)</h1>
         <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#tk-docs-nav" aria-controls="tk-docs-nav" aria-expanded="false" aria-label="Toggle docs navigation">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30" focusable="false"><title>Menu</title><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M4 7h22M4 15h22M4 23h22"></path></svg>
         </button>
@@ -108,7 +108,7 @@
             <ul class="nav tk-sidenav">
               
               
-                  <li><a href="https://tokio-cn.github.io/blog/2018-10-doc-blitz/" class="">Announcing the Tokio Doc Push (we need you!)</a></li>
+                  <li><a href="https://tokio-cn.github.io/blog/2018-10-doc-blitz/" class="active">Announcing the Tokio Doc Push (we need you!)</a></li>
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-08-async-await/" class="">Experimental async / await support for Tokio</a></li>
               
@@ -118,7 +118,7 @@
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-03-timers/" class="">New Timer implementation</a></li>
               
-                  <li><a href="https://tokio-cn.github.io/blog/2018-03-tokio-runtime/" class="active">Announcing the Tokio runtime</a></li>
+                  <li><a href="https://tokio-cn.github.io/blog/2018-03-tokio-runtime/" class="">Announcing the Tokio runtime</a></li>
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-02-tokio-reform-shipped/" class="">Tokio Reform is Shipped and the Road to 0.2</a></li>
               
@@ -138,11 +138,11 @@
 <ul>
 <li>
 <ul>
+<li><a href="#the-tokio-documentation-push">The Tokio documentation push</a></li>
+<li><a href="#writing-new-guides">Writing new guides</a></li>
+<li><a href="#an-experiment">An experiment</a></li>
+<li><a href="#faq">FAQ</a></li>
 <li><a href="#tl-dr">tl;dr</a></li>
-<li><a href="#what-is-the-tokio-runtime">What is the Tokio Runtime?</a></li>
-<li><a href="#using-the-tokio-runtime">Using the Tokio Runtime</a></li>
-<li><a href="#future-improvements">Future improvements</a></li>
-<li><a href="#tokio-core">Tokio-core</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -150,121 +150,115 @@
 
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">Announcing the Tokio runtime</h1>
+      <h1 class="tk-title">Announcing the Tokio Doc Push (we need you!)</h1>
       
       
 
-<p>I&rsquo;m happy to announce a new release of Tokio. This release includes the first
-iteration of the Tokio Runtime.</p>
+<p>In the past, there has been reoccurring feedback that Tokio is hard to
+understand. I believe a lack of good documentation plays a significant part.
+It&rsquo;s time to fix this problem.</p>
+
+<p>And because Tokio is open source, it is on us (the community) to make this
+happen! 👏</p>
+
+<p>But don&rsquo;t worry, this isn&rsquo;t an aimless request to contribute documentation. It
+does, however, require participation. There are ways to get involved at any
+level of prior Tokio experience.</p>
+
+<h2 id="the-tokio-documentation-push">The Tokio documentation push</h2>
+
+<p>Here is the plan. A temporary repository
+<a href="http://github.com/tokio-rs/doc-push"><code>doc-push</code></a> has been setup, and that is
+where the documentation effort will be coordinated. The README has steps on how
+to get started. Roughly, the process will be:</p>
+
+<p>1) Read the existing documentation, tracking parts that are confusing or leave
+questions unanswered.</p>
+
+<p>2) Open an issue on the doc-push repository to report the confusion.</p>
+
+<p>3) Fix the issue.</p>
+
+<p>4) Repeat.</p>
+
+<p>Where &ldquo;fix the issue&rdquo; is fix an existing guide or write a new guide.</p>
+
+<h2 id="writing-new-guides">Writing new guides</h2>
+
+<p>To get the effort of writing new guides bootstrapped, the doc-push repository
+has been seeded with an <a href="https://github.com/tokio-rs/doc-push/blob/master/outline/README.md">outline</a> representing my best guess of how the guides
+should be structured.</p>
+
+<p>Anyone can volunteer to write a page from this outline. Just submit a PR adding
+your Github handle next to the page. For example, if you wanted to volunteer to
+write a guide on timeouts, you would submit a PR updating the
+<a href="https://github.com/tokio-rs/doc-push/blob/master/outline/tracking-time.md#timeouts">section</a>,
+changing <strong>Status: Unassigned</strong> to <strong>Status: Assigned (@myname)</strong>.</p>
+
+<p>Also, feedback and suggestions on the outline structure is greatly appreciated.
+Please open issues and PRs agains the outline.</p>
+
+<p>There is also a new <a href="https://gitter.im/tokio-rs/doc-blitz">Gitter</a> channel dedicated to the doc push. If you want to
+get involved, but need some guidance. Join the channel and ping us.  Perhaps you
+want to try to write a guide, but don&rsquo;t quite feel up to the task yet. Ping us,
+and we will help you through it.</p>
+
+<h2 id="an-experiment">An experiment</h2>
+
+<p>The doc push is an experiment. I don&rsquo;t know how it will go, but I am
+hopeful that it will be successful.</p>
+
+<p>It is also an iterative effort. Once a pass at improving the guides happens, we
+need to go back to step 1) and have new comers try to learn Tokio using the new
+documentation. This will expose new gaps which will need to be addressed.</p>
+
+<h2 id="faq">FAQ</h2>
+
+<p><strong>I don&rsquo;t know Tokio yet!</strong></p>
+
+<p>First, this isn&rsquo;t a question.</p>
+
+<p>Second, great! You are who we want to get involved. We need fresh eyes to go
+over the guides and report issues that they hit.</p>
+
+<p>Things that you can do:</p>
+
+<ul>
+<li>Read the existing guide and report <a href="https://github.com/tokio-rs/doc-push/issues/new">issues</a>.</li>
+<li>Brainstorm items for the <a href="https://github.com/tokio-rs/doc-push/issues/23">cookbook</a> or <a href="https://github.com/tokio-rs/doc-push/issues/14">&ldquo;gotchas&rdquo;</a> sections.</li>
+<li>Review and provide feedback on <a href="https://github.com/tokio-rs/website/pulls">PRs to the website</a>.</li>
+</ul>
+
+<p><strong>I would like to contribute guides, but I am uncertain that I am able to</strong></p>
+
+<p>Still not a question!</p>
+
+<p>You know what <em>they</em> say: &ldquo;teaching is the best way to learn&rdquo;. This is a great
+opportunity to learn Tokio. First, there are some outlines to get you started.
+These outlines will probably result in you having questions or need some
+pointers. Perhaps you need to learn the topic first before writing the guide!</p>
+
+<p>We are in the <a href="https://gitter.im/tokio-rs/doc-blitz">Gitter</a> channel waiting eagerly to help you along. We will help
+you learn what you need to. In exchange, you will contribute a guide 😊.</p>
 
 <h2 id="tl-dr">tl;dr</h2>
 
-<p>This is how a multi-threaded Tokio based server is now written:</p>
+<p>This is your opportunity to help make Tokio easier to learn. It won&rsquo;t happen
+without volunteering for the doc push. In short:</p>
 
-<pre><code class="language-rust,ignore">extern crate tokio;
+<p>1) Join the <a href="https://gitter.im/tokio-rs/doc-blitz">Gitter</a>.</p>
 
-use tokio::net::TcpListener;
-use tokio::prelude::*;
+<p>2) Watch the <a href="https://github.com/tokio-rs/doc-push">repo</a>.</p>
 
-fn process(s: TcpStream)
-  -&gt; impl Future&lt;Item = (), Error = ()&gt; + Send
-{ ... }
+<p>3) Get involved!</p>
 
-let addr = &quot;127.0.0.1:8080&quot;.parse().unwrap();
-let listener = TcpListener::bind(&amp;addr).unwrap();
-
-let server = listener.incoming()
-    .map_err(|e| println!(&quot;error = {:?}&quot;, e))
-    .for_each(|socket| {
-        tokio::spawn(process(socket))
-    });
-
-tokio::run(server);
-</code></pre>
-
-<p>where <code>process</code> represents a user defined function that takes a socket and
-returns a future that process it. In the case of an echo server, that might be
-reading all data from the socket and writing it back to the same socket.</p>
-
-<p>The <a href="https://tokio-cn.github.io/docs/getting-started/hello-world/">guides</a> and <a href="https://github.com/tokio-rs/tokio/tree/master/examples">examples</a> have been updated to use the runtime.</p>
-
-<h2 id="what-is-the-tokio-runtime">What is the Tokio Runtime?</h2>
-
-<p>The Rust asynchronous stack is evolving to a set of loosely coupled components.
-To get a basic networking application running, you need at a minimum an
-asynchronous task executor and an instance of the Tokio reactor. Because
-everything is decoupled, there are multiple options for these various
-components, but this adds a bunch of boilerplate to all apps.</p>
-
-<p>To help mitigate this, Tokio now provides the concept of a runtime. This is a
-pre-configured package of all the various components that are necessary for
-running the application.</p>
-
-<p>This initial release of the runtime includes the reactor as well as a
-<a href="https://en.wikipedia.org/wiki/Work_stealing">work-stealing</a> based thread pool for scheduling and executing the application&rsquo;s
-code. This provides a multi-threaded default for applications.</p>
-
-<p>The work-stealing default is ideal for most applications. It uses a similar
-strategy as Go, Erlang, .NET, Java (the ForkJoin pool), etc&hellip; The
-implementation provided by Tokio is designed for use cases where many
-<strong>unrelated</strong> tasks are multiplexed on a single thread pool.</p>
-
-<h2 id="using-the-tokio-runtime">Using the Tokio Runtime</h2>
-
-<p>As illustrated in the example above, the easiest way to use the Tokio runtime
-is with two functions:</p>
-
-<ul>
-<li><code>tokio::run</code></li>
-<li><code>tokio::spawn</code>.</li>
-</ul>
-
-<p>The first function takes a future to seed the application and starts the
-runtime. Roughly, it does the following:</p>
-
-<ol>
-<li>Start the reactor.</li>
-<li>Start the thread pool.</li>
-<li>Spawn the future onto the thread pool.</li>
-<li>Blocks the thread until the runtime becomes idle.</li>
-</ol>
-
-<p>The runtime becomes idle once <strong>all</strong> spawned futures have completed and <strong>all</strong>
-I/O resources bound to the reactor are dropped.</p>
-
-<p>From within the context of a runtime. The application may spawn additional
-futures onto the thread pool using <code>tokio::spawn</code>.</p>
-
-<p>Alternatively, the <a href="#"><code>Runtime</code></a> type can be used directly. This allows for more
-flexibility around setting up and using the runtime.</p>
-
-<h2 id="future-improvements">Future improvements</h2>
-
-<p>This is just the initial release of the Tokio runtime. Upcoming releases will
-include additional functionality that is useful for Tokio based applications. A
-blog post will be coming soon that goes into the roadmap in more detail.</p>
-
-<p>The goal, as mentioned before, is to release early and often. Providing new
-features to enable the community to experiment with them. Sometime in the next
-few months, there will be a breaking release of the entire Tokio stack, so any
-changes in the API need to be discovered before then.</p>
-
-<h2 id="tokio-core">Tokio-core</h2>
-
-<p>There has also been a new release of <code>tokio-core</code>. This release updates
-<code>tokio-core</code> to use <code>tokio</code> under the hood. This enables all existing
-applications and libraries that currently depend on <code>tokio-core</code> (like Hyper) to
-be able to use the improvements that come with the Tokio runtime without
-requiring a breaking change.</p>
-
-<p>Given the amount of churn that is expected to happen in the next few months,
-we&rsquo;re hoping to help ease the transition across releases.</p>
+<div style="text-align:right">&mdash; <a href="https://github.com/carllerche">@carllerche</a></div>
 
       
 
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/blog/2018-02-tokio-reform-shipped/">Tokio Reform is Shipped and the Road to 0.2</a>
+          <b>下一篇</b>：<a href ="/blog/2018-08-async-await/">Experimental async / await support for Tokio</a>
         </div>
       
     </main>
