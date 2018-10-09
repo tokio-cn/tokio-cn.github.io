@@ -26,14 +26,11 @@ More specifically, Tokio is an event-driven, non-blocking I/O platform for writi
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/docs/getting-started/hello-world/</guid>
-      <description>为了开始我们的 Tokio 之旅，我们会以惯例“hello world”开始。这个服务器会监听接入的连接。收到连接后，它会向客户端写入“hello world”并关闭连接。
-在开始之前，你应该对 TCP 套接字的工作原理有基本的了解。 了解 Rust 的标准库实现也很有帮助。
+      <description>为了开始我们的 Tokio 之旅，我们会以惯例“hello world”开始。 This program will create a TCP stream and write &amp;ldquo;hello, world!&amp;rdquo; to the stream. The difference between this and a Rust program that writes to a TCP stream without Tokio is that this program won&amp;rsquo;t block program execution when the stream is created or when our &amp;ldquo;hello, world!&amp;rdquo; message is written to the stream.
+在开始之前，你应该对 TCP stream 的工作原理有最基本的了解。 了解 Rust 的标准库实现也很有帮助。
 我们开始吧。
 首先，生成一个新的 crate。
-$ cargo new --bin hello-world $ cd hello-world  接下来，添加必要的依赖项：
-[dependencies] tokio = &amp;quot;0.1&amp;quot;  还有 main.rs 中的 crate 与类型：
-# #![deny(deprecated)] extern crate tokio; use tokio::io; use tokio::net::TcpListener; use tokio::prelude::*; # fn main() {}  编写服务器 第一步是将 TcpListener 绑定到本地端口。我们使用 Tokio 提供的 TcpListener 实现。
-# #![deny(deprecated)] # extern crate tokio; # # use tokio::io; # use tokio::net::TcpListener; # use tokio::prelude::*; fn main() { let addr = &amp;quot;127.</description>
+$ cargo new --bin hello-world $ cd hello-world  接下来，添加必要的依赖项：</description>
     </item>
     
     <item>

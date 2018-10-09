@@ -195,24 +195,24 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
-<li><a href="#fast">Fast</a>
+<li><a href="#快速">快速</a>
 <ul>
-<li><a href="#zero-cost-abstractions">Zero-cost abstractions</a></li>
-<li><a href="#concurrency">Concurrency</a></li>
-<li><a href="#non-blocking-i-o">Non-blocking I/O</a></li>
+<li><a href="#零开销抽象">零开销抽象</a></li>
+<li><a href="#并发">并发</a></li>
+<li><a href="#非阻塞-i-o">非阻塞 I/O</a></li>
 </ul></li>
-<li><a href="#reliable">Reliable</a>
+<li><a href="#可靠">可靠</a>
 <ul>
-<li><a href="#ownership-and-type-system">Ownership and type system</a></li>
-<li><a href="#backpressure">Backpressure</a></li>
-<li><a href="#cancellation">Cancellation</a></li>
+<li><a href="#所有权与类型系统">所有权与类型系统</a></li>
+<li><a href="#反压">反压</a></li>
+<li><a href="#撤销">撤销</a></li>
 </ul></li>
-<li><a href="#lightweight">Lightweight</a>
+<li><a href="#轻量">轻量</a>
 <ul>
-<li><a href="#no-garbage-collector">No garbage collector</a></li>
-<li><a href="#modular">Modular</a></li>
+<li><a href="#无垃圾回收器">无垃圾回收器</a></li>
+<li><a href="#模块化">模块化</a></li>
 </ul></li>
-<li><a href="#example">Example</a></li>
+<li><a href="#示例">示例</a></li>
 </ul>
 </nav>
       </div>
@@ -244,13 +244,13 @@ IOCP, etc&hellip;).</li>
 <p>These components provide the runtime components necessary for building
 an asynchronous application.</p>
 
-<h1 id="fast">Fast</h1>
+<h1 id="快速">快速</h1>
 
 <p>Tokio is built on the Rust programming language, which is in of itself very
 fast. Applications built with Tokio will get those same benefits. Tokio&rsquo;s design
 is also geared towards enabling applications to be as fast as possible.</p>
 
-<h2 id="zero-cost-abstractions">Zero-cost abstractions</h2>
+<h2 id="零开销抽象">零开销抽象</h2>
 
 <p>Tokio is built around <a href="https://tokio-cn.github.io/docs/getting-started/futures/">futures</a>. Futures aren&rsquo;t a new idea, but the way Tokio
 uses them is <a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/#polling-model">unique</a>. Unlike futures from other languages, Tokio&rsquo;s
@@ -261,7 +261,7 @@ synchronization, allocation, or other costs common with future implementations.<
 no cost. It means that using Tokio results in an end product with equivalent
 overhead to not using Tokio.</p>
 
-<h2 id="concurrency">Concurrency</h2>
+<h2 id="并发">并发</h2>
 
 <p>Out of the box, Tokio provides a multi-threaded, <a href="https://en.wikipedia.org/wiki/Work_stealing">work-stealing</a>, scheduler. So,
 when you start the Tokio runtime, you are already using all of your computer&rsquo;s
@@ -270,7 +270,7 @@ CPU cores.</p>
 <p>Modern computers increase their performance by adding cores, so being able to
 utilize many cores is critical for writing fast applications.</p>
 
-<h2 id="non-blocking-i-o">Non-blocking I/O</h2>
+<h2 id="非阻塞-i-o">非阻塞 I/O</h2>
 
 <p>When hitting the network, Tokio will used the most efficient system available to
 the operating system. On Linux this means <a href="http://man7.org/linux/man-pages/man7/epoll.7.html">epoll</a>, *bsd platforms provide <a href="https://www.freebsd.org/cgi/man.cgi?query=kqueue&amp;sektion=2">kqueue</a>,
@@ -280,13 +280,13 @@ and Windows has <a href="https://docs.microsoft.com/en-us/windows/desktop/fileio
 operating system notifications in batches, thus reducing system calls. All this
 leads to less overhead for the application.</p>
 
-<h1 id="reliable">Reliable</h1>
+<h1 id="可靠">可靠</h1>
 
 <p>While Tokio cannot prevent all bugs, it is designed to minimize them. It does
 this by providing APIs that are hard to misuse. At the end of the day, you can
 ship applications to production with confidence.</p>
 
-<h2 id="ownership-and-type-system">Ownership and type system</h2>
+<h2 id="所有权与类型系统">所有权与类型系统</h2>
 
 <p>Rust&rsquo;s ownership model and type system enables implementing system level
 applications without the fear of memory unsafety. It prevents classic bugs
@@ -296,7 +296,7 @@ adding any run-time overhead.</p>
 <p>Further, APIs are able to leverage the type system to provide hard to misuse
 APIs. For example, <code>Mutex</code> does not require the user to explicitly unlock.</p>
 
-<h2 id="backpressure">Backpressure</h2>
+<h2 id="反压">反压</h2>
 
 <p>In push based systems, when a producer produces data faster than the consumer
 can process, data will start backing up. Pending data is stored in memory.
@@ -308,7 +308,7 @@ is backpressure.</p>
 Producers are lazy by default. They will not produce any data unless the
 consumer asks them to. This is built into Tokio&rsquo;s foundation.</p>
 
-<h2 id="cancellation">Cancellation</h2>
+<h2 id="撤销">撤销</h2>
 
 <p>Because of Tokio&rsquo;s <a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/#polling-model">poll</a> based model, computations do no work unless they are
 polled. Dependents of that computation hold a <a href="https://tokio-cn.github.io/docs/getting-started/futures/">future</a> representing the
@@ -320,12 +320,12 @@ perform no more work.</p>
 handles to detect the future being dropped. This allows it to perform any
 necessary cleanup work.</p>
 
-<h1 id="lightweight">Lightweight</h1>
+<h1 id="轻量">轻量</h1>
 
 <p>Tokio scales well without adding overhead to the application, allowing it to
 thrive in resource constrained environments.</p>
 
-<h2 id="no-garbage-collector">No garbage collector</h2>
+<h2 id="无垃圾回收器">无垃圾回收器</h2>
 
 <p>Because Tokio is built on Rust, the compiled executable includes minimal
 language run-time. The end product is similar to what C++ would produce. This
@@ -336,13 +336,13 @@ stack manipulation. Write your server applications without fear of
 <p>It is possible to use Tokio without incurring any runtime allocations, making it
 a good fit for <a href="https://en.wikipedia.org/wiki/Real-time_computing">real-time</a> use cases.</p>
 
-<h2 id="modular">Modular</h2>
+<h2 id="模块化">模块化</h2>
 
 <p>While Tokio provides a lot out of the box, it is all organized very modularly.
 Each component lives in a separate library. If needed, applications may opt to
 pick and choose the needed components and avoid pulling in the rest.</p>
 
-<h1 id="example">Example</h1>
+<h1 id="示例">示例</h1>
 
 <p>A basic TCP echo server with Tokio:</p>
 
@@ -355,35 +355,35 @@ use tokio::net::TcpListener;
 fn main() {
 # }
 # fn hax() {
-    // Bind the server's socket.
+    // 绑定服务器的套接字。
     let addr = &quot;127.0.0.1:12345&quot;.parse().unwrap();
     let listener = TcpListener::bind(&amp;addr)
         .expect(&quot;unable to bind TCP listener&quot;);
 
-    // Pull out a stream of sockets for incoming connections
+    // 从传入的链接的套接字中取出 stream
     let server = listener.incoming()
         .map_err(|e| eprintln!(&quot;accept failed = {:?}&quot;, e))
         .for_each(|sock| {
-            // Split up the reading and writing parts of the
-            // socket.
+            // 拆分该套接字的读、写
+            // 两部分。
             let (reader, writer) = sock.split();
 
-            // A future that echos the data and returns how
-            // many bytes were copied...
+            // 一个回显该数据并返回
+            // 复制了多少字节的 future……
             let bytes_copied = copy(reader, writer);
 
-            // ... after which we'll print what happened.
+            // ……之后我们会输出所发生的事情。
             let handle_conn = bytes_copied.map(|amt| {
                 println!(&quot;wrote {:?} bytes&quot;, amt)
             }).map_err(|err| {
                 eprintln!(&quot;IO error {:?}&quot;, err)
             });
 
-            // Spawn the future as a concurrent task.
+            // 产生该 future 作为并发任务。
             tokio::spawn(handle_conn)
         });
 
-    // Start the Tokio runtime
+    // 启动 Tokio 运行时
     tokio::run(server);
 }
 </code></pre>

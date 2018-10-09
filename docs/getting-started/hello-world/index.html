@@ -195,9 +195,9 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
-<li><a href="#编写服务器">编写服务器</a></li>
-<li><a href="#运行服务器">运行服务器</a></li>
-<li><a href="#写数据">写数据</a>
+<li><a href="#creating-the-stream">Creating the stream</a></li>
+<li><a href="#写数据">写数据</a></li>
+<li><a href="#running-the-client-task">Running the client task</a>
 <ul>
 <li><a href="#下一步">下一步</a></li>
 </ul></li>
@@ -213,12 +213,14 @@
       
 
 <p>为了开始我们的 Tokio 之旅，我们会以惯例“hello world”开始<!--
--->。这个服务器会监听接入的连接。收到连接<!--
--->后，它会向客户端写入“hello world”并关闭连接。</p>
+-->。 This program will create a TCP stream and write &ldquo;hello, world!&rdquo; to the stream.
+The difference between this and a Rust program that writes to a TCP stream without Tokio
+is that this program won&rsquo;t block program execution when the stream is created or when
+our &ldquo;hello, world!&rdquo; message is written to the stream.</p>
 
-<p>在开始之前，你应该对 TCP 套接字的工作原理有基本的了解。
-了解 Rust 的<a href="https://doc.rust-lang.org/std/net/struct.TcpListener.html">标准库实现</a>也<!--
--->很有帮助。</p>
+<p>在开始之前，你应该对 TCP stream 的工作原理有最基本的了解。
+了解 Rust 的<a href="https://doc.rust-lang.org/std/net/struct.TcpStream.html">标准库实现</a><!--
+-->也很有帮助。</p>
 
 <p>我们开始吧。</p>
 
@@ -240,46 +242,43 @@ tokio = &quot;0.1&quot;
 extern crate tokio;
 
 use tokio::io;
-use tokio::net::TcpListener;
+use tokio::net::TcpStream;
 use tokio::prelude::*;
 # fn main() {}
 </code></pre>
 
-<h1 id="编写服务器">编写服务器</h1>
+<h1 id="creating-the-stream">Creating the stream</h1>
 
-<p>第一步是将 <code>TcpListener</code> 绑定到本地端口。我们使用
-Tokio 提供的 <code>TcpListener</code> 实现。</p>
+<p>第一步是创建 <code>TcpStream</code>。我们使用 Tokio 提供的 <code>TcpStream</code>
+实现。</p>
 
 <pre><code class="language-rust"># #![deny(deprecated)]
 # extern crate tokio;
 #
-# use tokio::io;
-# use tokio::net::TcpListener;
-# use tokio::prelude::*;
+# use tokio::net::TcpStream;
 fn main() {
+    // Parse the address of whatever server we're talking to
     let addr = &quot;127.0.0.1:6142&quot;.parse().unwrap();
-    let listener = TcpListener::bind(&amp;addr).unwrap();
+    let stream = TcpStream::connect(&amp;addr);
 
     // 后续片段写到这里……
 }
 </code></pre>
 
-<p>接下来，我们定义服务器任务。这个异步任务会监听<!--
--->在已绑定的监听器上接入的连接，并处理每个已接受连接。</p>
+<p>接下来，我们定义  <code>client</code> 任务。这个异步任务会 create the stream
+and then yield the stream once it&rsquo;s been created for additional processing.</p>
 
 <pre><code class="language-rust"># #![deny(deprecated)]
 # extern crate tokio;
 #
-# use tokio::io;
-# use tokio::net::TcpListener;
+# use tokio::net::TcpStream;
 # use tokio::prelude::*;
 # fn main() {
-#     let addr = &quot;127.0.0.1:0&quot;.parse().unwrap();
-#     let listener = TcpListener::bind(&amp;addr).unwrap();
-let server = listener.incoming().for_each(|socket| {
-    println!(&quot;accepted socket; addr={:?}&quot;, socket.peer_addr().unwrap());
+# let addr = &quot;127.0.0.1:6142&quot;.parse().unwrap();
+let hello_world = TcpStream::connect(&amp;addr).and_then(|stream| {
+    println!(&quot;created stream&quot;);
 
-    // 这里处理套接字。
+    // 这里处理 stream。
 
     Ok(())
 })
@@ -288,120 +287,108 @@ let server = listener.incoming().for_each(|socket| {
     // 错误处理，并且有助于避免静默故障。
     //
     // 在本例中，只是将错误记录到 STDOUT（标准输出）。
-    println!(&quot;accept error = {:?}&quot;, err);
+    println!(&quot;connection error = {:?}&quot;, err);
 });
 # }
 </code></pre>
 
-<p>调用 <code>listener.incoming()</code> 会返回一个已接受连接的 <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code></a>。
-我们会在指南的后续部分学习更多关于 [<code>Streams</code>] 的内容，不过现在你可以将
-<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code></a> 看作异步的迭代器。每次接受套接字时，
-<code>for_each</code> 方法都会产生新的套接字。<code>for_each</code> 是组合子函数的一个示例，
-它定义了如何处理异步作业。</p>
+<p>调用 <code>TcpStream::connect</code> 会返回一个已创建的 TCP stream 的 <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>。
+我们会在指南的后续部分学习更多关于 [<code>Futures</code>] 的内容，不过现在你可以将
+[<code>Stream</code>] as a value that represents something that will eventually happen in the
+future (in this case the stream will be created). This means that <code>TcpStream::connect</code> does
+not wait for the stream to be created before it returns. Rather it returns immediately
+with a value representing the work of creating a TCP stream. We&rsquo;ll see down below when this work
+<em>actually</em> gets executed.</p>
+
+<p>The <code>and_then</code> method yields the stream once it has been created. <code>and_then</code> 是<!--
+-->定义了如何处理异步作业的组合子函数的一个示例。</p>
 
 <p>每个组合子函数都获得必要状态的所有权以及用<!--
--->以执行的回调，并返回一个新的 <code>Stream</code> 或者是有附加“步骤”顺次排入的 <code>Future</code><!--
+-->以执行的回调，并返回一个新的有附加“步骤”顺次排入的 <code>Future</code><!--
 -->。<code>Future</code> 是表示会在未来的某个时刻完成的<!--
--->某些计算的值</p>
+-->某些计算的值。</p>
 
-<p>返回的那些 future 与 stream 都是惰性的，也就是说，在调用该组合子时不执行任何操作<!--
+<p>值得重申的是返回的那些 future 都是惰性的，也就是说，在调用该组合子时不执行任何操作<!--
 -->。相反，一旦所有异步步骤都已顺次排入，
 最终的 <code>Future</code>（代表整个任务）就会“产生”（即运行）。这是<!--
--->之前定义的作业开始运行的时候。</p>
+-->之前定义的作业开始运行的时候。 In other words, the code
+we&rsquo;ve written so far does not actually create a TCP stream.</p>
 
-<p>我们稍后会深入探讨这些 future 与 stream。</p>
+<p>我们稍后会更深入地探讨这些 future（以及 stream 与 sink 的相关概念）<!--
+-->。</p>
 
-<h1 id="运行服务器">运行服务器</h1>
+<p>It&rsquo;s also important to note that we&rsquo;ve called <code>map_err</code> to convert whatever error
+we may have gotten to <code>()</code> before we can actually run our future. This ensures that
+we acknowledge errors.</p>
 
-<p>到目前为止，我们有一个表示服务器会完成的作业的 <code>Future</code>，但是我们<!--
--->需要一种方式来产生该作业。我们需要一个执行子。</p>
-
-<p>执行子负责调度异步任务，使其<!--
--->完成。有很多执行子的实现可供选择，每个都有<!--
--->不同的优缺点。在本例中，我们会使用 <a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">Tokio 运行时</a>，
-它有一组执行子的实现。</p>
-
-<p>Tokio 运行时是为异步应用程序预配置的运行时。它<!--
--->包含一个线程池作为默认执行子。该线程池已经为<!--
--->在异步应用程序中使用而调整好。</p>
-
-<pre><code class="language-rust"># #![deny(deprecated)]
-# extern crate tokio;
-# extern crate futures;
-#
-# use tokio::io;
-# use tokio::net::TcpListener;
-# use tokio::prelude::*;
-# use futures::future;
-# fn main() {
-# let server = future::ok(());
-
-println!(&quot;server running on localhost:6142&quot;);
-tokio::run(server);
-# }
-</code></pre>
-
-<p><code>tokio::run</code> 会启动该运行时，阻塞当前进程直到<!--
--->所有已产生的任务都已完成并且所有资源（如 TCP 套接字）都已<!--
--->释放。</p>
-
-<p>至此，我们仅仅在执行子上执行了单个任务，因此 <code>server</code> 任务<!--
--->是阻塞 <code>run</code> 返回的唯一任务。</p>
-
-<p>接下来，我们会处理入站套接字。</p>
+<p>Next, we will process the stream.</p>
 
 <h1 id="写数据">写数据</h1>
 
-<p>我们的目标是对每个已接受的套接字写入 <code>&quot;hello world\n&quot;</code>。我们会这样做：<!--
--->通过定义一个新的异步任务来执行写操作，并在<!--
--->同一执行子上产生该任务。</p>
+<p>我们的目标是将 <code>&quot;hello world\n&quot;</code> 写入到 stream。</p>
 
-<p>回到 <code>incoming().for_each</code> 块：</p>
+<p>回到 <code>TcpStream::connect(addr).and_then</code> 块：</p>
 
 <pre><code class="language-rust"># #![deny(deprecated)]
 # extern crate tokio;
 #
 # use tokio::io;
-# use tokio::net::TcpListener;
 # use tokio::prelude::*;
+# use tokio::net::TcpStream;
 # fn main() {
-#     let addr = &quot;127.0.0.1:0&quot;.parse().unwrap();
-#     let listener = TcpListener::bind(&amp;addr).unwrap();
-let server = listener.incoming().for_each(|socket| {
-    println!(&quot;accepted socket; addr={:?}&quot;, socket.peer_addr().unwrap());
+# let addr = &quot;127.0.0.1:6142&quot;.parse().unwrap();
+let client = TcpStream::connect(&amp;addr).and_then(|stream| {
+    println!(&quot;created stream&quot;);
 
-    let connection = io::write_all(socket, &quot;hello world\n&quot;)
-        .then(|res| {
-            println!(&quot;wrote message; success={:?}&quot;, res.is_ok());
-            Ok(())
-        });
-
-    // 产生一个处理该套接字的新任务：
-    tokio::spawn(connection);
-
-    Ok(())
+    io::write_all(stream, &quot;hello world\n&quot;).then(|result| {
+      println!(&quot;wrote to stream; success={:?}&quot;, result.is_ok());
+      Ok(())
+    })
 })
 # ;
 # }
 </code></pre>
 
-<p>我们正在定义另一个异步任务。这个任务会取得该套接字的所有权<!--
--->、对该套接字写入信息，然后完成。<code>connection</code>
-变量保存了其最终任务。同样，此时还没有执行任何作业。</p>
+<p>The <a href="https://docs.rs/tokio-io/0.1/tokio_io/io/fn.write_all.html"><code>io::write_all</code></a> function takes ownership of <code>stream</code>, returning a
+<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a> that completes once the entire message has been written to the
+stream. <code>then</code> is used to sequence a step that gets run once the write has
+completed. In our example, we just write a message to <code>STDOUT</code> indicating that
+the write has completed.</p>
 
-<p><code>tokio::spawn</code> 用于在运行时产生任务。因为
-<code>server</code> future 会在运行时上运行，所以我们可以产生更多任务。
-如果在运行时外部调用 <code>tokio::spawn</code>，它会恐慌（panic）。</p>
+<p>Note that <code>result</code> is a <code>Result</code> that contains the original stream. This allows us
+to sequence additional reads or writes to the same stream. However, we have
+nothing more to do, so we just drop the stream, which automatically closes it.</p>
 
-<p><a href="https://docs.rs/tokio-io/0.1/tokio_io/io/fn.write_all.html"><code>io::write_all</code></a> 函数获取 <code>socket</code> 的所有权并返回一个
-<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>，一旦整个消息都已写入到该套接字中，这个 future 就会完成<!--
--->。<code>then</code> 用于排入当写操作完成后运行的步骤<!--
--->。在本例中，我们只向 <code>STDOUT</code> 写一条消息，表明<!--
--->写操作已完成。</p>
+<h1 id="running-the-client-task">Running the client task</h1>
 
-<p>请注意 <code>res</code> 是一个包含原始套接字的 <code>Result</code>。这让我们可以<!--
--->在同一个套接字上顺次排入附加的读取或写入。然而，我们并<!--
--->没有任何事情可做，所有我们只是释放该套接字，即可关闭该套接字。</p>
+<p>到目前为止，我们有一个表示程序会完成的作业的 <code>Future</code>，但是我们<!--
+-->并没有真正运行它。需要一种方式来“产生”该作业。我们需要一个执行子。</p>
+
+<p>执行子负责调度异步任务，使其<!--
+-->完成。有很多执行子的实现可供选择，每个都有<!--
+-->不同的优缺点。在本例中，我们会使用
+<a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">Tokio 运行时</a> 的默认执行子。</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate tokio;
+# extern crate futures;
+#
+# use tokio::prelude::*;
+# use futures::future;
+# fn main() {
+# let client = future::ok(());
+println!(&quot;About to create the stream and write to it...&quot;);
+tokio::run(client);
+println!(&quot;Stream has been created and written to.&quot;);
+# }
+</code></pre>
+
+<p><code>tokio::run</code> 会启动该运行时，阻塞当前进程直到所有已产生的任务<!--
+-->都已完成并且所有资源（如文件与套接字）都已释放。</p>
+
+<p>至此，我们仅仅在执行子上执行了单个任务，因此 <code>client</code> 任务<!--
+-->是阻塞 <code>run</code> 返回的唯一任务。 Once <code>run</code> has returned we can be sure
+that our Future has been run to completion.</p>
 
 <p>可以在<a href="https://github.com/tokio-rs/tokio/blob/master/examples/hello_world.rs">这里</a>找到完整的示例。</p>
 
