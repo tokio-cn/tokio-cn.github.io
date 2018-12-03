@@ -27,7 +27,7 @@
 
     <title>
       
-        Returning futures · Tokio 中文站
+        Implementing futures · Tokio 中文站
       
     </title>
   </head>
@@ -139,7 +139,7 @@
           
             
               
-              <div class="tk-toc-item ">
+              <div class="tk-toc-item active">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/futures/overview/">
                   Working with futures
                 </a>
@@ -147,7 +147,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/futures/overview/" class="">Overview</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/futures/basic/" class="">Implementing futures</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/futures/basic/" class="active">Implementing futures</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/futures/getting_asynchronous/" class="">Getting asynchronous</a></li>
                 
@@ -191,7 +191,7 @@
           
             
               
-              <div class="tk-toc-item active">
+              <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/futures/">
                   深入
                 </a>
@@ -211,7 +211,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/futures-mechanics/" class="">Essential combinators</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="active">Returning futures</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="">Returning futures</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/frames/" class="">Working with framed streams</a></li>
                 
@@ -253,164 +253,197 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
+<li><a href="#the-future-trait">The <code>Future</code> trait.</a></li>
+<li><a href="#running-the-future">Running the future</a></li>
+<li><a href="#cleaning-things-up">Cleaning things up</a></li>
 </ul>
 </nav>
       </div>
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">Returning futures</h1>
+      <h1 class="tk-title">Implementing futures</h1>
       <div class="github-edit">
-        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/going-deeper/returning.md"> 在 GitHub 上编辑</a>
+        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/futures/basic.md"> 在 GitHub 上编辑</a>
       </div>
       
 
-<p>When working with futures, one of the first things you&rsquo;re likely to need to do
-is to return a <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>. As with <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a>s, however, doing so can be a little tricky.
-There are several options, listed from most to least ergonomic:</p>
+<p>Implementing futures is very common when using Tokio. Let&rsquo;s start with a very
+basic future that performs no asynchronous logic and simply returns a message
+(the venerable &ldquo;hello world&rdquo;).</p>
 
-<ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
-</ul>
+<h1 id="the-future-trait">The <code>Future</code> trait.</h1>
 
-<h1 id="trait-objects">Trait objects</h1>
+<p>The <code>Future</code> trait is as follows:</p>
 
-<p>First, you always have the option of returning a boxed <a href="https://doc.rust-lang.org/book/trait-objects.html">trait object</a>:</p>
+<pre><code class="language-rust,ignore">trait Future {
+    /// The type of the value returned when the future completes.
+    type Item;
 
-<pre><code class="language-rust"># extern crate futures;
-# use std::io;
-# use futures::Future;
-# fn main() {}
-fn foo() -&gt; Box&lt;Future&lt;Item = u32, Error = io::Error&gt; + Send&gt; {
-    // ...
-# loop {}
+    /// The type representing errors that occurred while processing the computation.
+    type Error;
+
+    /// The function that will be repeatedly called to see if the future is
+    /// has completed or not. The `Async` enum can either by `Ready` or
+    /// or `NotReady` and indicates whether the future is ready
+    // to produce a value or not.
+    fn poll(&amp;mut self) -&gt; Result&lt;Async&lt;Self::Item&gt;, Self::Error&gt;;
 }
 </code></pre>
 
-<p>The upside of this strategy is that it&rsquo;s easy to write down (just a <a href="https://doc.rust-lang.org/std/boxed/struct.Box.html"><code>Box</code></a>) and
-easy to create. This is also maximally flexible in terms of future changes to
-the method as <em>any</em> type of future can be returned as an opaque, boxed <code>Future</code>.</p>
+<p>Let&rsquo;s implement it for our &ldquo;hello world&rdquo; future:</p>
 
-<p>The downside of this approach is that it requires a runtime allocation when the
-future is constructed, and dynamic dispatch when using that future. The <code>Box</code>
-needs to be allocated on the heap and the future itself is then placed
-inside. Note, though that this is the <em>only</em> allocation here, otherwise while
-the future is being executed no allocations will be made.</p>
+<pre><code class="language-rust"># #![deny(deprecated)]
+extern crate futures;
 
-<p>It&rsquo;s often possible to mitigate that cost by boxing only at the end of a long
-chain of futures you want to return, which entails only a single allocation and
-dynamic dispatch for the entire chain.</p>
+// `Poll` is a type alias for `Result&lt;Async&lt;T&gt;, E&gt;`
+use futures::{Future, Async, Poll};
 
-<p>Astute readers may notice the explicit <code>Send</code> trait notation within the <code>Box</code>
-definition. The notation is added because <code>Future</code> is not explicitly <code>Send</code> by
-default; this causes problems later when trying to pass this future or one of its
-derivatives into <code>tokio::run</code>.</p>
+struct HelloWorld;
 
-<h1 id="impl-trait"><code>impl Trait</code></h1>
+impl Future for HelloWorld {
+    type Item = String;
+    type Error = ();
 
-<p>If you are using a version of Rust greater than 1.26, then you can use the
-language feature <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>. This language feature will allow, for
-example:</p>
+    fn poll(&amp;mut self) -&gt; Poll&lt;Self::Item, Self::Error&gt; {
+        Ok(Async::Ready(&quot;hello world&quot;.to_string()))
+    }
+}
+</code></pre>
 
-<pre><code class="language-rust,ignore">fn add_10&lt;F&gt;(f: F) -&gt; impl Future&lt;Item = i32, Error = F::Error&gt;
-    where F: Future&lt;Item = i32&gt;,
+<p>The <code>Item</code> and <code>Error</code> associated types define the types returned by the future
+once it completes. <code>Item</code> is the success value and <code>Error</code> is returned when the
+future encounters an error while processing. By convention, infallible futures
+set <code>Error</code> to <code>()</code>.</p>
+
+<p>Futures use a poll based model. The consumer of a future repeatedly calls the
+<code>poll</code> function. The future then attempts to complete. If the future is able to
+complete, it returns <code>Async::Ready(value)</code>. If the future is unable to complete
+due to being blocked on an internal resource (such as a TCP socket), it returns
+<code>Async::NotReady</code>.</p>
+
+<p>When a future&rsquo;s <code>poll</code> function is called, the implementation will
+<strong>synchronously</strong> do as much work as possible until it is logically
+blocked on some asynchronous event that has not occured yet. The future
+implementation then saves its state internally so that the next time
+<code>poll</code> is called (after an external event is receied), it resumes
+processing from the point it left off. Work is not repeated.</p>
+
+<p>The hello world future requires no asynchronous processing and is immediately
+ready, so it returns <code>Ok(Async::Ready(value))</code>.</p>
+
+<h1 id="running-the-future">Running the future</h1>
+
+<p>Tokio is responsible for running futures to completion. This is done by passing
+the future to <code>tokio::run</code>.</p>
+
+<p>The <code>tokio::run</code> accepts futures where both <code>Item</code> and <code>Error</code> are set to <code>()</code>.
+This is because Tokio only executes the futures, it does not do anything with
+values. The user of Tokio is required to fully process all values in the future.</p>
+
+<p>In our case, let&rsquo;s print the future to STDOUT. We will do that by implementing a
+<code>Display</code> future.</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+extern crate futures;
+
+use futures::{Future, Async, Poll};
+use std::fmt;
+
+struct Display&lt;T&gt;(T);
+
+impl&lt;T&gt; Future for Display&lt;T&gt;
+where
+    T: Future,
+    T::Item: fmt::Display,
 {
-    f.map(|i| i + 10)
+    type Item = ();
+    type Error = T::Error;
+
+    fn poll(&amp;mut self) -&gt; Poll&lt;(), T::Error&gt; {
+        let value = match self.0.poll() {
+            Ok(Async::Ready(value)) =&gt; value,
+            Ok(Async::NotReady) =&gt; return Ok(Async::NotReady),
+            Err(err) =&gt; return Err(err),
+        };
+
+        println!(&quot;{}&quot;, value);
+        Ok(Async::Ready(()))
+    }
 }
 </code></pre>
 
-<p>Here we&rsquo;re indicating that the return type is &ldquo;something that implements
-<code>Future</code>&rdquo; with the given associated types. Other than that we just use the
-future combinators as we normally would.</p>
+<p>The <code>Display</code> takes a future that yields items that can be displayed. When it is
+polled, it first tries to poll the inner future. If the inner future is <strong>not
+ready</strong> then <code>Display</code> cannot complete. In this case, <code>Display</code> also returns
+<code>NotReady</code>.</p>
 
-<p>The upsides to this approach are that it is zero overhead with no <code>Box</code>
-necessary, it&rsquo;s maximally flexible to future implementations as the actual
-return type is hidden, and it&rsquo;s ergonomic to write as it&rsquo;s similar to the nice
-<code>Box</code> example above. (You can even remove <code>Send</code>, because the compiler has
-enough information to determine at compile time that <code>Future</code> is <code>Send</code>!)</p>
+<p><strong><code>poll</code> implementations must never return <code>NotReady</code> unless they received
+<code>NotReady</code> by calling an inner future.</strong> This will be explained in more detail
+in a later section.</p>
 
-<p>The downside to this approach is only that using a <code>Box</code> is still more
-flexible. If you might return two different types of <code>Future</code>, then you
-must still return <code>Box&lt;Future&lt;Item = F::Item, Error = F::Error&gt; + Send&gt;</code> instead
-of <code>impl Future&lt;Item = F::Item, Error = F::Error&gt;</code>. For the same reason, you
-cannot use <code>impl Trait</code> when defining or implementing your own traits &ndash; the
-compiler will not let you specify <code>impl Trait</code> as a return type in a trait
-implementation because it can&rsquo;t determine which explicit type the trait should return.
-The good news however is that these cases are rare; in general, it should be a
-backwards-compatible extension to change return types from <code>Box</code> to <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>.</p>
+<p>The <code>Display</code> future will error when the inner future errors. The error is
+bubbled up.</p>
 
-<h1 id="named-types">Named types</h1>
+<p>When <code>HelloWorld</code> is combined with <code>Display</code>, both the <code>Item</code> and <code>Error</code> types
+are <code>()</code> and the future can be executed by Tokio:</p>
 
-<p>If you wouldn&rsquo;t like to return a <code>Box</code> and want to stick with older versions of
-Rust, another option is to write the return type directly:</p>
+<pre><code class="language-rust"># #![deny(deprecated)]
+extern crate tokio;
+# extern crate futures;
+# struct HelloWorld;
+# struct Display&lt;T&gt;(T);
+# impl&lt;T&gt; futures::Future for Display&lt;T&gt; {
+#     type Item = ();
+#     type Error = ();
+#     fn poll(&amp;mut self) -&gt; futures::Poll&lt;(), ()&gt; {
+#         Ok(().into())
+#     }
+# }
 
-<pre><code class="language-rust"># extern crate futures;
-# use futures::Future;
-# use futures::future::Map;
-# fn main() {}
-fn add_10&lt;F&gt;(f: F) -&gt; Map&lt;F, fn(i32) -&gt; i32&gt;
-    where F: Future&lt;Item = i32&gt;,
+let future = Display(HelloWorld);
+tokio::run(future);
+</code></pre>
+
+<p>Running this results in &ldquo;hello world&rdquo; being outputted to standard out.</p>
+
+<h1 id="cleaning-things-up">Cleaning things up</h1>
+
+<p>The pattern of waiting on an inner future is common enough that there is a
+helper macro: <code>try_ready!</code>.</p>
+
+<p>The poll function can be rewritten using the macro as such:</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+#[macro_use]
+extern crate futures;
+
+use futures::{Future, Async, Poll};
+use std::fmt;
+
+struct Display&lt;T&gt;(T);
+
+impl&lt;T&gt; Future for Display&lt;T&gt;
+where
+    T: Future,
+    T::Item: fmt::Display,
 {
-    fn do_map(i: i32) -&gt; i32 { i + 10 }
-    f.map(do_map)
+    type Item = ();
+    type Error = T::Error;
+
+    fn poll(&amp;mut self) -&gt; Poll&lt;(), T::Error&gt; {
+        let value = try_ready!(self.0.poll());
+        println!(&quot;{}&quot;, value);
+        Ok(Async::Ready(()))
+    }
 }
+
+# fn main() {}
 </code></pre>
-
-<p>Here we name the return type exactly as the compiler sees it. The <code>map</code>
-function returns the <a href="https://docs.rs/futures/0.1/futures/future/struct.Map.html"><code>Map</code></a> struct which internally contains the future and the
-function to perform the map.</p>
-
-<p>The upside to this approach is that it doesn&rsquo;t have the runtime overhead of
-<code>Box</code> from before, and works on Rust versions pre-1.26.</p>
-
-<p>The downside, however, is that it&rsquo;s often quite difficult to name the type.
-Sometimes the types can get quite large or be unnameable altogether. Here we&rsquo;re
-using a function pointer (<code>fn(i32) -&gt; i32</code>), but we would ideally use a closure.
-Unfortunately, the return type cannot name the closure, for now. It also leads to
-very verbose signatures, and leaks implementation details to clients.</p>
-
-<h1 id="custom-types">Custom types</h1>
-
-<p>Finally, you can wrap the concrete return type in a new type, and implement
-future for it. For example:</p>
-
-<pre><code class="language-rust,ignore">struct MyFuture {
-    inner: Sender&lt;i32&gt;,
-}
-
-fn foo() -&gt; MyFuture {
-    let (tx, rx) = oneshot::channel();
-    // ...
-    MyFuture { inner: tx }
-}
-
-impl Future for MyFuture {
-    // ...
-}
-</code></pre>
-
-<p>In this example we&rsquo;re returning a custom type, <code>MyFuture</code>, and we implement the
-<code>Future</code> trait directly for it. This implementation leverages an underlying
-<code>Oneshot&lt;i32&gt;</code>, but any other kind of protocol can also be implemented here as
-well.</p>
-
-<p>The upside to this approach is that it won&rsquo;t require a <code>Box</code> allocation and it&rsquo;s
-still maximally flexible. The implementation details of <code>MyFuture</code> are hidden to
-the outside world so it can change without breaking others.</p>
-
-<p>The downside to this approach, however, is that this is the least ergonomic way
-to return futures.</p>
 
       
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/docs/going-deeper/frames/">Working with framed streams</a>
+          <b>下一篇</b>：<a href ="/docs/futures/getting_asynchronous/">Getting asynchronous</a>
         </div>
       
     </main>

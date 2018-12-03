@@ -27,7 +27,7 @@
 
     <title>
       
-        I/O with Tokio · Tokio 中文站
+        Datagram APIs · Tokio 中文站
       
     </title>
   </head>
@@ -119,7 +119,7 @@
           
             
               
-              <div class="tk-toc-item active">
+              <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/getting-started/hello-world/">
                   入门
                 </a>
@@ -127,15 +127,11 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/hello-world/" class="">Hello World!</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/" class="">运行时模型</a></li>
-                
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="">Futures</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/tasks/" class="">Tasks</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime/" class="">Runtime</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/io/" class="active">I/O with Tokio</a></li>
-                
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/chat/" class="">Example: A Chat Server</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/echo/" class="">Example: An Echo Server</a></li>
                 
                 </ul>
               </div>
@@ -144,10 +140,72 @@
             
               
               <div class="tk-toc-item ">
-                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/timers/">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/futures/overview/">
+                  Working with futures
+                </a>
+                <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/overview/" class="">Overview</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/basic/" class="">Implementing futures</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/getting_asynchronous/" class="">Getting asynchronous</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/combinators/" class="">Combinators</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/streams/" class="">Streams</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/spawning/" class="">Spawning</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/leaf-futures/" class="">Leaf futures</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/runtime-model/" class="">Runtime model</a></li>
+                
+                </ul>
+              </div>
+            
+          
+            
+              
+              <div class="tk-toc-item active">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/io/overview/">
+                  I/O with Tokio
+                </a>
+                <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/overview/" class="">I/O Overview</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/reading_writing_data/" class="">Reading and Writing Data</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/async_read_write/" class="">Using AsyncRead and AsyncWrite directly</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/impl_async_read_write/" class="">Implementing Async Read/Write</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/filesystem/" class="">Filesystem APIs</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/datagrams/" class="active">Datagram APIs</a></li>
+                
+                </ul>
+              </div>
+            
+          
+            
+              
+              <div class="tk-toc-item ">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/futures/">
                   深入
                 </a>
                 <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/futures/" class="">Futures: In Depth</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/tasks/" class="">Tasks</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/runtime-model/" class="">运行时模型</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/io/" class="">I/O with Tokio</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/chat/" class="">Example: A Chat Server</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/timers/" class="">Timers</a></li>
                 
@@ -193,185 +251,21 @@
     </div>
     <div class="d-none d-xl-block col-xl-2 tk-toc">
       <div class="section-nav">
-        <nav id="TableOfContents">
-<ul>
-<li><a href="#using-the-future-api">Using the Future API</a></li>
-<li><a href="#using-the-poll-api">Using the Poll API</a></li>
-<li><a href="#datagrams">Datagrams</a></li>
-</ul>
-</nav>
+        
       </div>
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">I/O with Tokio</h1>
+      <h1 class="tk-title">Datagram APIs</h1>
       <div class="github-edit">
-        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/getting-started/io.md"> 在 GitHub 上编辑</a>
+        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/io/datagrams.md"> 在 GitHub 上编辑</a>
       </div>
-      
-
-<p>The <a href="https://docs.rs/tokio/0.1/tokio"><code>tokio</code></a> crate comes with TCP and UDP networking types. Unlike the types in
-<code>std</code>, Tokio&rsquo;s networking types are based on the poll model and will notify the
-task executors when their readiness states change (data is received and write
-buffers are flushed). In the <a href="https://docs.rs/tokio/0.1/tokio/net/index.html"><code>tokio::net</code></a> module you&rsquo;ll find types like
-<a href="https://docs.rs/tokio/0.1/tokio/net/struct.TcpListener.html"><code>TcpListener</code></a>, <a href="https://docs.rs/tokio/0.1/tokio/net/struct.TcpStream.html"><code>TcpStream</code></a>, and <a href="https://docs.rs/tokio/0.1/tokio/net/struct.UdpSocket.html"><code>UdpSocket</code></a>.</p>
-
-<p>All of these types provide both a future API as well as a poll
-API.</p>
-
-<p>The Tokio net types are powered by a <a href="https://docs.rs/mio/">Mio</a> based reactor that, by default, is
-started up lazily on a background thread. See <a href="https://docs.rs/tokio/0.1/tokio/reactor/index.html">reactor</a> documentation for more
-details.</p>
-
-<h1 id="using-the-future-api">Using the Future API</h1>
-
-<p>We&rsquo;ve already seen some of this earlier in the guide with the <a href="https://docs.rs/tokio/0.1/tokio/net/struct.TcpListener.html#method.incoming"><code>incoming</code></a>
-function as well as the helpers found in <a href="https://docs.rs/tokio/0.1/tokio/io/index.html"><code>tokio_io::io</code></a>.</p>
-
-<p>These helpers include:</p>
-
-<ul>
-<li><a href="https://docs.rs/tokio/0.1/tokio/net/struct.TcpListener.html#method.incoming"><code>incoming</code></a>: A stream of inbound TCP connections.</li>
-<li><a href="https://docs.rs/tokio/0.1/tokio/io/fn.read_exact.html"><code>read_exact</code></a>: Read exactly <code>n</code> bytes into a buffer.</li>
-<li><a href="https://docs.rs/tokio/0.1/tokio/io/fn.read_to_end.html"><code>read_to_end</code></a>: Read all bytes into a buffer.</li>
-<li><a href="https://docs.rs/tokio/0.1/tokio/io/fn.write_all.html"><code>write_all</code></a>: Write the entire contents of a buffer.</li>
-<li><a href="https://docs.rs/tokio/0.1/tokio/io/fn.copy.html"><code>copy</code></a>: Copy bytes from one I/O handle to another.</li>
-</ul>
-
-<p>A lot of these functions / helpers are generic over the <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html"><code>AsyncRead</code></a> and
-<a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncWrite.html"><code>AsyncWrite</code></a> traits. These traits are similar to <a href="https://doc.rust-lang.org/std/io/trait.Read.html"><code>Read</code></a> and <a href="https://doc.rust-lang.org/std/io/trait.Write.html"><code>Write</code></a> from
-<code>std</code>, but are only for types that are &ldquo;future aware&rdquo;, i.e. follow the
-mandated properties:</p>
-
-<ul>
-<li>Calls to <code>read</code> or <code>write</code> are <strong>nonblocking</strong>, they never block the calling
-thread.</li>
-<li>If a call would otherwise block then the function returns a value indicating so.
-If this happens then the current future&rsquo;s task is scheduled to receive a
-notification when the I/O is ready again.</li>
-</ul>
-
-<p>Note that users of <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html"><code>AsyncRead</code></a> and <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncWrite.html"><code>AsyncWrite</code></a> types should use
-<a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html#method.poll_read"><code>poll_read</code></a> and <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncWrite.html#method.poll_write"><code>poll_write</code></a> instead of directly calling <a href="https://doc.rust-lang.org/std/io/trait.Read.html"><code>read</code></a> and <a href="https://doc.rust-lang.org/std/io/trait.Write.html"><code>write</code></a>.</p>
-
-<p>For example, here is how to accept connections, read 5 bytes from them, then
-write the 5 bytes back to the socket:</p>
-
-<pre><code class="language-rust"># #![deny(deprecated)]
-# extern crate tokio;
-#
-# use tokio::io;
-# use tokio::net::TcpListener;
-# use tokio::prelude::*;
-# fn main() {
-#     let addr = &quot;127.0.0.1:6142&quot;.parse().unwrap();
-#     let listener = TcpListener::bind(&amp;addr).unwrap();
-let server = listener.incoming().for_each(|socket| {
-    println!(&quot;accepted socket; addr={:?}&quot;, socket.peer_addr().unwrap());
-
-    let buf = vec![0; 5];
-
-    let connection = io::read_exact(socket, buf)
-        .and_then(|(socket, buf)| {
-            io::write_all(socket, buf)
-        })
-        .then(|_| Ok(())); // Just discard the socket and buffer
-
-    // Spawn a new task that processes the socket:
-    tokio::spawn(connection);
-
-    Ok(())
-})
-# ;
-# }
-</code></pre>
-
-<h1 id="using-the-poll-api">Using the Poll API</h1>
-
-<p>The Poll based API is to be used when implementing <code>Future</code> by hand and you need
-to return <code>Async</code>. This is useful when you need to implement your own
-combinators that handle custom logic.</p>
-
-<p>For example, this is how the <code>read_exact</code> future could be implemented for a
-<code>TcpStream</code>.</p>
-
-<pre><code class="language-rust"># #![deny(deprecated)]
-# extern crate tokio;
-# #[macro_use]
-# extern crate futures;
-# use tokio::io;
-# use tokio::prelude::*;
-#
-# use tokio::net::TcpStream;
-# use std::mem;
-pub struct ReadExact {
-    state: State,
-}
-
-enum State {
-    Reading {
-        stream: TcpStream,
-        buf: Vec&lt;u8&gt;,
-        pos: usize,
-    },
-    Empty,
-}
-
-impl Future for ReadExact {
-    type Item = (TcpStream, Vec&lt;u8&gt;);
-    type Error = io::Error;
-
-    fn poll(&amp;mut self) -&gt; Result&lt;Async&lt;Self::Item&gt;, io::Error&gt; {
-        match self.state {
-            State::Reading {
-                ref mut stream,
-                ref mut buf,
-                ref mut pos
-            } =&gt; {
-                while *pos &lt; buf.len() {
-                    let n = try_ready!({
-                        stream.poll_read(&amp;mut buf[*pos..])
-                    });
-                    *pos += n;
-                    if n == 0 {
-                        let err = io::Error::new(
-                            io::ErrorKind::UnexpectedEof,
-                            &quot;early eof&quot;);
-
-                        return Err(err)
-                    }
-                }
-            }
-            State::Empty =&gt; panic!(&quot;poll a ReadExact after it's done&quot;),
-        }
-
-        match mem::replace(&amp;mut self.state, State::Empty) {
-            State::Reading { stream, buf, .. } =&gt; {
-                Ok(Async::Ready((stream, buf)))
-            }
-            State::Empty =&gt; panic!(),
-        }
-    }
-}
-# pub fn main() {}
-</code></pre>
-
-<h1 id="datagrams">Datagrams</h1>
-
-<p>Note that most of this discussion has been around I/O or byte <em>streams</em>, which
-UDP importantly is not! To accommodate this, however, the <a href="https://docs.rs/tokio/0.1/tokio/net/struct.UdpSocket.html"><code>UdpSocket</code></a> type
-also provides a number of methods for working with it conveniently:</p>
-
-<ul>
-<li><a href="https://docs.rs/tokio/0.1/tokio/net/struct.UdpSocket.html#method.send_dgram"><code>send_dgram</code></a> allows you to express sending a datagram as a future, returning
-an error if the entire datagram couldn&rsquo;t be sent at once.</li>
-<li><a href="https://docs.rs/tokio/0.1/tokio/net/struct.UdpSocket.html#method.recv_dgram"><code>recv_dgram</code></a> expresses reading a datagram into a buffer, yielding both the
-buffer and the address it came from.</li>
-</ul>
+      <p>This page has not been worked on yet. If you&rsquo;d like to contribute visit the <a href="https://github.com/tokio-rs/doc-push">doc-push</a>
+repo.</p>
 
       
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/docs/getting-started/chat/">Example: A Chat Server</a>
+          <b>下一篇</b>：<a href ="/docs/going-deeper/futures/">Futures: In Depth</a>
         </div>
       
     </main>

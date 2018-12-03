@@ -27,7 +27,7 @@
 
     <title>
       
-        Returning futures · Tokio 中文站
+        Runtime · Tokio 中文站
       
     </title>
   </head>
@@ -119,7 +119,7 @@
           
             
               
-              <div class="tk-toc-item ">
+              <div class="tk-toc-item active">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/getting-started/hello-world/">
                   入门
                 </a>
@@ -129,7 +129,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="">Futures</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime/" class="">Runtime</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime/" class="active">Runtime</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/echo/" class="">Example: An Echo Server</a></li>
                 
@@ -191,7 +191,7 @@
           
             
               
-              <div class="tk-toc-item active">
+              <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/futures/">
                   深入
                 </a>
@@ -211,7 +211,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/futures-mechanics/" class="">Essential combinators</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="active">Returning futures</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="">Returning futures</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/frames/" class="">Working with framed streams</a></li>
                 
@@ -253,164 +253,107 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
+<li>
+<ul>
+<li><a href="#tokio-runtime">Tokio runtime</a></li>
+<li><a href="#spawning-tasks">Spawning Tasks</a></li>
+</ul></li>
 </ul>
 </nav>
       </div>
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">Returning futures</h1>
+      <h1 class="tk-title">Runtime</h1>
       <div class="github-edit">
-        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/going-deeper/returning.md"> 在 GitHub 上编辑</a>
+        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/getting-started/runtime.md"> 在 GitHub 上编辑</a>
       </div>
       
 
-<p>When working with futures, one of the first things you&rsquo;re likely to need to do
-is to return a <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>. As with <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a>s, however, doing so can be a little tricky.
-There are several options, listed from most to least ergonomic:</p>
+<p>In the previous section we explored Futures and Streams which allow us to represent
+a value (in the case of a <code>Future</code>) or a series of values (in the case of <code>Stream</code>)
+that will be available &ldquo;at some point in the future&rdquo;. We talked about <code>poll</code> on
+<code>Future</code> and <code>Stream</code> which the runtime will call to figure out if the <code>Future</code> or
+the <code>Stream</code> are ready to yield a value.</p>
 
-<ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
-</ul>
+<p>Lastly, we said that the runtime is needed to poll Futures and Streams driving them
+to completion. We&rsquo;ll take a closer look at the runtime now.</p>
 
-<h1 id="trait-objects">Trait objects</h1>
+<h2 id="tokio-runtime">Tokio runtime</h2>
 
-<p>First, you always have the option of returning a boxed <a href="https://doc.rust-lang.org/book/trait-objects.html">trait object</a>:</p>
+<p>In order for a <code>Future</code> to make progress, something has to call <code>poll</code>. This is the
+job of the runtime.</p>
 
-<pre><code class="language-rust"># extern crate futures;
-# use std::io;
-# use futures::Future;
-# fn main() {}
-fn foo() -&gt; Box&lt;Future&lt;Item = u32, Error = io::Error&gt; + Send&gt; {
-    // ...
-# loop {}
-}
+<p>The runtime is responsible for repeatedly calling <code>poll</code> on a <code>Future</code> until its
+value is returned. There are many different ways to do this and thus many types of
+runtime configurations. For example, the <a href="https://docs.rs/tokio/0.1/tokio/executor/current_thread/index.html"><code>CurrentThread</code></a> runtime configuration
+will block the current thread and loop through all spawned Futures, calling poll on
+them. The <a href="http://docs.rs/tokio-threadpool"><code>ThreadPool</code></a> configuration schedules Futures across a thread pool. This
+is also the default configuration used by the Tokio <a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">runtime</a>.</p>
+
+<p>It&rsquo;s important to remember that all futures <strong>must</strong> be spawned on the runtime or no
+work will be performed.</p>
+
+<h2 id="spawning-tasks">Spawning Tasks</h2>
+
+<p>One of the unique aspects of Tokio is that futures can be spawned on the runtime from
+within other futures or streams. When we use futures in this way, we usually refer to
+them as tasks. Tasks are the application’s “unit of logic”. They are similar to <a href="https://www.golang-book.com/books/intro/10">Go’s
+goroutine</a> and <a href="http://erlang.org/doc/reference_manual/processes.html">Erlang’s process</a>, but asynchronous. In other words, tasks are
+asynchronous green threads.</p>
+
+<p>Given that a task runs an asynchronous bit of logic, they are represented by the
+Future trait. The task’s future implementation completes with a <code>()</code> value once the
+task is done processing.</p>
+
+<p>Tasks are passed to the runtime, which handle scheduling the task. The runtime is
+usually scheduling many tasks across a single or small set of threads. Tasks must not
+perform computation-heavy logic or they will prevent other tasks from executing. So
+don’t try to compute the fibonacci sequence as a task!</p>
+
+<p>Tasks are implemented by either building up a future using the various combinator
+functions available in the futures and tokio crates or by implementing the Future
+trait directly.</p>
+
+<p>We can spawn tasks using <code>tokio::spawn</code>. For example:</p>
+
+<pre><code class="language-rust"># extern crate tokio;
+# extern crate futures;
+#
+# use tokio::prelude::*;
+# use futures::stream;
+# fn main() {
+# let my_outer_stream = stream::once(Ok(1));
+// Create some kind of future that we want our runtime to execute
+let program = my_outer_stream.for_each(|my_outer_value| {
+  println!(&quot;Got value {:?} from the stream&quot;, my_outer_value);
+
+  let my_inner_future = future::ok(1);
+
+  let task = my_inner_future.and_then(|my_inner_value| {
+    println!(&quot;Got a value {:?} from second future&quot;, my_inner_value);
+    Ok(())
+  });
+
+  tokio::spawn(task);
+  Ok(())
+});
+
+tokio::run(program);
+# }
 </code></pre>
 
-<p>The upside of this strategy is that it&rsquo;s easy to write down (just a <a href="https://doc.rust-lang.org/std/boxed/struct.Box.html"><code>Box</code></a>) and
-easy to create. This is also maximally flexible in terms of future changes to
-the method as <em>any</em> type of future can be returned as an opaque, boxed <code>Future</code>.</p>
+<p>Again spawning tasks can happen within other futures or streams allowing multiple
+things to happen concurrently. In the above example we&rsquo;re spawning the inner future
+from within the outer stream. Each time we get a value from the stream we&rsquo;ll simply
+run inner future.</p>
 
-<p>The downside of this approach is that it requires a runtime allocation when the
-future is constructed, and dynamic dispatch when using that future. The <code>Box</code>
-needs to be allocated on the heap and the future itself is then placed
-inside. Note, though that this is the <em>only</em> allocation here, otherwise while
-the future is being executed no allocations will be made.</p>
-
-<p>It&rsquo;s often possible to mitigate that cost by boxing only at the end of a long
-chain of futures you want to return, which entails only a single allocation and
-dynamic dispatch for the entire chain.</p>
-
-<p>Astute readers may notice the explicit <code>Send</code> trait notation within the <code>Box</code>
-definition. The notation is added because <code>Future</code> is not explicitly <code>Send</code> by
-default; this causes problems later when trying to pass this future or one of its
-derivatives into <code>tokio::run</code>.</p>
-
-<h1 id="impl-trait"><code>impl Trait</code></h1>
-
-<p>If you are using a version of Rust greater than 1.26, then you can use the
-language feature <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>. This language feature will allow, for
-example:</p>
-
-<pre><code class="language-rust,ignore">fn add_10&lt;F&gt;(f: F) -&gt; impl Future&lt;Item = i32, Error = F::Error&gt;
-    where F: Future&lt;Item = i32&gt;,
-{
-    f.map(|i| i + 10)
-}
-</code></pre>
-
-<p>Here we&rsquo;re indicating that the return type is &ldquo;something that implements
-<code>Future</code>&rdquo; with the given associated types. Other than that we just use the
-future combinators as we normally would.</p>
-
-<p>The upsides to this approach are that it is zero overhead with no <code>Box</code>
-necessary, it&rsquo;s maximally flexible to future implementations as the actual
-return type is hidden, and it&rsquo;s ergonomic to write as it&rsquo;s similar to the nice
-<code>Box</code> example above. (You can even remove <code>Send</code>, because the compiler has
-enough information to determine at compile time that <code>Future</code> is <code>Send</code>!)</p>
-
-<p>The downside to this approach is only that using a <code>Box</code> is still more
-flexible. If you might return two different types of <code>Future</code>, then you
-must still return <code>Box&lt;Future&lt;Item = F::Item, Error = F::Error&gt; + Send&gt;</code> instead
-of <code>impl Future&lt;Item = F::Item, Error = F::Error&gt;</code>. For the same reason, you
-cannot use <code>impl Trait</code> when defining or implementing your own traits &ndash; the
-compiler will not let you specify <code>impl Trait</code> as a return type in a trait
-implementation because it can&rsquo;t determine which explicit type the trait should return.
-The good news however is that these cases are rare; in general, it should be a
-backwards-compatible extension to change return types from <code>Box</code> to <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>.</p>
-
-<h1 id="named-types">Named types</h1>
-
-<p>If you wouldn&rsquo;t like to return a <code>Box</code> and want to stick with older versions of
-Rust, another option is to write the return type directly:</p>
-
-<pre><code class="language-rust"># extern crate futures;
-# use futures::Future;
-# use futures::future::Map;
-# fn main() {}
-fn add_10&lt;F&gt;(f: F) -&gt; Map&lt;F, fn(i32) -&gt; i32&gt;
-    where F: Future&lt;Item = i32&gt;,
-{
-    fn do_map(i: i32) -&gt; i32 { i + 10 }
-    f.map(do_map)
-}
-</code></pre>
-
-<p>Here we name the return type exactly as the compiler sees it. The <code>map</code>
-function returns the <a href="https://docs.rs/futures/0.1/futures/future/struct.Map.html"><code>Map</code></a> struct which internally contains the future and the
-function to perform the map.</p>
-
-<p>The upside to this approach is that it doesn&rsquo;t have the runtime overhead of
-<code>Box</code> from before, and works on Rust versions pre-1.26.</p>
-
-<p>The downside, however, is that it&rsquo;s often quite difficult to name the type.
-Sometimes the types can get quite large or be unnameable altogether. Here we&rsquo;re
-using a function pointer (<code>fn(i32) -&gt; i32</code>), but we would ideally use a closure.
-Unfortunately, the return type cannot name the closure, for now. It also leads to
-very verbose signatures, and leaks implementation details to clients.</p>
-
-<h1 id="custom-types">Custom types</h1>
-
-<p>Finally, you can wrap the concrete return type in a new type, and implement
-future for it. For example:</p>
-
-<pre><code class="language-rust,ignore">struct MyFuture {
-    inner: Sender&lt;i32&gt;,
-}
-
-fn foo() -&gt; MyFuture {
-    let (tx, rx) = oneshot::channel();
-    // ...
-    MyFuture { inner: tx }
-}
-
-impl Future for MyFuture {
-    // ...
-}
-</code></pre>
-
-<p>In this example we&rsquo;re returning a custom type, <code>MyFuture</code>, and we implement the
-<code>Future</code> trait directly for it. This implementation leverages an underlying
-<code>Oneshot&lt;i32&gt;</code>, but any other kind of protocol can also be implemented here as
-well.</p>
-
-<p>The upside to this approach is that it won&rsquo;t require a <code>Box</code> allocation and it&rsquo;s
-still maximally flexible. The implementation details of <code>MyFuture</code> are hidden to
-the outside world so it can change without breaking others.</p>
-
-<p>The downside to this approach, however, is that this is the least ergonomic way
-to return futures.</p>
+<p>In the next section, we&rsquo;ll take a look at a more involved example than our hello-
+world example that takes everything we&rsquo;ve learned so far into account.</p>
 
       
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/docs/going-deeper/frames/">Working with framed streams</a>
+          <b>下一篇</b>：<a href ="/docs/getting-started/echo/">Example: An Echo Server</a>
         </div>
       
     </main>

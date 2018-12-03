@@ -127,15 +127,11 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/hello-world/" class="">Hello World!</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/" class="">运行时模型</a></li>
-                
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="">Futures</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/tasks/" class="">Tasks</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime/" class="">Runtime</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/io/" class="">I/O with Tokio</a></li>
-                
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/chat/" class="">Example: A Chat Server</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/echo/" class="">Example: An Echo Server</a></li>
                 
                 </ul>
               </div>
@@ -144,10 +140,72 @@
             
               
               <div class="tk-toc-item ">
-                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/timers/">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/futures/overview/">
+                  Working with futures
+                </a>
+                <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/overview/" class="">Overview</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/basic/" class="">Implementing futures</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/getting_asynchronous/" class="">Getting asynchronous</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/combinators/" class="">Combinators</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/streams/" class="">Streams</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/spawning/" class="">Spawning</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/leaf-futures/" class="">Leaf futures</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/runtime-model/" class="">Runtime model</a></li>
+                
+                </ul>
+              </div>
+            
+          
+            
+              
+              <div class="tk-toc-item ">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/io/overview/">
+                  I/O with Tokio
+                </a>
+                <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/overview/" class="">I/O Overview</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/reading_writing_data/" class="">Reading and Writing Data</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/async_read_write/" class="">Using AsyncRead and AsyncWrite directly</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/impl_async_read_write/" class="">Implementing Async Read/Write</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/filesystem/" class="">Filesystem APIs</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/datagrams/" class="">Datagram APIs</a></li>
+                
+                </ul>
+              </div>
+            
+          
+            
+              
+              <div class="tk-toc-item ">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/futures/">
                   深入
                 </a>
                 <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/futures/" class="">Futures: In Depth</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/tasks/" class="">Tasks</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/runtime-model/" class="">运行时模型</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/io/" class="">I/O with Tokio</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/chat/" class="">Example: A Chat Server</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/timers/" class="">Timers</a></li>
                 
@@ -225,8 +283,8 @@
       
 
 <p>Tokio allows developers to write asynchronous programs in the Rust programming
-language. Instead of synchronously waiting for long-running operations like reading
-a file or waiting for a timer to complete before moving on to the next thing,
+language. Instead of synchronously waiting for long-running operations (like reading
+a file or waiting for a timer to complete) before moving on to the next thing,
 Tokio allows developers to write programs where execution continues while the
 long-running operations are in progress.</p>
 
@@ -253,7 +311,7 @@ is also geared towards enabling applications to be as fast as possible.</p>
 <h2 id="零开销抽象">零开销抽象</h2>
 
 <p>Tokio is built around <a href="https://tokio-cn.github.io/docs/getting-started/futures/">futures</a>. Futures aren&rsquo;t a new idea, but the way Tokio
-uses them is <a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/#polling-model">unique</a>. Unlike futures from other languages, Tokio&rsquo;s
+uses them is <a href="https://tokio-cn.github.io/docs/getting-started/futures/#poll-based-futures">unique</a>. Unlike futures from other languages, Tokio&rsquo;s
 futures compile down to a state machine. There is no added overhead from
 synchronization, allocation, or other costs common with future implementations.</p>
 
@@ -272,8 +330,8 @@ utilize many cores is critical for writing fast applications.</p>
 
 <h2 id="非阻塞-i-o">非阻塞 I/O</h2>
 
-<p>When hitting the network, Tokio will used the most efficient system available to
-the operating system. On Linux this means <a href="http://man7.org/linux/man-pages/man7/epoll.7.html">epoll</a>, *bsd platforms provide <a href="https://www.freebsd.org/cgi/man.cgi?query=kqueue&amp;sektion=2">kqueue</a>,
+<p>When hitting the network, Tokio will use the most efficient system available to
+the operating system. On Linux this means <a href="http://man7.org/linux/man-pages/man7/epoll.7.html">epoll</a>, bsd platforms provide <a href="https://www.freebsd.org/cgi/man.cgi?query=kqueue&amp;sektion=2">kqueue</a>,
 and Windows has <a href="https://docs.microsoft.com/en-us/windows/desktop/fileio/i-o-completion-ports">I/O completion ports</a>.</p>
 
 <p>This allows multiplexing many sockets on a single thread and receiving
@@ -304,13 +362,13 @@ Unless the producer stops producing, the system will eventually run out of
 memory and crash. The ability for a consumer to inform the producer to slow down
 is backpressure.</p>
 
-<p>Because Tokio uses a <a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/#polling-model">poll</a> based model, the problem mostly just goes away.
+<p>Because Tokio uses a <a href="https://tokio-cn.github.io/docs/getting-started/futures/#poll-based-futures">poll</a> based model, the problem mostly just goes away.
 Producers are lazy by default. They will not produce any data unless the
 consumer asks them to. This is built into Tokio&rsquo;s foundation.</p>
 
 <h2 id="撤销">撤销</h2>
 
-<p>Because of Tokio&rsquo;s <a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/#polling-model">poll</a> based model, computations do no work unless they are
+<p>Because of Tokio&rsquo;s <a href="https://tokio-cn.github.io/docs/getting-started/futures/#poll-based-futures">poll</a> based model, computations do no work unless they are
 polled. Dependents of that computation hold a <a href="https://tokio-cn.github.io/docs/getting-started/futures/">future</a> representing the
 result of that computation. If the result is no longer needed, the future is
 dropped. At this point, the computation will no longer be polled and thus
@@ -341,6 +399,10 @@ a good fit for <a href="https://en.wikipedia.org/wiki/Real-time_computing">real-
 <p>While Tokio provides a lot out of the box, it is all organized very modularly.
 Each component lives in a separate library. If needed, applications may opt to
 pick and choose the needed components and avoid pulling in the rest.</p>
+
+<p>Tokio leverages <a href="https://carllerche.github.io/mio/mio/index.html"><code>mio</code></a> for the system event queue and <a href="https://docs.rs/futures/*/futures/"><code>futures</code></a> for defining
+tasks.  Tokio implements <a href="https://tokio.rs/blog/2018-08-async-await/">async</a> syntax to improve readability of futures.
+<a href="https://crates.io/crates/tokio/reverse_dependencies">Many</a> libraries are implemented using Tokio, including <a href="https://hyper.rs/guides/"><code>hyper</code></a> and <a href="https://actix.rs/book/actix/"><code>actix</code></a>.</p>
 
 <h1 id="示例">示例</h1>
 
@@ -374,7 +436,7 @@ fn main() {
 
             // ……之后我们会输出所发生的事情。
             let handle_conn = bytes_copied.map(|amt| {
-                println!(&quot;wrote {:?} bytes&quot;, amt)
+                println!(&quot;wrote {:} bytes&quot;, amt.0)
             }).map_err(|err| {
                 eprintln!(&quot;IO error {:?}&quot;, err)
             });
@@ -388,7 +450,7 @@ fn main() {
 }
 </code></pre>
 
-<p>More examples can be found <a href="examples">here</a>.</p>
+<p>More examples can be found <a href="https://github.com/tokio-rs/tokio/tree/master/examples">here</a>.</p>
 
       
       

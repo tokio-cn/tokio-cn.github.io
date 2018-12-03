@@ -27,7 +27,7 @@
 
     <title>
       
-        Returning futures · Tokio 中文站
+        Spawning · Tokio 中文站
       
     </title>
   </head>
@@ -139,7 +139,7 @@
           
             
               
-              <div class="tk-toc-item ">
+              <div class="tk-toc-item active">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/futures/overview/">
                   Working with futures
                 </a>
@@ -155,7 +155,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/futures/streams/" class="">Streams</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/futures/spawning/" class="">Spawning</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/futures/spawning/" class="active">Spawning</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/futures/leaf-futures/" class="">Leaf futures</a></li>
                 
@@ -191,7 +191,7 @@
           
             
               
-              <div class="tk-toc-item active">
+              <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/futures/">
                   深入
                 </a>
@@ -211,7 +211,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/futures-mechanics/" class="">Essential combinators</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="active">Returning futures</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="">Returning futures</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/frames/" class="">Working with framed streams</a></li>
                 
@@ -253,164 +253,445 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
+<li><a href="#communicating-with-tasks">Communicating with tasks</a></li>
+<li><a href="#multi-threaded">Multi threaded</a></li>
+<li><a href="#when-to-spawn-tasks">When to spawn tasks</a>
+<ul>
+<li><a href="#processing-inbound-sockets">Processing inbound sockets</a></li>
+<li><a href="#background-processing">Background processing</a></li>
+<li><a href="#coordinating-access-to-a-resource">Coordinating access to a resource</a></li>
+</ul></li>
+<li><a href="#when-not-to-spawn-tasks">When not to spawn tasks</a></li>
 </ul>
 </nav>
       </div>
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">Returning futures</h1>
+      <h1 class="tk-title">Spawning</h1>
       <div class="github-edit">
-        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/going-deeper/returning.md"> 在 GitHub 上编辑</a>
+        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/futures/spawning.md"> 在 GitHub 上编辑</a>
       </div>
       
 
-<p>When working with futures, one of the first things you&rsquo;re likely to need to do
-is to return a <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>. As with <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a>s, however, doing so can be a little tricky.
-There are several options, listed from most to least ergonomic:</p>
+<p>Tokio based applications are organized in terms of Tasks. A task is a small unit
+of logic that executes independently from other tasks. It is similar to <a href="https://www.golang-book.com/books/intro/10">Go&rsquo;s
+goroutine</a> and <a href="http://erlang.org/doc/reference_manual/processes.html">Erlang&rsquo;s process</a>, but asynchronous. In other words, tasks are
+asynchronous green threads. Tasks are spawned for similar reasons that threads
+are spawned in synchronous code, but spawning a task with Tokio is extremely
+lightweight.</p>
+
+<p>Previous examples defined a future and passed that future to <code>tokio::run</code>. This
+resulted in a task being spawned onto Tokio&rsquo;s runtime to execute the provided
+future. Additional tasks may be spawned by calling <code>tokio::spawn</code>, but only from
+code that is already running on a Tokio task. One way to think about it is the
+future passed to <code>tokio::run</code> is the &ldquo;main function&rdquo;.</p>
+
+<p>In the following example, four tasks are spawned.</p>
+
+<pre><code class="language-rust">extern crate tokio;
+extern crate futures;
+
+use futures::future::lazy;
+
+tokio::run(lazy(|| {
+    for i in 0..4 {
+        tokio::spawn(lazy(move || {
+            println!(&quot;Hello from task {}&quot;, i);
+            Ok(())
+        }));
+    }
+
+    Ok(())
+}));
+</code></pre>
+
+<p>The <code>tokio::run</code> function will block until the the future passed to <code>run</code>
+teriminates as well as <strong>all other spawned tasks</strong>. In this case, <code>tokio::run</code>
+blocks until all four tasks output to STDOUT and terminate.</p>
+
+<p>The <a href="https://docs.rs/futures/0.1/futures/future/fn.lazy.html"><code>lazy</code></a> function runs the closure the first time the future is polled. It
+is used here to ensure that <code>tokio::spawn</code> is called from a task. Without
+<a href="https://docs.rs/futures/0.1/futures/future/fn.lazy.html"><code>lazy</code></a>, <code>tokio::spawn</code> would be called from outside the context of a task,
+which results in an error.</p>
+
+<h1 id="communicating-with-tasks">Communicating with tasks</h1>
+
+<p>Just as with Go and Erlang, tasks can communicate using message passing. In
+fact, it will be very common to use message passing to coordinate multiple
+tasks. This allows independent tasks to still interact.</p>
+
+<p>The <a href="https://docs.rs/futures/0.1/futures"><code>futures</code></a> crate provides a <a href="https://docs.rs/futures/0.1/futures/sync/index.html"><code>sync</code></a> module which contains some channel
+types that are ideal for message passing across tasks.</p>
 
 <ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
+<li><a href="https://docs.rs/futures/0.1/futures/sync/oneshot/index.html"><code>oneshot</code></a> is a channel for sending exactly one value.</li>
+<li><a href="https://docs.rs/futures/0.1/futures/sync/mpsc/index.html"><code>mpsc</code></a> is a channel for sending many (zero or more) values.</li>
 </ul>
 
-<h1 id="trait-objects">Trait objects</h1>
+<p>A <code>oneshot</code> is ideal for getting the result from a spawned task:</p>
 
-<p>First, you always have the option of returning a boxed <a href="https://doc.rust-lang.org/book/trait-objects.html">trait object</a>:</p>
+<pre><code class="language-rust">extern crate tokio;
+extern crate futures;
 
-<pre><code class="language-rust"># extern crate futures;
-# use std::io;
-# use futures::Future;
-# fn main() {}
-fn foo() -&gt; Box&lt;Future&lt;Item = u32, Error = io::Error&gt; + Send&gt; {
-    // ...
-# loop {}
-}
-</code></pre>
+use futures::Future;
+use futures::future::lazy;
+use futures::sync::oneshot;
 
-<p>The upside of this strategy is that it&rsquo;s easy to write down (just a <a href="https://doc.rust-lang.org/std/boxed/struct.Box.html"><code>Box</code></a>) and
-easy to create. This is also maximally flexible in terms of future changes to
-the method as <em>any</em> type of future can be returned as an opaque, boxed <code>Future</code>.</p>
-
-<p>The downside of this approach is that it requires a runtime allocation when the
-future is constructed, and dynamic dispatch when using that future. The <code>Box</code>
-needs to be allocated on the heap and the future itself is then placed
-inside. Note, though that this is the <em>only</em> allocation here, otherwise while
-the future is being executed no allocations will be made.</p>
-
-<p>It&rsquo;s often possible to mitigate that cost by boxing only at the end of a long
-chain of futures you want to return, which entails only a single allocation and
-dynamic dispatch for the entire chain.</p>
-
-<p>Astute readers may notice the explicit <code>Send</code> trait notation within the <code>Box</code>
-definition. The notation is added because <code>Future</code> is not explicitly <code>Send</code> by
-default; this causes problems later when trying to pass this future or one of its
-derivatives into <code>tokio::run</code>.</p>
-
-<h1 id="impl-trait"><code>impl Trait</code></h1>
-
-<p>If you are using a version of Rust greater than 1.26, then you can use the
-language feature <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>. This language feature will allow, for
-example:</p>
-
-<pre><code class="language-rust,ignore">fn add_10&lt;F&gt;(f: F) -&gt; impl Future&lt;Item = i32, Error = F::Error&gt;
-    where F: Future&lt;Item = i32&gt;,
-{
-    f.map(|i| i + 10)
-}
-</code></pre>
-
-<p>Here we&rsquo;re indicating that the return type is &ldquo;something that implements
-<code>Future</code>&rdquo; with the given associated types. Other than that we just use the
-future combinators as we normally would.</p>
-
-<p>The upsides to this approach are that it is zero overhead with no <code>Box</code>
-necessary, it&rsquo;s maximally flexible to future implementations as the actual
-return type is hidden, and it&rsquo;s ergonomic to write as it&rsquo;s similar to the nice
-<code>Box</code> example above. (You can even remove <code>Send</code>, because the compiler has
-enough information to determine at compile time that <code>Future</code> is <code>Send</code>!)</p>
-
-<p>The downside to this approach is only that using a <code>Box</code> is still more
-flexible. If you might return two different types of <code>Future</code>, then you
-must still return <code>Box&lt;Future&lt;Item = F::Item, Error = F::Error&gt; + Send&gt;</code> instead
-of <code>impl Future&lt;Item = F::Item, Error = F::Error&gt;</code>. For the same reason, you
-cannot use <code>impl Trait</code> when defining or implementing your own traits &ndash; the
-compiler will not let you specify <code>impl Trait</code> as a return type in a trait
-implementation because it can&rsquo;t determine which explicit type the trait should return.
-The good news however is that these cases are rare; in general, it should be a
-backwards-compatible extension to change return types from <code>Box</code> to <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>.</p>
-
-<h1 id="named-types">Named types</h1>
-
-<p>If you wouldn&rsquo;t like to return a <code>Box</code> and want to stick with older versions of
-Rust, another option is to write the return type directly:</p>
-
-<pre><code class="language-rust"># extern crate futures;
-# use futures::Future;
-# use futures::future::Map;
-# fn main() {}
-fn add_10&lt;F&gt;(f: F) -&gt; Map&lt;F, fn(i32) -&gt; i32&gt;
-    where F: Future&lt;Item = i32&gt;,
-{
-    fn do_map(i: i32) -&gt; i32 { i + 10 }
-    f.map(do_map)
-}
-</code></pre>
-
-<p>Here we name the return type exactly as the compiler sees it. The <code>map</code>
-function returns the <a href="https://docs.rs/futures/0.1/futures/future/struct.Map.html"><code>Map</code></a> struct which internally contains the future and the
-function to perform the map.</p>
-
-<p>The upside to this approach is that it doesn&rsquo;t have the runtime overhead of
-<code>Box</code> from before, and works on Rust versions pre-1.26.</p>
-
-<p>The downside, however, is that it&rsquo;s often quite difficult to name the type.
-Sometimes the types can get quite large or be unnameable altogether. Here we&rsquo;re
-using a function pointer (<code>fn(i32) -&gt; i32</code>), but we would ideally use a closure.
-Unfortunately, the return type cannot name the closure, for now. It also leads to
-very verbose signatures, and leaks implementation details to clients.</p>
-
-<h1 id="custom-types">Custom types</h1>
-
-<p>Finally, you can wrap the concrete return type in a new type, and implement
-future for it. For example:</p>
-
-<pre><code class="language-rust,ignore">struct MyFuture {
-    inner: Sender&lt;i32&gt;,
-}
-
-fn foo() -&gt; MyFuture {
+tokio::run(lazy(|| {
     let (tx, rx) = oneshot::channel();
-    // ...
-    MyFuture { inner: tx }
-}
 
-impl Future for MyFuture {
-    // ...
-}
+    tokio::spawn(lazy(|| {
+        tx.send(&quot;hello from spawned task&quot;);
+        Ok(())
+    }));
+
+    rx.and_then(|msg| {
+        println!(&quot;Got `{}`&quot;, msg);
+        Ok(())
+    })
+    .map_err(|e| println!(&quot;error = {:?}&quot;, e))
+}));
 </code></pre>
 
-<p>In this example we&rsquo;re returning a custom type, <code>MyFuture</code>, and we implement the
-<code>Future</code> trait directly for it. This implementation leverages an underlying
-<code>Oneshot&lt;i32&gt;</code>, but any other kind of protocol can also be implemented here as
-well.</p>
+<p>And <code>mpsc</code> is good for sending a stream of values to another task:</p>
 
-<p>The upside to this approach is that it won&rsquo;t require a <code>Box</code> allocation and it&rsquo;s
-still maximally flexible. The implementation details of <code>MyFuture</code> are hidden to
-the outside world so it can change without breaking others.</p>
+<pre><code class="language-rust">extern crate tokio;
+extern crate futures;
 
-<p>The downside to this approach, however, is that this is the least ergonomic way
-to return futures.</p>
+use futures::{stream, Future, Stream, Sink};
+use futures::future::lazy;
+use futures::sync::mpsc;
+
+tokio::run(lazy(|| {
+    let (tx, rx) = mpsc::channel(1_024);
+
+    tokio::spawn({
+        stream::iter_ok(0..10).fold(tx, |tx, i| {
+            tx.send(format!(&quot;Message {} from spawned task&quot;, i))
+                .map_err(|e| println!(&quot;error = {:?}&quot;, e))
+        })
+        .map(|_| ()) // Drop tx handle
+    });
+
+    rx.for_each(|msg| {
+        println!(&quot;Got `{}`&quot;, msg);
+        Ok(())
+    })
+}));
+</code></pre>
+
+<p>These two message passing primitives will also be used in the examples below to
+coordinate and communicate between tasks.</p>
+
+<h1 id="multi-threaded">Multi threaded</h1>
+
+<p>While it is possible to introduce concurrency with futures without spawning
+tasks, this concurrency will be limited to running on a single thread. Spawning
+tasks allows the Tokio runtime to schedule these tasks on multiple threads.</p>
+
+<p>The <a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">multi-threaded Tokio runtime</a> manages multiple OS threads internally.
+It multiplexes many tasks across a few physical threads. When a Tokio
+application spawns its tasks, these tasks are submitted to the runtime and the
+runtime handles scheduling.</p>
+
+<h1 id="when-to-spawn-tasks">When to spawn tasks</h1>
+
+<p>As all things software related, the answer is that it depends. Generally, the
+answer is spawn a new task whenever you can. The more available tasks, the
+greater the ability to run the tasks in parallel. However, keep in mind that if
+multiple tasks do require communication, this will involve channel overhead.</p>
+
+<p>The following examples will help illustrate cases for spawning new tasks.</p>
+
+<h2 id="processing-inbound-sockets">Processing inbound sockets</h2>
+
+<p>The most straightforward example for spawning tasks is a network server.
+The primary task listens for inbound sockets on a TCP listener. When a
+new connection arrives, the listener task spawns a new task for
+processing the socket.</p>
+
+<pre><code class="language-rust">extern crate tokio;
+extern crate futures;
+
+use tokio::io;
+use tokio::net::TcpListener;
+use futures::{Future, Stream};
+
+let addr = &quot;127.0.0.1:0&quot;.parse().unwrap();
+let listener = TcpListener::bind(&amp;addr).unwrap();
+
+# if false {
+tokio::run({
+    listener.incoming().for_each(|socket| {
+        // An inbound socket has been received.
+        //
+        // Spawn a new task to process the socket
+        tokio::spawn({
+            // In this example, &quot;hello world&quot; will be written to the
+            // socket followed by the socket being closed.
+            io::write_all(socket, &quot;hello world&quot;)
+                // Drop the socket
+                .map(|_| ())
+                // Write any error to STDOUT
+                .map_err(|e| println!(&quot;socket error = {:?}&quot;, e))
+        });
+
+        // Receive the next inbound socket
+        Ok(())
+    })
+    .map_err(|e| println!(&quot;listener error = {:?}&quot;, e))
+});
+# }
+</code></pre>
+
+<p>The listener task and the tasks that process each socket are completely
+unrelated. They do not communicate and either can terminate without
+impacting the others. This is a perfect use case for spawning tasks.</p>
+
+<h2 id="background-processing">Background processing</h2>
+
+<p>Another case is to spawn a task that runs background computations in
+service of other tasks. The primary tasks send data to the background
+task for processing but do not care about if and when the data gets
+processed. This also allows a single background task to coalesce data
+from multiple primary tasks.</p>
+
+<p>This requires communication between the primary tasks and the background
+task. This is usually handled with an <a href="https://docs.rs/futures/0.1/futures/sync/mpsc/index.html"><code>mpsc</code></a> channel.</p>
+
+<p>The following example is a TCP server that reads data from the remote
+peer and tracks the number of received bytes. It then sends the number
+of received bytes to a background task. This background task writes the
+total number of bytes read from all socket tasks every 30 seconds.</p>
+
+<pre><code class="language-rust">extern crate tokio;
+extern crate futures;
+
+use tokio::io;
+use tokio::net::TcpListener;
+use tokio::timer::Interval;
+use futures::{future, stream, Future, Stream, Sink};
+use futures::future::lazy;
+use futures::sync::mpsc;
+use std::time::Duration;
+
+// Defines the background task. The `rx` argument is the channel receive
+// handle. The task will pull `usize` values (which represent number of
+// bytes read by a socket) off the channel and sum it internally. Every
+// 30 seconds, the current sum is written to STDOUT and the sum is reset
+// to zero.
+fn bg_task(rx: mpsc::Receiver&lt;usize&gt;)
+-&gt; impl Future&lt;Item = (), Error = ()&gt;
+{
+    // The stream of received `usize` values will be merged with a 30
+    // second interval stream. The value types of each stream must
+    // match. This enum is used to track the various values.
+    #[derive(Eq, PartialEq)]
+    enum Item {
+        Value(usize),
+        Tick,
+        Done,
+    }
+
+    // Interval at which the current sum is written to STDOUT.
+    let tick_dur = Duration::from_secs(30);
+
+    let interval = Interval::new_interval(tick_dur)
+        .map(|_| Item::Tick)
+        .map_err(|_| ());
+
+    // Turn the stream into a sequence of:
+    // Item(num), Item(num), ... Done
+    //
+    let items = rx.map(Item::Value)
+      .chain(stream::once(Ok(Item::Done)))
+      // Merge in the stream of intervals
+      .select(interval)
+      // Terminate the stream once `Done` is received. This is necessary
+      // because `Interval` is an infinite stream and `select` will keep
+      // selecting on it.
+      .take_while(|item| future::ok(*item != Item::Done));
+
+    // With the stream of `Item` values, start our logic.
+    //
+    // Using `fold` allows the state to be maintained across iterations.
+    // In this case, the state is the number of read bytes between tick.
+    items.fold(0, |num, item| {
+        match item {
+            // Sum the number of bytes with the state.
+            Item::Value(v) =&gt; future::ok(num + v),
+            Item::Tick =&gt; {
+                println!(&quot;bytes read = {}&quot;, num);
+
+                // Reset the byte counter
+                future::ok(0)
+            }
+            _ =&gt; unreachable!(),
+        }
+    })
+    .map(|_| ())
+}
+
+# if false {
+// Start the application
+tokio::run(lazy(|| {
+    let addr = &quot;127.0.0.1:0&quot;.parse().unwrap();
+    let listener = TcpListener::bind(&amp;addr).unwrap();
+
+    // Create the channel that is used to communicate with the
+    // background task.
+    let (tx, rx) = mpsc::channel(1_024);
+
+    // Spawn the background task:
+    tokio::spawn(bg_task(rx));
+
+    listener.incoming().for_each(move |socket| {
+        // An inbound socket has been received.
+        //
+        // Spawn a new task to process the socket
+        tokio::spawn({
+            // Each spawned task will have a clone of the sender handle.
+            let tx = tx.clone();
+
+            // In this example, &quot;hello world&quot; will be written to the
+            // socket followed by the socket being closed.
+            io::read_to_end(socket, vec![])
+                // Drop the socket
+                .and_then(move |(_, buf)| {
+                    tx.send(buf.len())
+                        .map_err(|_| io::ErrorKind::Other.into())
+                })
+                .map(|_| ())
+                // Write any error to STDOUT
+                .map_err(|e| println!(&quot;socket error = {:?}&quot;, e))
+        });
+
+        // Receive the next inbound socket
+        Ok(())
+    })
+    .map_err(|e| println!(&quot;listener error = {:?}&quot;, e))
+}));
+# }
+</code></pre>
+
+<h2 id="coordinating-access-to-a-resource">Coordinating access to a resource</h2>
+
+<p>When working with futures, the preferred strategy for coordinating
+access to a shared resource (socket, data, etc&hellip;) is by using message
+passing. To do this, a dedicated task is spawned to manage the resource
+and other tasks interact with the resource by sending messages.</p>
+
+<p>This pattern is very similar to the previous example, but this time the
+tasks want to receive a message back once the operation is complete. To
+implement this, both <code>mpsc</code> and <code>oneshot</code> channels are used.</p>
+
+<p>The example coordinates access to a <a href="https://tokio-cn.github.io/docs/going-deeper/frames/">transport</a> over a ping / pong
+protocol. Pings are sent into the transport and pongs are received.
+Primary tasks send a message to the coordinator task to initiate a ping,
+the coordinator task will respond to the ping request with the <a href="https://en.wikipedia.org/wiki/Round-trip_delay_time">round
+trip time</a>. The message sent to the coordinator task over the
+<code>mpsc</code> contains a <code>oneshot::Sender</code> allowing the coordinator task to
+respond.</p>
+
+<pre><code class="language-rust">extern crate tokio;
+extern crate futures;
+
+use tokio::io;
+use futures::{future, Future, Stream, Sink};
+use futures::future::lazy;
+use futures::sync::{mpsc, oneshot};
+use std::time::{Duration, Instant};
+
+type Message = oneshot::Sender&lt;Duration&gt;;
+
+struct Transport;
+
+impl Transport {
+    fn send_ping(&amp;self) {
+        // ...
+    }
+
+    fn recv_pong(&amp;self) -&gt; impl Future&lt;Item = (), Error = io::Error&gt; {
+#         future::ok(())
+        // ...
+    }
+}
+
+fn coordinator_task(rx: mpsc::Receiver&lt;Message&gt;)
+-&gt; impl Future&lt;Item = (), Error = ()&gt;
+{
+    let transport = Transport;
+
+    rx.for_each(move |pong_tx| {
+        let start = Instant::now();
+
+        transport.send_ping();
+
+        transport.recv_pong()
+            .map_err(|_| ())
+            .and_then(move |_| {
+                let rtt = start.elapsed();
+                pong_tx.send(rtt).unwrap();
+                Ok(())
+            })
+    })
+}
+
+/// Request an rtt.
+fn rtt(tx: mpsc::Sender&lt;Message&gt;)
+-&gt; impl Future&lt;Item = (Duration, mpsc::Sender&lt;Message&gt;), Error = ()&gt;
+{
+    let (resp_tx, resp_rx) = oneshot::channel();
+
+    tx.send(resp_tx)
+        .map_err(|_| ())
+        .and_then(|tx| {
+            resp_rx.map(|dur| (dur, tx))
+                .map_err(|_| ())
+        })
+}
+
+# if false {
+// Start the application
+tokio::run(lazy(|| {
+    // Create the channel that is used to communicate with the
+    // background task.
+    let (tx, rx) = mpsc::channel(1_024);
+
+    // Spawn the background task:
+    tokio::spawn(coordinator_task(rx));
+
+    // Spawn a few tasks that use the coordinator to requst RTTs.
+    for _ in 0..4 {
+        let tx = tx.clone();
+
+        tokio::spawn(lazy(|| {
+            rtt(tx).and_then(|(dur, _)| {
+                println!(&quot;duration = {:?}&quot;, dur);
+                Ok(())
+            })
+        }));
+    }
+
+    Ok(())
+}));
+# }
+</code></pre>
+
+<h1 id="when-not-to-spawn-tasks">When not to spawn tasks</h1>
+
+<p>If the amount of coordination via message passing and synchronization primitives
+outweighs the parallism benefits from spawning tasks, then maintaining a single
+task is preferred.</p>
+
+<p>For example, it is generally better to maintain reading from and writing to a
+single TCP socket on a single task instead of splitting up reading and writing
+between two tasks.</p>
 
       
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/docs/going-deeper/frames/">Working with framed streams</a>
+          <b>下一篇</b>：<a href ="/docs/futures/leaf-futures/">Leaf futures</a>
         </div>
       
     </main>

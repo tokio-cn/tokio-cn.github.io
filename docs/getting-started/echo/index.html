@@ -27,7 +27,7 @@
 
     <title>
       
-        Returning futures · Tokio 中文站
+        Example: An Echo Server · Tokio 中文站
       
     </title>
   </head>
@@ -119,7 +119,7 @@
           
             
               
-              <div class="tk-toc-item ">
+              <div class="tk-toc-item active">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/getting-started/hello-world/">
                   入门
                 </a>
@@ -131,7 +131,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime/" class="">Runtime</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/echo/" class="">Example: An Echo Server</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/echo/" class="active">Example: An Echo Server</a></li>
                 
                 </ul>
               </div>
@@ -191,7 +191,7 @@
           
             
               
-              <div class="tk-toc-item active">
+              <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/futures/">
                   深入
                 </a>
@@ -211,7 +211,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/futures-mechanics/" class="">Essential combinators</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="active">Returning futures</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="">Returning futures</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/frames/" class="">Working with framed streams</a></li>
                 
@@ -253,164 +253,197 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
+<li><a href="#setup">Setup</a>
+<ul>
+<li><a href="#handling-the-connections">Handling the connections</a></li>
+</ul></li>
 </ul>
 </nav>
       </div>
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">Returning futures</h1>
+      <h1 class="tk-title">Example: An Echo Server</h1>
       <div class="github-edit">
-        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/going-deeper/returning.md"> 在 GitHub 上编辑</a>
+        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/getting-started/echo.md"> 在 GitHub 上编辑</a>
       </div>
       
 
-<p>When working with futures, one of the first things you&rsquo;re likely to need to do
-is to return a <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>. As with <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a>s, however, doing so can be a little tricky.
-There are several options, listed from most to least ergonomic:</p>
+<p>We&rsquo;re going to use what has been covered so far to build an echo server. This is a
+Tokio application that encorporates everything we&rsquo;ve learned so far. The server will
+simply receive messages from the connected client and send back the same message it
+received to the client.</p>
+
+<p>We&rsquo;ll be able to test this echo server using the basic Tcp client we created in the
+<a href="https://tokio-cn.github.io/docs/getting-started/hello-world/">hello world</a> section.</p>
+
+<p>The full code can be found <a href="https://github.com/tokio-rs/tokio/blob/master/examples/echo.rs">here</a>.</p>
+
+<h1 id="setup">Setup</h1>
+
+<p>First, generate a new crate.</p>
+
+<pre><code class="language-shell">$ cargo new --bin echo-server
+cd echo-server
+</code></pre>
+
+<p>Next, add the necessary dependencies:</p>
+
+<pre><code class="language-toml">[dependencies]
+tokio = &quot;0.1&quot;
+</code></pre>
+
+<p>and the crates and types into scope in <code>main.rs</code>:</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+extern crate tokio;
+extern crate futures;
+
+use tokio::io;
+use tokio::net::TcpListener;
+use tokio::prelude::*;
+
+# fn main() {}
+</code></pre>
+
+<p>Now, we setup the necessary structure for a server:</p>
 
 <ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
+<li>Bind a <code>TcpListener</code> to a local port.</li>
+<li>Define a task that accepts inbound connections and processes them.</li>
+<li>Spawn the server task.</li>
+<li>Start the Tokio runtime</li>
 </ul>
 
-<h1 id="trait-objects">Trait objects</h1>
+<p>Again, no work actually happens until the server task is spawned on the
+executor.</p>
 
-<p>First, you always have the option of returning a boxed <a href="https://doc.rust-lang.org/book/trait-objects.html">trait object</a>:</p>
+<pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate tokio;
+# extern crate futures;
+#
+# use tokio::prelude::*;
+# use tokio::net::TcpListener;
+fn main() {
+    let addr = &quot;127.0.0.1:6142&quot;.parse().unwrap();
+    let listener = TcpListener::bind(&amp;addr).unwrap();
 
-<pre><code class="language-rust"># extern crate futures;
-# use std::io;
-# use futures::Future;
-# fn main() {}
-fn foo() -&gt; Box&lt;Future&lt;Item = u32, Error = io::Error&gt; + Send&gt; {
-    // ...
-# loop {}
+    // Here we convert the `TcpListener` to a stream of incoming connections
+    // with the `incoming` method. We then define how to process each element in
+    // the stream with the `for_each` combinator method
+    let server = listener.incoming().for_each(|socket| {
+        // TODO: Process socket
+        Ok(())
+    })
+    .map_err(|err| {
+        // Handle error by printing to STDOUT.
+        println!(&quot;accept error = {:?}&quot;, err);
+    });
+
+    println!(&quot;server running on localhost:6142&quot;);
+#    // `select` completes when the first of the two futures completes. Since
+#    // future::ok() completes immediately, the server won't hang waiting for
+#    // more connections. This is just so the doc test doesn't hang.
+#    let server = server.select(futures::future::ok(())).then(|_| Ok(()));
+
+    // Start the server
+    //
+    // This does a few things:
+    //
+    // * Start the Tokio runtime
+    // * Spawns the `server` task onto the runtime.
+    // * Blocks the current thread until the runtime becomes idle, i.e. all
+    //   spawned tasks have completed.
+    tokio::run(server);
 }
 </code></pre>
 
-<p>The upside of this strategy is that it&rsquo;s easy to write down (just a <a href="https://doc.rust-lang.org/std/boxed/struct.Box.html"><code>Box</code></a>) and
-easy to create. This is also maximally flexible in terms of future changes to
-the method as <em>any</em> type of future can be returned as an opaque, boxed <code>Future</code>.</p>
+<p>Here we&rsquo;ve created a TcpListener that can listen for incoming TCP connections. On the
+listener we call <code>incoming</code> which turns the listener into a <code>Stream</code> of inbound client
+connections. We then call <code>for_each</code> which will yield each inbound client connection.
+For now we&rsquo;re not doing anything with this inbound connection - that&rsquo;s our next step.</p>
 
-<p>The downside of this approach is that it requires a runtime allocation when the
-future is constructed, and dynamic dispatch when using that future. The <code>Box</code>
-needs to be allocated on the heap and the future itself is then placed
-inside. Note, though that this is the <em>only</em> allocation here, otherwise while
-the future is being executed no allocations will be made.</p>
+<p>Once we have our server, we can give it to <code>tokio::run</code>. Up until this point our
+server feature has done nothing. It&rsquo;s up to the Tokio runtime to drive our future to
+completion.</p>
 
-<p>It&rsquo;s often possible to mitigate that cost by boxing only at the end of a long
-chain of futures you want to return, which entails only a single allocation and
-dynamic dispatch for the entire chain.</p>
+<p>Note: We must call <code>map_err</code> on our <code>server</code> future because <code>tokio::run</code> expects
+a future with <code>Item</code> of type <code>()</code> and <code>Error</code> of type <code>()</code>. This is to ensure that
+we handle all values and errors before handing off the future to the runtime.</p>
 
-<p>Astute readers may notice the explicit <code>Send</code> trait notation within the <code>Box</code>
-definition. The notation is added because <code>Future</code> is not explicitly <code>Send</code> by
-default; this causes problems later when trying to pass this future or one of its
-derivatives into <code>tokio::run</code>.</p>
+<h2 id="handling-the-connections">Handling the connections</h2>
 
-<h1 id="impl-trait"><code>impl Trait</code></h1>
+<p>Now that we have incoming client connections, we should handle them.</p>
 
-<p>If you are using a version of Rust greater than 1.26, then you can use the
-language feature <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>. This language feature will allow, for
-example:</p>
+<p>We just want to copy all data read from the socket back onto the socket itself
+(e.g. &ldquo;echo&rdquo;). We can use the standard <a href="https://docs.rs/tokio-codec/0.1/tokio_codec/fn.copy.html"><code>io::copy</code></a> function to do precisely this.</p>
 
-<pre><code class="language-rust,ignore">fn add_10&lt;F&gt;(f: F) -&gt; impl Future&lt;Item = i32, Error = F::Error&gt;
-    where F: Future&lt;Item = i32&gt;,
-{
-    f.map(|i| i + 10)
-}
+<p>The <code>copy</code> function takes two arguments, where to read from and where to write to.
+We only have one argument, though, with <code>socket</code>. Luckily there&rsquo;s a method, <a href="https://docs.rs/tokio-codec/0.1/tokio_codec/trait.AsyncRead.html#method.split"><code>split</code></a>
+, which will split a readable and writeable stream into its two halves. This
+operation allows us to work with each stream independently, such as pass them as two
+arguments to the <code>copy</code> function.</p>
+
+<p>The <code>copy</code> function then returns a future, and this future will be resolved when the
+copying operation is complete, resolving to the amount of data that was copied.</p>
+
+<p>Let&rsquo;s take a look at the closure we passed to <code>for_each</code> again.</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate tokio;
+# extern crate futures;
+#
+# use tokio::prelude::*;
+# use tokio::net::TcpListener;
+# use tokio::io;
+# fn main() {
+# let addr = &quot;127.0.0.1:6142&quot;.parse().unwrap();
+# let listener = TcpListener::bind(&amp;addr).unwrap();
+let server = listener.incoming().for_each(|socket| {
+  // split the socket stream into readable and writable parts
+  let (reader, writer) = socket.split();
+  // copy bytes from the reader into the writer
+  let amount = io::copy(reader, writer);
+
+  let msg = amount.then(|result| {
+    match result {
+      Ok((amount, _, _)) =&gt; println!(&quot;wrote {} bytes&quot;, amount),
+      Err(e)             =&gt; println!(&quot;error: {}&quot;, e),
+    }
+
+    Ok(())
+  });
+
+  // spawn the task that handles the client connection socket on to the
+  // tokio runtime. This means each client connection will be handled
+  // concurrently
+  tokio::spawn(msg);
+  Ok(())
+})
+# .map_err(|_| ());
+# let server = server.select(futures::future::ok(())).then(|_| Ok(()));
+# tokio::run(server);
+# }
 </code></pre>
 
-<p>Here we&rsquo;re indicating that the return type is &ldquo;something that implements
-<code>Future</code>&rdquo; with the given associated types. Other than that we just use the
-future combinators as we normally would.</p>
+<p>As you can see we&rsquo;ve split the <code>socket</code> stream into readable and writable parts. We
+then used <code>io::copy</code> to read from <code>reader</code> and write into <code>writer</code>. We use the <code>then</code>
+combinator to look at the <code>amount</code> future&rsquo;s <code>Item</code> and <code>Error</code> as a <code>Result</code> printing
+some diagnostics.</p>
 
-<p>The upsides to this approach are that it is zero overhead with no <code>Box</code>
-necessary, it&rsquo;s maximally flexible to future implementations as the actual
-return type is hidden, and it&rsquo;s ergonomic to write as it&rsquo;s similar to the nice
-<code>Box</code> example above. (You can even remove <code>Send</code>, because the compiler has
-enough information to determine at compile time that <code>Future</code> is <code>Send</code>!)</p>
+<p>The call to <a href="https://docs.rs/tokio-executor/0.1/tokio_executor/fn.spawn.html"><code>tokio::spawn</code></a> is the key here. We crucially want all clients to make
+progress concurrently, rather than blocking one on completion of another. To achieve
+this we use the <code>tokio::spawn</code> function to execute the work in the background.</p>
 
-<p>The downside to this approach is only that using a <code>Box</code> is still more
-flexible. If you might return two different types of <code>Future</code>, then you
-must still return <code>Box&lt;Future&lt;Item = F::Item, Error = F::Error&gt; + Send&gt;</code> instead
-of <code>impl Future&lt;Item = F::Item, Error = F::Error&gt;</code>. For the same reason, you
-cannot use <code>impl Trait</code> when defining or implementing your own traits &ndash; the
-compiler will not let you specify <code>impl Trait</code> as a return type in a trait
-implementation because it can&rsquo;t determine which explicit type the trait should return.
-The good news however is that these cases are rare; in general, it should be a
-backwards-compatible extension to change return types from <code>Box</code> to <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>.</p>
+<p>If we did not do this then each invocation of the block in <code>for_each</code> would be
+resolved at a time meaning we could never have two client connections processed
+concurrently!</p>
 
-<h1 id="named-types">Named types</h1>
-
-<p>If you wouldn&rsquo;t like to return a <code>Box</code> and want to stick with older versions of
-Rust, another option is to write the return type directly:</p>
-
-<pre><code class="language-rust"># extern crate futures;
-# use futures::Future;
-# use futures::future::Map;
-# fn main() {}
-fn add_10&lt;F&gt;(f: F) -&gt; Map&lt;F, fn(i32) -&gt; i32&gt;
-    where F: Future&lt;Item = i32&gt;,
-{
-    fn do_map(i: i32) -&gt; i32 { i + 10 }
-    f.map(do_map)
-}
-</code></pre>
-
-<p>Here we name the return type exactly as the compiler sees it. The <code>map</code>
-function returns the <a href="https://docs.rs/futures/0.1/futures/future/struct.Map.html"><code>Map</code></a> struct which internally contains the future and the
-function to perform the map.</p>
-
-<p>The upside to this approach is that it doesn&rsquo;t have the runtime overhead of
-<code>Box</code> from before, and works on Rust versions pre-1.26.</p>
-
-<p>The downside, however, is that it&rsquo;s often quite difficult to name the type.
-Sometimes the types can get quite large or be unnameable altogether. Here we&rsquo;re
-using a function pointer (<code>fn(i32) -&gt; i32</code>), but we would ideally use a closure.
-Unfortunately, the return type cannot name the closure, for now. It also leads to
-very verbose signatures, and leaks implementation details to clients.</p>
-
-<h1 id="custom-types">Custom types</h1>
-
-<p>Finally, you can wrap the concrete return type in a new type, and implement
-future for it. For example:</p>
-
-<pre><code class="language-rust,ignore">struct MyFuture {
-    inner: Sender&lt;i32&gt;,
-}
-
-fn foo() -&gt; MyFuture {
-    let (tx, rx) = oneshot::channel();
-    // ...
-    MyFuture { inner: tx }
-}
-
-impl Future for MyFuture {
-    // ...
-}
-</code></pre>
-
-<p>In this example we&rsquo;re returning a custom type, <code>MyFuture</code>, and we implement the
-<code>Future</code> trait directly for it. This implementation leverages an underlying
-<code>Oneshot&lt;i32&gt;</code>, but any other kind of protocol can also be implemented here as
-well.</p>
-
-<p>The upside to this approach is that it won&rsquo;t require a <code>Box</code> allocation and it&rsquo;s
-still maximally flexible. The implementation details of <code>MyFuture</code> are hidden to
-the outside world so it can change without breaking others.</p>
-
-<p>The downside to this approach, however, is that this is the least ergonomic way
-to return futures.</p>
+<p>The full code can be found <a href="https://github.com/tokio-rs/tokio/blob/master/examples/echo.rs">here</a>.</p>
 
       
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/docs/going-deeper/frames/">Working with framed streams</a>
+          <b>下一篇</b>：<a href ="/docs/futures/overview/">Overview</a>
         </div>
       
     </main>

@@ -27,7 +27,7 @@
 
     <title>
       
-        Returning futures · Tokio 中文站
+        Streams · Tokio 中文站
       
     </title>
   </head>
@@ -139,7 +139,7 @@
           
             
               
-              <div class="tk-toc-item ">
+              <div class="tk-toc-item active">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/futures/overview/">
                   Working with futures
                 </a>
@@ -153,7 +153,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/futures/combinators/" class="">Combinators</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/futures/streams/" class="">Streams</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/futures/streams/" class="active">Streams</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/futures/spawning/" class="">Spawning</a></li>
                 
@@ -191,7 +191,7 @@
           
             
               
-              <div class="tk-toc-item active">
+              <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/futures/">
                   深入
                 </a>
@@ -211,7 +211,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/futures-mechanics/" class="">Essential combinators</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="active">Returning futures</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="">Returning futures</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/frames/" class="">Working with framed streams</a></li>
                 
@@ -253,164 +253,382 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
+<li><a href="#the-stream-trait">The <code>Stream</code> trait</a></li>
+<li><a href="#fibonacci">Fibonacci</a>
+<ul>
+<li><a href="#getting-asynchronous">Getting asynchronous</a></li>
+</ul></li>
+<li><a href="#combinators">Combinators</a></li>
+<li><a href="#essential-combinators">Essential combinators</a>
+<ul>
+<li><a href="#concrete-streams">Concrete streams</a></li>
+<li><a href="#adapters">Adapters</a></li>
+</ul></li>
 </ul>
 </nav>
       </div>
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">Returning futures</h1>
+      <h1 class="tk-title">Streams</h1>
       <div class="github-edit">
-        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/going-deeper/returning.md"> 在 GitHub 上编辑</a>
+        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/futures/streams.md"> 在 GitHub 上编辑</a>
       </div>
       
 
-<p>When working with futures, one of the first things you&rsquo;re likely to need to do
-is to return a <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>. As with <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a>s, however, doing so can be a little tricky.
-There are several options, listed from most to least ergonomic:</p>
+<p>Streams are similar to futures, but instead of yielding a single value, they
+asynchronously yield one or more values. They can be thought of as asynchronous
+iterators.</p>
+
+<p>Just like futures, streams are able to represent a wide range of things as long
+as those things produce discrete values at different points sometime in the
+future. For instance:</p>
 
 <ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
+<li><strong>UI Events</strong> caused by the user interacting with a GUI in different ways. When an
+event happens the stream yields a different message to your app over time.</li>
+<li><strong>Push Notifications from a server</strong>. Sometimes a request/response model is not
+what you need. A client can establish a notification stream with a server to be
+able to receive messages from the server without specifically being requested.</li>
+<li><strong>Incoming socket connections</strong>. As different clients connect to a server, the
+connections stream will yield socket connections.</li>
 </ul>
 
-<h1 id="trait-objects">Trait objects</h1>
+<h1 id="the-stream-trait">The <code>Stream</code> trait</h1>
 
-<p>First, you always have the option of returning a boxed <a href="https://doc.rust-lang.org/book/trait-objects.html">trait object</a>:</p>
+<p>Just like <code>Future</code>, implementing <code>Stream</code> is common when using Tokio. The
+<code>Stream</code> trait is as follows:</p>
 
-<pre><code class="language-rust"># extern crate futures;
-# use std::io;
-# use futures::Future;
-# fn main() {}
-fn foo() -&gt; Box&lt;Future&lt;Item = u32, Error = io::Error&gt; + Send&gt; {
-    // ...
-# loop {}
+<pre><code class="language-rust,ignore">trait Stream {
+    /// The type of the value yielded by the stream.
+    type Item;
+
+    /// The type representing errors that occurred while processing the computation.
+    type Error;
+
+    /// The function that will be repeatedly called to see if the stream has
+    /// another value it can yield
+    fn poll(&amp;mut self) -&gt; Poll&lt;Option&lt;Self::Item&gt;, Self::Error&gt;;
 }
 </code></pre>
 
-<p>The upside of this strategy is that it&rsquo;s easy to write down (just a <a href="https://doc.rust-lang.org/std/boxed/struct.Box.html"><code>Box</code></a>) and
-easy to create. This is also maximally flexible in terms of future changes to
-the method as <em>any</em> type of future can be returned as an opaque, boxed <code>Future</code>.</p>
+<p>The <code>Item</code> associated type is the type yielded by the stream. The <code>Error</code>
+associated type is the type of the error yielded when something unexpected
+happens. The <code>poll</code> function is very similar to <code>Future</code>&rsquo;s <code>poll</code> function. The
+only difference is that, this time, <code>Option&lt;Self::Item&gt;</code> is returned.</p>
 
-<p>The downside of this approach is that it requires a runtime allocation when the
-future is constructed, and dynamic dispatch when using that future. The <code>Box</code>
-needs to be allocated on the heap and the future itself is then placed
-inside. Note, though that this is the <em>only</em> allocation here, otherwise while
-the future is being executed no allocations will be made.</p>
+<p>Stream implementations have the <code>poll</code> function called many times. When the next
+value is ready, <code>Ok(Async::Ready(Some(value)))</code> is returned. When the stream is
+<strong>not ready</strong> to yield a value, <code>Ok(Async::NotReady)</code> is returned. When the
+stream is exhausted and will yield no further values, <code>Ok(Async::Ready(None))</code>
+is returned. Just like with futures, streams <strong>must not</strong> return
+<code>Async::NotReady</code> unless <code>Async::NotReady</code> was obtained by an inner stream or
+future.</p>
 
-<p>It&rsquo;s often possible to mitigate that cost by boxing only at the end of a long
-chain of futures you want to return, which entails only a single allocation and
-dynamic dispatch for the entire chain.</p>
+<p>When the stream encounters an error, <code>Err(error)</code> is returned. Returning an
+error <strong>does not</strong> signify that the stream is exhausted. The error may be
+transient and the caller may try calling <code>poll</code> again in the future and values
+may be produced again. If the error is fatal, then the next call to <code>poll</code>
+should return <code>Ok(Async::Ready(None))</code>.</p>
 
-<p>Astute readers may notice the explicit <code>Send</code> trait notation within the <code>Box</code>
-definition. The notation is added because <code>Future</code> is not explicitly <code>Send</code> by
-default; this causes problems later when trying to pass this future or one of its
-derivatives into <code>tokio::run</code>.</p>
+<h1 id="fibonacci">Fibonacci</h1>
 
-<h1 id="impl-trait"><code>impl Trait</code></h1>
+<p>The following example shows how to implement the fibonacci sequence as a stream.</p>
 
-<p>If you are using a version of Rust greater than 1.26, then you can use the
-language feature <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>. This language feature will allow, for
-example:</p>
+<pre><code class="language-rust">extern crate futures;
 
-<pre><code class="language-rust,ignore">fn add_10&lt;F&gt;(f: F) -&gt; impl Future&lt;Item = i32, Error = F::Error&gt;
-    where F: Future&lt;Item = i32&gt;,
+use futures::{Stream, Poll, Async};
+
+pub struct Fibonacci {
+    curr: u64,
+    next: u64,
+}
+
+impl Fibonacci {
+    fn new() -&gt; Fibonacci {
+        Fibonacci {
+            curr: 1,
+            next: 1,
+        }
+    }
+}
+
+impl Stream for Fibonacci {
+    type Item = u64;
+
+    // The stream will never yield an error
+    type Error = ();
+
+    fn poll(&amp;mut self) -&gt; Poll&lt;Option&lt;u64&gt;, ()&gt; {
+        let curr = self.curr;
+        let next = curr + self.next;
+
+        self.curr = self.next;
+        self.next = next;
+
+        Ok(Async::Ready(Some(curr)))
+    }
+}
+</code></pre>
+
+<p>To use the stream, a future must be built that consumes it. The following future
+will take a stream and display 10 items from it.</p>
+
+<pre><code class="language-rust">#[macro_use]
+extern crate futures;
+
+use futures::{Future, Stream, Poll, Async};
+use std::fmt;
+
+pub struct Display10&lt;T&gt; {
+    stream: T,
+    curr: usize,
+}
+
+impl&lt;T&gt; Display10&lt;T&gt; {
+    fn new(stream: T) -&gt; Display10&lt;T&gt; {
+        Display10 {
+            stream,
+            curr: 0,
+        }
+    }
+}
+
+impl&lt;T&gt; Future for Display10&lt;T&gt;
+where
+    T: Stream,
+    T::Item: fmt::Display,
 {
-    f.map(|i| i + 10)
+    type Item = ();
+    type Error = T::Error;
+
+    fn poll(&amp;mut self) -&gt; Poll&lt;(), Self::Error&gt; {
+        while self.curr &lt; 10 {
+            let value = match try_ready!(self.stream.poll()) {
+                Some(value) =&gt; value,
+                // There were less than 10 values to display, terminate the
+                // future.
+                None =&gt; break,
+            };
+
+            println!(&quot;value #{} = {}&quot;, self.curr, value);
+            self.curr += 1;
+        }
+
+        Ok(Async::Ready(()))
+    }
 }
-</code></pre>
-
-<p>Here we&rsquo;re indicating that the return type is &ldquo;something that implements
-<code>Future</code>&rdquo; with the given associated types. Other than that we just use the
-future combinators as we normally would.</p>
-
-<p>The upsides to this approach are that it is zero overhead with no <code>Box</code>
-necessary, it&rsquo;s maximally flexible to future implementations as the actual
-return type is hidden, and it&rsquo;s ergonomic to write as it&rsquo;s similar to the nice
-<code>Box</code> example above. (You can even remove <code>Send</code>, because the compiler has
-enough information to determine at compile time that <code>Future</code> is <code>Send</code>!)</p>
-
-<p>The downside to this approach is only that using a <code>Box</code> is still more
-flexible. If you might return two different types of <code>Future</code>, then you
-must still return <code>Box&lt;Future&lt;Item = F::Item, Error = F::Error&gt; + Send&gt;</code> instead
-of <code>impl Future&lt;Item = F::Item, Error = F::Error&gt;</code>. For the same reason, you
-cannot use <code>impl Trait</code> when defining or implementing your own traits &ndash; the
-compiler will not let you specify <code>impl Trait</code> as a return type in a trait
-implementation because it can&rsquo;t determine which explicit type the trait should return.
-The good news however is that these cases are rare; in general, it should be a
-backwards-compatible extension to change return types from <code>Box</code> to <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>.</p>
-
-<h1 id="named-types">Named types</h1>
-
-<p>If you wouldn&rsquo;t like to return a <code>Box</code> and want to stick with older versions of
-Rust, another option is to write the return type directly:</p>
-
-<pre><code class="language-rust"># extern crate futures;
-# use futures::Future;
-# use futures::future::Map;
 # fn main() {}
-fn add_10&lt;F&gt;(f: F) -&gt; Map&lt;F, fn(i32) -&gt; i32&gt;
-    where F: Future&lt;Item = i32&gt;,
-{
-    fn do_map(i: i32) -&gt; i32 { i + 10 }
-    f.map(do_map)
+</code></pre>
+
+<p>Now, the fibonacci sequence can be displayed:</p>
+
+<pre><code class="language-rust">extern crate tokio;
+# extern crate futures;
+# struct Fibonacci;
+# impl Fibonacci { fn new() { } }
+# struct Display10&lt;T&gt; { v: T };
+# impl&lt;T&gt; Display10&lt;T&gt; {
+# fn new(_: T) -&gt; futures::future::FutureResult&lt;(), ()&gt; {
+# futures::future::ok(())
+# }
+# }
+
+let fib = Fibonacci::new();
+let display = Display10::new(fib);
+
+tokio::run(display);
+</code></pre>
+
+<h2 id="getting-asynchronous">Getting asynchronous</h2>
+
+<p>So far, the fibonacci stream is synchronous. Lets make it asynchronous by
+waiting a second between values. To do this,
+<a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Interval.html"><code>tokio::timer::Interval</code></a> is used. <code>Interval</code> is, itself, a stream
+that yields <code>()</code> values at the requested time interval. Calling <code>Interval::poll</code>
+between intervals results in <code>Async::NotReady</code> being returned.</p>
+
+<p>The <code>Fibonacci</code> stream is updated as such:</p>
+
+<pre><code class="language-rust">#[macro_use]
+extern crate futures;
+extern crate tokio;
+
+use tokio::timer::Interval;
+use futures::{Stream, Poll, Async};
+use std::time::Duration;
+
+pub struct Fibonacci {
+    interval: Interval,
+    curr: u64,
+    next: u64,
+}
+
+impl Fibonacci {
+    fn new(duration: Duration) -&gt; Fibonacci {
+        Fibonacci {
+            interval: Interval::new_interval(duration),
+            curr: 1,
+            next: 1,
+        }
+    }
+}
+
+impl Stream for Fibonacci {
+    type Item = u64;
+
+    // The stream will never yield an error
+    type Error = ();
+
+    fn poll(&amp;mut self) -&gt; Poll&lt;Option&lt;u64&gt;, ()&gt; {
+        // Wait until the next interval
+        try_ready!(
+            self.interval.poll()
+                // The interval can fail if the Tokio runtime is unavailable.
+                // In this example, the error is ignored.
+                .map_err(|_| ())
+        );
+
+        let curr = self.curr;
+        let next = curr + self.next;
+
+        self.curr = self.next;
+        self.next = next;
+
+        Ok(Async::Ready(Some(curr)))
+    }
+}
+# fn main() {}
+</code></pre>
+
+<p>The <code>Display10</code> future already supports asynchronicity so it does not need to be
+updated.</p>
+
+<p>To run the throttled fibonacci sequence, include an interval:</p>
+
+<pre><code class="language-rust">extern crate tokio;
+# extern crate futures;
+# struct Fibonacci;
+# impl Fibonacci { fn new(dur: Duration) { } }
+# struct Display10&lt;T&gt; { v: T };
+# impl&lt;T&gt; Display10&lt;T&gt; {
+# fn new(_: T) -&gt; futures::future::FutureResult&lt;(), ()&gt; {
+# futures::future::ok(())
+# }
+# }
+
+use std::time::Duration;
+
+let fib = Fibonacci::new(Duration::from_secs(1));
+let display = Display10::new(fib);
+
+tokio::run(display);
+</code></pre>
+
+<h1 id="combinators">Combinators</h1>
+
+<p>Just like futures, streams come with a number of combinators for reducing
+boilerplate. Many of these combinators exist as functions on the
+<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code></a> trait.</p>
+
+<p>Updating fibonacci stream can be rewritten using the <a href="https://docs.rs/futures/0.1/futures/stream/fn.unfold.html"><code>unfold</code></a> function:</p>
+
+<pre><code class="language-rust">extern crate futures;
+
+use futures::{stream, Stream};
+
+fn fibonacci() -&gt; impl Stream&lt;Item = u64, Error = ()&gt; {
+    stream::unfold((1, 1), |(curr, next)| {
+        let new_next = curr + next;
+
+        Some(Ok((curr, (next, new_next))))
+    })
 }
 </code></pre>
 
-<p>Here we name the return type exactly as the compiler sees it. The <code>map</code>
-function returns the <a href="https://docs.rs/futures/0.1/futures/future/struct.Map.html"><code>Map</code></a> struct which internally contains the future and the
-function to perform the map.</p>
+<p>Just like with futures, using stream combinators requires a functional style of
+programming. Also, <code>impl Stream</code> is used to return the stream from the function.
+The <a href="https://tokio-cn.github.io/docs/futures/combinators/#returning-futures#">returning futures</a> strategies apply equality to returning streams.</p>
 
-<p>The upside to this approach is that it doesn&rsquo;t have the runtime overhead of
-<code>Box</code> from before, and works on Rust versions pre-1.26.</p>
+<p><code>Display10</code> is reimplemented using <a href="#"><code>take</code></a> and <a href="#"><code>for_each</code></a>:</p>
 
-<p>The downside, however, is that it&rsquo;s often quite difficult to name the type.
-Sometimes the types can get quite large or be unnameable altogether. Here we&rsquo;re
-using a function pointer (<code>fn(i32) -&gt; i32</code>), but we would ideally use a closure.
-Unfortunately, the return type cannot name the closure, for now. It also leads to
-very verbose signatures, and leaks implementation details to clients.</p>
+<pre><code class="language-rust">extern crate tokio;
+extern crate futures;
 
-<h1 id="custom-types">Custom types</h1>
+use futures::Stream;
+# use futures::stream;
+# fn fibonacci() -&gt; impl Stream&lt;Item = u64, Error = ()&gt; {
+# stream::once(Ok(1))
+# }
 
-<p>Finally, you can wrap the concrete return type in a new type, and implement
-future for it. For example:</p>
-
-<pre><code class="language-rust,ignore">struct MyFuture {
-    inner: Sender&lt;i32&gt;,
-}
-
-fn foo() -&gt; MyFuture {
-    let (tx, rx) = oneshot::channel();
-    // ...
-    MyFuture { inner: tx }
-}
-
-impl Future for MyFuture {
-    // ...
-}
+tokio::run(
+    fibonacci().take(10)
+        .for_each(|num| {
+            println!(&quot;{}&quot;, num);
+            Ok(())
+        })
+);
 </code></pre>
 
-<p>In this example we&rsquo;re returning a custom type, <code>MyFuture</code>, and we implement the
-<code>Future</code> trait directly for it. This implementation leverages an underlying
-<code>Oneshot&lt;i32&gt;</code>, but any other kind of protocol can also be implemented here as
-well.</p>
+<p>The <a href="#"><code>take</code></a> combinator limits the fibonacci stream to 10 values. The <a href="#"><code>for_each</code></a>
+combinator asynchronously iterates the stream values. <a href="#"><code>for_each</code></a> consumes the
+stream and returns a future that completes once the closure was called once for
+each stream value. It is the asynchronous equivalent to a rust <code>for</code> loop.</p>
 
-<p>The upside to this approach is that it won&rsquo;t require a <code>Box</code> allocation and it&rsquo;s
-still maximally flexible. The implementation details of <code>MyFuture</code> are hidden to
-the outside world so it can change without breaking others.</p>
+<h1 id="essential-combinators">Essential combinators</h1>
 
-<p>The downside to this approach, however, is that this is the least ergonomic way
-to return futures.</p>
+<p>It is worth spending some time with the <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html"><code>Stream</code> trait</a> and
+<a href="https://docs.rs/futures/0.1/futures/stream/index.html">module</a> documentation to gain some familiarity with the full set of
+available combinators. This guide will provide a very quick overview.</p>
+
+<h2 id="concrete-streams">Concrete streams</h2>
+
+<p>The <a href="https://docs.rs/futures/0.1/futures/stream/index.html"><code>stream</code> module</a> contains functions for converting values and
+iterators into streams.</p>
+
+<ul>
+<li><a href="https://docs.rs/futures/0.1/futures/stream/fn.once.html"><code>once</code></a> converts the provided value into an immediately ready stream that
+yields a single item: the provided value.</li>
+<li><a href="https://docs.rs/futures/0.1/futures/stream/fn.iter_ok.html"><code>iter_ok</code></a> and <a href="https://docs.rs/futures/0.1/futures/stream/fn.iter_result.html"><code>iter_result</code></a> both take <a href="https://doc.rust-lang.org/std/iter/trait.IntoIterator.html"><code>IntoIterator</code></a> values and converts
+them to an immediately ready stream that yields the iterator values.</li>
+<li><a href="https://docs.rs/futures/0.1/futures/stream/fn.empty.html"><code>empty</code></a> returns a stream that immediately yields <code>None</code>.</li>
+</ul>
+
+<p>For example:</p>
+
+<pre><code class="language-rust">extern crate tokio;
+extern crate futures;
+
+use futures::{stream, Stream};
+
+let values = vec![&quot;one&quot;, &quot;two&quot;, &quot;three&quot;];
+
+tokio::run(
+    stream::iter_ok(values).for_each(|value| {
+        println!(&quot;{}&quot;, value);
+        Ok(())
+    })
+)
+</code></pre>
+
+<h2 id="adapters">Adapters</h2>
+
+<p>Like <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a>, the <code>Stream</code> trait includes a broad range of &ldquo;adapter&rdquo;
+methods. These methods all consume the stream, returning a new stream providing
+the requested behavior. Using these adapter combinators, it is possible to:</p>
+
+<ul>
+<li>Change the type of a stream (<a href="#"><code>map</code></a>, <a href="#"><code>map_err</code></a>, <a href="#"><code>and_then</code></a>).</li>
+<li>Handle stream errors (<a href="#"><code>or_else</code></a>).</li>
+<li>Filter stream values (<a href="#"><code>take</code></a>, <a href="#"><code>take_while</code></a>, <a href="#"><code>skip</code></a>, <a href="#"><code>skip_while</code></a>,
+<a href="#"><code>filter</code></a>, <a href="#"><code>filter_map</code></a>).</li>
+<li>Asynchronously iterate the values (<a href="#"><code>for_each</code></a>, <a href="#"><code>fold</code></a>).</li>
+<li>Combine multiple streams together (<a href="#"><code>zip</code></a>, <a href="#"><code>chain</code></a>, <a href="#"><code>select</code></a>).</li>
+</ul>
 
       
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/docs/going-deeper/frames/">Working with framed streams</a>
+          <b>下一篇</b>：<a href ="/docs/futures/spawning/">Spawning</a>
         </div>
       
     </main>

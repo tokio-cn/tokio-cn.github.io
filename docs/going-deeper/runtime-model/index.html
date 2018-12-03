@@ -27,7 +27,7 @@
 
     <title>
       
-        Returning futures · Tokio 中文站
+        运行时模型 · Tokio 中文站
       
     </title>
   </head>
@@ -201,7 +201,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/tasks/" class="">Tasks</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/runtime-model/" class="">运行时模型</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/runtime-model/" class="active">运行时模型</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/io/" class="">I/O with Tokio</a></li>
                 
@@ -211,7 +211,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/futures-mechanics/" class="">Essential combinators</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="active">Returning futures</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/returning/" class="">Returning futures</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/frames/" class="">Working with framed streams</a></li>
                 
@@ -253,164 +253,245 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
+<li>
+<ul>
+<li><a href="#同步模型">同步模型</a></li>
+<li><a href="#非阻塞套接字">非阻塞套接字</a></li>
+<li><a href="#轮询模型">轮询模型</a></li>
+<li><a href="#执行子">执行子</a></li>
+</ul></li>
 </ul>
 </nav>
       </div>
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">Returning futures</h1>
+      <h1 class="tk-title">运行时模型</h1>
       <div class="github-edit">
-        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/going-deeper/returning.md"> 在 GitHub 上编辑</a>
+        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/going-deeper/runtime-model.md"> 在 GitHub 上编辑</a>
       </div>
       
 
-<p>When working with futures, one of the first things you&rsquo;re likely to need to do
-is to return a <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>. As with <a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html"><code>Iterator</code></a>s, however, doing so can be a little tricky.
-There are several options, listed from most to least ergonomic:</p>
+<p>现在我们要介绍 Tokio / future 运行时模型。Tokio 建立在
+<a href="https://docs.rs/futures/0.1/futures"><code>futures</code></a> crate 之上并使用其运行时模型。这让 Tokio 可以<!--
+-->与其他也使用 <a href="https://docs.rs/futures/0.1/futures"><code>futures</code></a> crate 的库进行互操作。</p>
 
-<ul>
-<li><a href="#trait-objects">Trait objects</a></li>
-<li><a href="#impl-trait"><code>impl Trait</code></a></li>
-<li><a href="#named-types">Named types</a></li>
-<li><a href="#custom-types">Custom types</a></li>
-</ul>
+<p><strong>注</strong>：这个运行时模型与其他语言中的异步库非常不同<!--
+-->。虽然在高级别的 API 上看起来很相似，但是代码执行的方式<!--
+-->却并不相同。</p>
 
-<h1 id="trait-objects">Trait objects</h1>
+<h2 id="同步模型">同步模型</h2>
 
-<p>First, you always have the option of returning a boxed <a href="https://doc.rust-lang.org/book/trait-objects.html">trait object</a>:</p>
+<p>首先，我们来简要谈谈同步（或阻塞）模型。这是
+Rust <a href="https://doc.rust-lang.org/std/">标准库</a>使用的模型。</p>
 
-<pre><code class="language-rust"># extern crate futures;
-# use std::io;
-# use futures::Future;
-# fn main() {}
-fn foo() -&gt; Box&lt;Future&lt;Item = u32, Error = io::Error&gt; + Send&gt; {
-    // ...
-# loop {}
-}
+<pre><code class="language-rust"># use std::io::prelude::*;
+# use std::net::TcpStream;
+# fn dox(mut socket: TcpStream) {
+// let socket = ……;
+let mut buf = [0; 1024];
+let n = socket.read(&amp;mut buf).unwrap();
+
+// 使用 &amp;buf[..n];
+# }
 </code></pre>
 
-<p>The upside of this strategy is that it&rsquo;s easy to write down (just a <a href="https://doc.rust-lang.org/std/boxed/struct.Box.html"><code>Box</code></a>) and
-easy to create. This is also maximally flexible in terms of future changes to
-the method as <em>any</em> type of future can be returned as an opaque, boxed <code>Future</code>.</p>
+<p>当调用 <code>socket.read</code> 时，要么该套接字在其接收缓冲区有待读取的数据，
+要么没有。如果有待读取的数据，那么对 <code>read</code> 的调用会<!--
+-->立即返回并且以相应数据填充 <code>buf</code>。而如果<!--
+-->没有待读取的数据，那么 <code>read</code> 函数会阻塞当前线程直到<!--
+-->收到数据。这时，会以这次新接收到的数据填充 <code>buf</code>
+并且 <code>read</code> 函数会返回。</p>
 
-<p>The downside of this approach is that it requires a runtime allocation when the
-future is constructed, and dynamic dispatch when using that future. The <code>Box</code>
-needs to be allocated on the heap and the future itself is then placed
-inside. Note, though that this is the <em>only</em> allocation here, otherwise while
-the future is being executed no allocations will be made.</p>
+<p>为了对多个不同的套接字并发执行读取操作，需要每个套接字<!--
+-->一个线程。每个套接字使用一个线程不能很好地伸缩到<!--
+-->大量的套接字。这就是所谓的 <a href="https://en.wikipedia.org/wiki/C10k_problem">c10k</a> 问题。</p>
 
-<p>It&rsquo;s often possible to mitigate that cost by boxing only at the end of a long
-chain of futures you want to return, which entails only a single allocation and
-dynamic dispatch for the entire chain.</p>
+<h2 id="非阻塞套接字">非阻塞套接字</h2>
 
-<p>Astute readers may notice the explicit <code>Send</code> trait notation within the <code>Box</code>
-definition. The notation is added because <code>Future</code> is not explicitly <code>Send</code> by
-default; this causes problems later when trying to pass this future or one of its
-derivatives into <code>tokio::run</code>.</p>
+<p>在执行像读取这样的操作时避免阻塞线程的方法是<!--
+-->不阻塞线程！当套接字的接收缓冲区中没有待读取的数据时，
+<code>read</code> 函数会立即返回，表明该套接字“未<!--
+-->准备好”执行读取操作。</p>
 
-<h1 id="impl-trait"><code>impl Trait</code></h1>
+<p>当使用 Tokio <a href="https://docs.rs/tokio/0.1/tokio/net/struct.TcpStream.html"><code>TcpStream</code></a> 时，对 <code>read</code> 的调用会立即返回<!--
+-->一个值（<a href="https://doc.rust-lang.org/std/io/enum.ErrorKind.html#variant.WouldBlock"><code>ErrorKind::WouldBlock</code></a>）即使没有待读取数据。
+如果没有待读取数据，调用方负责稍后再次调用 <code>read</code><!--
+-->。其诀窍是知道什么时候是“稍后”。</p>
 
-<p>If you are using a version of Rust greater than 1.26, then you can use the
-language feature <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>. This language feature will allow, for
-example:</p>
+<p>考虑非阻塞读取的另一种方式是“轮询”用于读取数据的<!--
+-->套接字。</p>
 
-<pre><code class="language-rust,ignore">fn add_10&lt;F&gt;(f: F) -&gt; impl Future&lt;Item = i32, Error = F::Error&gt;
-    where F: Future&lt;Item = i32&gt;,
-{
-    f.map(|i| i + 10)
-}
+<h2 id="轮询模型">轮询模型</h2>
+
+<p>对数据套接字轮询的策略可以泛化为对任何操作轮询。
+例如，在轮询模型中获取“部件（widget）”的函数看起来<!--
+-->类似于：</p>
+
+<pre><code class="language-rust,ignore">fn poll_widget() -&gt; Async&lt;Widget&gt; { …… }
 </code></pre>
 
-<p>Here we&rsquo;re indicating that the return type is &ldquo;something that implements
-<code>Future</code>&rdquo; with the given associated types. Other than that we just use the
-future combinators as we normally would.</p>
+<p>这个函数返回一个 <code>Async&lt;Widget&gt;</code>，其中 <a href="https://docs.rs/futures/0.1/futures/enum.Async.html"><code>Async</code></a> 是枚举值
+<code>Ready(Widget)</code> 或 <code>NotReady</code>。<a href="https://docs.rs/futures/0.1/futures/enum.Async.html"><code>Async</code></a> 枚举由 <a href="https://docs.rs/futures/0.1/futures"><code>futures</code></a> crate 提供，
+并且是轮询模型的基本要素之一。</p>
 
-<p>The upsides to this approach are that it is zero overhead with no <code>Box</code>
-necessary, it&rsquo;s maximally flexible to future implementations as the actual
-return type is hidden, and it&rsquo;s ergonomic to write as it&rsquo;s similar to the nice
-<code>Box</code> example above. (You can even remove <code>Send</code>, because the compiler has
-enough information to determine at compile time that <code>Future</code> is <code>Send</code>!)</p>
+<p>现在，我们来定义一个无需使用这个
+<code>poll_widget</code> 函数的组合子的异步任务。该任务会执行以下操作：</p>
 
-<p>The downside to this approach is only that using a <code>Box</code> is still more
-flexible. If you might return two different types of <code>Future</code>, then you
-must still return <code>Box&lt;Future&lt;Item = F::Item, Error = F::Error&gt; + Send&gt;</code> instead
-of <code>impl Future&lt;Item = F::Item, Error = F::Error&gt;</code>. For the same reason, you
-cannot use <code>impl Trait</code> when defining or implementing your own traits &ndash; the
-compiler will not let you specify <code>impl Trait</code> as a return type in a trait
-implementation because it can&rsquo;t determine which explicit type the trait should return.
-The good news however is that these cases are rare; in general, it should be a
-backwards-compatible extension to change return types from <code>Box</code> to <a href="https://github.com/rust-lang/rfcs/blob/master/text/1522-conservative-impl-trait.md"><code>impl Trait</code></a>.</p>
+<ol>
+<li>获取一个部件。</li>
+<li>将该部件输出到标准输出（STDOUT）.</li>
+<li>结束该任务。</li>
+</ol>
 
-<h1 id="named-types">Named types</h1>
+<p>为了定义一个任务，我们实现了 <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a> trait。</p>
 
-<p>If you wouldn&rsquo;t like to return a <code>Box</code> and want to stick with older versions of
-Rust, another option is to write the return type directly:</p>
+<pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate futures;
+# use futures::{Async, Future};
+#
+# #[derive(Debug)]
+# pub struct Widget;
+# fn poll_widget() -&gt; Async&lt;Widget&gt; { unimplemented!() }
+#
+/// 轮询单个部件并将其写入到标准输出的任务。
+pub struct MyTask;
 
-<pre><code class="language-rust"># extern crate futures;
-# use futures::Future;
-# use futures::future::Map;
-# fn main() {}
-fn add_10&lt;F&gt;(f: F) -&gt; Map&lt;F, fn(i32) -&gt; i32&gt;
-    where F: Future&lt;Item = i32&gt;,
-{
-    fn do_map(i: i32) -&gt; i32 { i + 10 }
-    f.map(do_map)
+impl Future for MyTask {
+    // 这个 future 就绪后将会有的值
+    type Item = ();
+    type Error = ();
+
+    fn poll(&amp;mut self) -&gt; Result&lt;Async&lt;()&gt;, ()&gt; {
+        match poll_widget() {
+            Async::Ready(widget) =&gt; {
+                println!(&quot;widget={:?}&quot;, widget);
+                Ok(Async::Ready(()))
+            }
+            Async::NotReady =&gt; {
+                Ok(Async::NotReady)
+            }
+        }
+    }
 }
+#
+# fn main() {
+# }
 </code></pre>
 
-<p>Here we name the return type exactly as the compiler sees it. The <code>map</code>
-function returns the <a href="https://docs.rs/futures/0.1/futures/future/struct.Map.html"><code>Map</code></a> struct which internally contains the future and the
-function to perform the map.</p>
+<blockquote>
+<p><strong>重要</strong>：返回 <code>Async::NotReady</code> 具有特殊含义。关于更详细的信息，请参见<!--
+--><a href="https://tokio-cn.github.io/docs/getting-started/futures/#returning-not-ready">下一节</a>。</p>
+</blockquote>
 
-<p>The upside to this approach is that it doesn&rsquo;t have the runtime overhead of
-<code>Box</code> from before, and works on Rust versions pre-1.26.</p>
+<p>需要注意的关键是，当调用 <code>MyTask::poll</code> 时，它会立即尝试<!--
+-->获取该部件。如果对 <code>poll_widget</code> 的调用返回 <code>NotReady</code>，那么该任务<!--
+-->无法取得进一步的进展。然后该任务返回 <code>NotReady</code> 本身，
+表明它还没有准备好完成处理。</p>
 
-<p>The downside, however, is that it&rsquo;s often quite difficult to name the type.
-Sometimes the types can get quite large or be unnameable altogether. Here we&rsquo;re
-using a function pointer (<code>fn(i32) -&gt; i32</code>), but we would ideally use a closure.
-Unfortunately, the return type cannot name the closure, for now. It also leads to
-very verbose signatures, and leaks implementation details to clients.</p>
+<p>该任务的实现并不会阻塞。相反，“在将来的某个时刻”，
+执行子会再次调用 <code>MyTask::poll</code>。会再次调用 <code>poll_widget</code>。如果
+<code>poll_widget</code> 已经准备好返回一个部件，那么该任务就可以输出<!--
+-->该部件了。然后可以通过返回 <code>Ready</code> 完成该任务。</p>
 
-<h1 id="custom-types">Custom types</h1>
+<h2 id="执行子">执行子</h2>
 
-<p>Finally, you can wrap the concrete return type in a new type, and implement
-future for it. For example:</p>
+<p>为了使任务取得进展，必须有地方调用 <code>MyTask::poll</code>。
+这就是执行子（executor）的职责。</p>
 
-<pre><code class="language-rust,ignore">struct MyFuture {
-    inner: Sender&lt;i32&gt;,
+<p>执行子负责对任务重复调用 <code>poll</code>，直到返回 <code>Ready</code>
+。有许多不同的方法可以做到这一点。例如，
+<a href="https://docs.rs/tokio/0.1/tokio/executor/current_thread/index.html"><code>CurrentThread</code></a> 执行子会阻塞当前线程并循环遍历所有<!--
+-->已产生的任务，并对它们轮询调用。<a href="http://docs.rs/tokio-threadpool"><code>ThreadPool</code></a> 会在线程池上调度任务<!--
+-->。这也是<a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">运行时</a>所使用的默认执行子。</p>
+
+<p>所有任务<strong>必须</strong>都在执行子上产生，否则没有任何作用。</p>
+
+<p>在最简单的情况下，执行子可能看起来类似于：</p>
+
+<pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate futures;
+# use futures::{Async, Future};
+# use std::collections::VecDeque;
+#
+pub struct SpinExecutor {
+    // 执行子在双端队列中
+    // 所负责的任务
+    tasks: VecDeque&lt;Box&lt;Future&lt;Item = (), Error = ()&gt; + Send&gt;&gt;,
 }
 
-fn foo() -&gt; MyFuture {
-    let (tx, rx) = oneshot::channel();
-    // ...
-    MyFuture { inner: tx }
-}
+impl SpinExecutor {
+    pub fn spawn&lt;T&gt;(&amp;mut self, task: T)
+    where T: Future&lt;Item = (), Error = ()&gt; + 'static + Send
+    {
+        self.tasks.push_back(Box::new(task));
+    }
 
-impl Future for MyFuture {
-    // ...
+    pub fn run(&amp;mut self) {
+        // 在紧凑循环中从前面弹出任务
+        while let Some(mut task) = self.tasks.pop_front() {
+            match task.poll().unwrap() {
+                Async::Ready(_) =&gt; {}
+                Async::NotReady =&gt; {
+                    // 如果任务未就绪就将其置于队列的后面
+                    self.tasks.push_back(task);
+                }
+            }
+        }
+    }
 }
+# pub fn main() {}
 </code></pre>
 
-<p>In this example we&rsquo;re returning a custom type, <code>MyFuture</code>, and we implement the
-<code>Future</code> trait directly for it. This implementation leverages an underlying
-<code>Oneshot&lt;i32&gt;</code>, but any other kind of protocol can also be implemented here as
-well.</p>
+<p>当然，这不会很有效率。执行子在一个繁忙的循环中自旋<!--
+-->并尝试轮询所有任务，即使任务只会再次返回 <code>NotReady</code>。</p>
 
-<p>The upside to this approach is that it won&rsquo;t require a <code>Box</code> allocation and it&rsquo;s
-still maximally flexible. The implementation details of <code>MyFuture</code> are hidden to
-the outside world so it can change without breaking others.</p>
+<p>理想情况下，执行子可以通过某种方式知道任务何时变更为“准备就绪”<!--
+-->状态，即当对 <code>poll</code> 的调用会返回 <code>Ready</code> 时。
+那么执行子看起来会类似于：</p>
 
-<p>The downside to this approach, however, is that this is the least ergonomic way
-to return futures.</p>
+<pre><code class="language-rust"># #![deny(deprecated)]
+# extern crate futures;
+# use futures::{Async, Future};
+# use std::collections::VecDeque;
+#
+# pub struct SpinExecutor {
+#     ready_tasks: VecDeque&lt;Box&lt;Future&lt;Item = (), Error = ()&gt;&gt;&gt;,
+#     not_ready_tasks: VecDeque&lt;Box&lt;Future&lt;Item = (), Error = ()&gt;&gt;&gt;,
+# }
+#
+# impl SpinExecutor {
+#     fn sleep_until_tasks_are_ready(&amp;self) {}
+#
+    pub fn run(&amp;mut self) {
+        loop {
+            while let Some(mut task) = self.ready_tasks.pop_front() {
+                match task.poll().unwrap() {
+                    Async::Ready(_) =&gt; {}
+                    Async::NotReady =&gt; {
+                        self.not_ready_tasks.push_back(task);
+                    }
+                }
+            }
+
+            if self.not_ready_tasks.is_empty() {
+                return;
+            }
+
+            // 让线程进入休眠状态，直到有事情做
+            self.sleep_until_tasks_are_ready();
+        }
+    }
+# }
+# pub fn main() {}
+</code></pre>
+
+<p>当任务从“未准备好”变成“已准备好”时能够得到通知是<!--
+--><a href="https://docs.rs/futures/0.1/futures"><code>futures</code></a> 任务模型的核心。</p>
 
       
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/docs/going-deeper/frames/">Working with framed streams</a>
+          <b>下一篇</b>：<a href ="/docs/going-deeper/io/">I/O with Tokio</a>
         </div>
       
     </main>

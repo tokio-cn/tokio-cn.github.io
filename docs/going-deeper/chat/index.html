@@ -119,7 +119,7 @@
           
             
               
-              <div class="tk-toc-item active">
+              <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/getting-started/hello-world/">
                   入门
                 </a>
@@ -127,15 +127,11 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/hello-world/" class="">Hello World!</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/" class="">运行时模型</a></li>
-                
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="">Futures</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/tasks/" class="">Tasks</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime/" class="">Runtime</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/io/" class="">I/O with Tokio</a></li>
-                
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/chat/" class="active">Example: A Chat Server</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/echo/" class="">Example: An Echo Server</a></li>
                 
                 </ul>
               </div>
@@ -144,10 +140,72 @@
             
               
               <div class="tk-toc-item ">
-                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/timers/">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/futures/overview/">
+                  Working with futures
+                </a>
+                <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/overview/" class="">Overview</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/basic/" class="">Implementing futures</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/getting_asynchronous/" class="">Getting asynchronous</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/combinators/" class="">Combinators</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/streams/" class="">Streams</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/spawning/" class="">Spawning</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/leaf-futures/" class="">Leaf futures</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/runtime-model/" class="">Runtime model</a></li>
+                
+                </ul>
+              </div>
+            
+          
+            
+              
+              <div class="tk-toc-item ">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/io/overview/">
+                  I/O with Tokio
+                </a>
+                <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/overview/" class="">I/O Overview</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/reading_writing_data/" class="">Reading and Writing Data</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/async_read_write/" class="">Using AsyncRead and AsyncWrite directly</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/impl_async_read_write/" class="">Implementing Async Read/Write</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/filesystem/" class="">Filesystem APIs</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/datagrams/" class="">Datagram APIs</a></li>
+                
+                </ul>
+              </div>
+            
+          
+            
+              
+              <div class="tk-toc-item active">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/futures/">
                   深入
                 </a>
                 <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/futures/" class="">Futures: In Depth</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/tasks/" class="">Tasks</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/runtime-model/" class="">运行时模型</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/io/" class="">I/O with Tokio</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/chat/" class="active">Example: A Chat Server</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/timers/" class="">Timers</a></li>
                 
@@ -207,7 +265,7 @@
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
       <h1 class="tk-title">Example: A Chat Server</h1>
       <div class="github-edit">
-        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/getting-started/chat.md"> 在 GitHub 上编辑</a>
+        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/going-deeper/chat.md"> 在 GitHub 上编辑</a>
       </div>
       
 
@@ -321,7 +379,7 @@ fn main() {
 <h1 id="chat-state">Chat State</h1>
 
 <p>A chat server requires that messages received from one client are broadcasted to
-all other connected clients. This will be done using <a href="https://tokio-cn.github.io/docs/getting-started/tasks/#message-passing">message passing</a> over
+all other connected clients. This will be done using <a href="https://tokio-cn.github.io/docs/going-deeper/tasks/#message-passing">message passing</a> over
 <a href="https://docs.rs/futures/0.1/futures/sync/mpsc/index.html">mpsc</a> channels.</p>
 
 <p>Each client socket will be managed by a task. Each task will have an associated
@@ -417,7 +475,7 @@ consumes lines.</p>
 
 <p>A codec is a loose term for a type that takes a byte stream type (<code>AsyncRead +
 AsyncWrite</code>) and exposes a read and write API at the frame level. The
-<a href="https://docs.rs/tokio-io/0.1/tokio_io"><code>tokio-io</code></a> crate provides additional helpers for writing codecs, in this
+<a href="https://docs.rs/tokio-codec/0.1/tokio_codec"><code>tokio-io</code></a> crate provides additional helpers for writing codecs, in this
 example, we are going to do it by hand.</p>
 
 <p>The <code>Lines</code> codec is defined as such:</p>
@@ -658,7 +716,7 @@ others.</p>
 </ol>
 
 <p>Implementing this logic entirely with combinators is also possible, but requires
-using <a href="https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncRead.html#method.split"><code>split</code></a>, which hasn&rsquo;t been covered yet. Also, this provides an
+using <a href="https://docs.rs/tokio-codec/0.1/tokio_codec/trait.AsyncRead.html#method.split"><code>split</code></a>, which hasn&rsquo;t been covered yet. Also, this provides an
 opportunity to see how to implement a non-trivial <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a> by hand.</p>
 
 <p>Here is the definition of the future that processes the broadcast logic for a

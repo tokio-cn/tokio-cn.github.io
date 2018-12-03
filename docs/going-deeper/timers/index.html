@@ -127,15 +127,63 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/hello-world/" class="">Hello World!</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/" class="">运行时模型</a></li>
-                
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="">Futures</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/tasks/" class="">Tasks</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime/" class="">Runtime</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/io/" class="">I/O with Tokio</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/echo/" class="">Example: An Echo Server</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/chat/" class="">Example: A Chat Server</a></li>
+                </ul>
+              </div>
+            
+          
+            
+              
+              <div class="tk-toc-item ">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/futures/overview/">
+                  Working with futures
+                </a>
+                <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/overview/" class="">Overview</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/basic/" class="">Implementing futures</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/getting_asynchronous/" class="">Getting asynchronous</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/combinators/" class="">Combinators</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/streams/" class="">Streams</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/spawning/" class="">Spawning</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/leaf-futures/" class="">Leaf futures</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/runtime-model/" class="">Runtime model</a></li>
+                
+                </ul>
+              </div>
+            
+          
+            
+              
+              <div class="tk-toc-item ">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/io/overview/">
+                  I/O with Tokio
+                </a>
+                <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/overview/" class="">I/O Overview</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/reading_writing_data/" class="">Reading and Writing Data</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/async_read_write/" class="">Using AsyncRead and AsyncWrite directly</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/impl_async_read_write/" class="">Implementing Async Read/Write</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/filesystem/" class="">Filesystem APIs</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/datagrams/" class="">Datagram APIs</a></li>
                 
                 </ul>
               </div>
@@ -144,10 +192,20 @@
             
               
               <div class="tk-toc-item active">
-                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/timers/">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/futures/">
                   深入
                 </a>
                 <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/futures/" class="">Futures: In Depth</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/tasks/" class="">Tasks</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/runtime-model/" class="">运行时模型</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/io/" class="">I/O with Tokio</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/chat/" class="">Example: A Chat Server</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/timers/" class="active">Timers</a></li>
                 
@@ -281,7 +339,7 @@ use tokio::prelude::*;
 use std::time::{Duration, Instant};
 
 fn read_four_bytes(socket: TcpStream)
-    -&gt; Box&lt;Future&lt;Item = (TcpStream, Vec&lt;u8&gt;), Error = ()&gt;&gt;
+    -&gt; Box&lt;Future&lt;Item = (TcpStream, Vec&lt;u8&gt;), Error = ()&gt; + Send&gt;
 {
     let buf = vec![0; 4];
     let fut = io::read_exact(socket, buf)

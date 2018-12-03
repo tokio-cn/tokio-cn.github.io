@@ -127,15 +127,11 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/hello-world/" class="active">Hello World!</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime-model/" class="">运行时模型</a></li>
-                
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="">Futures</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/tasks/" class="">Tasks</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime/" class="">Runtime</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/io/" class="">I/O with Tokio</a></li>
-                
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/chat/" class="">Example: A Chat Server</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/echo/" class="">Example: An Echo Server</a></li>
                 
                 </ul>
               </div>
@@ -144,10 +140,72 @@
             
               
               <div class="tk-toc-item ">
-                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/timers/">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/futures/overview/">
+                  Working with futures
+                </a>
+                <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/overview/" class="">Overview</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/basic/" class="">Implementing futures</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/getting_asynchronous/" class="">Getting asynchronous</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/combinators/" class="">Combinators</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/streams/" class="">Streams</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/spawning/" class="">Spawning</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/leaf-futures/" class="">Leaf futures</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/futures/runtime-model/" class="">Runtime model</a></li>
+                
+                </ul>
+              </div>
+            
+          
+            
+              
+              <div class="tk-toc-item ">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/io/overview/">
+                  I/O with Tokio
+                </a>
+                <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/overview/" class="">I/O Overview</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/reading_writing_data/" class="">Reading and Writing Data</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/async_read_write/" class="">Using AsyncRead and AsyncWrite directly</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/impl_async_read_write/" class="">Implementing Async Read/Write</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/filesystem/" class="">Filesystem APIs</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/io/datagrams/" class="">Datagram APIs</a></li>
+                
+                </ul>
+              </div>
+            
+          
+            
+              
+              <div class="tk-toc-item ">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/futures/">
                   深入
                 </a>
                 <ul class="nav tk-sidenav">
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/futures/" class="">Futures: In Depth</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/tasks/" class="">Tasks</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/runtime-model/" class="">运行时模型</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/io/" class="">I/O with Tokio</a></li>
+                
+                  <li><a href="https://tokio-cn.github.io/docs/going-deeper/chat/" class="">Example: A Chat Server</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/going-deeper/timers/" class="">Timers</a></li>
                 
@@ -195,12 +253,11 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
-<li><a href="#creating-the-stream">Creating the stream</a></li>
+<li><a href="#创建流">创建流</a></li>
 <li><a href="#写数据">写数据</a></li>
-<li><a href="#running-the-client-task">Running the client task</a>
-<ul>
+<li><a href="#运行客户端任务">运行客户端任务</a></li>
+<li><a href="#running-the-code">Running the code</a></li>
 <li><a href="#下一步">下一步</a></li>
-</ul></li>
 </ul>
 </nav>
       </div>
@@ -213,12 +270,12 @@
       
 
 <p>为了开始我们的 Tokio 之旅，我们会以惯例“hello world”开始<!--
--->。 This program will create a TCP stream and write &ldquo;hello, world!&rdquo; to the stream.
-The difference between this and a Rust program that writes to a TCP stream without Tokio
-is that this program won&rsquo;t block program execution when the stream is created or when
-our &ldquo;hello, world!&rdquo; message is written to the stream.</p>
+-->。 这个程序会创建一个 TCP 流并将“hello, world!”写入到流中。
+这与未使用 Tokio 写入到 TCP 流的 Rust 程序之间的区别<!--
+-->在于，这个程序在创建流或者<!--
+-->将“hello, world!”消息写入到流中的时候不会阻塞程序执行。</p>
 
-<p>在开始之前，你应该对 TCP stream 的工作原理有最基本的了解。
+<p>在开始之前，你应该对 TCP 流的工作原理有最基本的了解。
 了解 Rust 的<a href="https://doc.rust-lang.org/std/net/struct.TcpStream.html">标准库实现</a><!--
 -->也很有帮助。</p>
 
@@ -226,11 +283,11 @@ our &ldquo;hello, world!&rdquo; message is written to the stream.</p>
 
 <p>首先，生成一个新的 crate。</p>
 
-<pre><code class="language-bash">$ cargo new --bin hello-world
+<pre><code class="language-bash">$ cargo new hello-world
 $ cd hello-world
 </code></pre>
 
-<p>接下来，添加必要的依赖项：</p>
+<p>接下来，在 <code>Cargo.toml</code> 中添加必要的依赖项：</p>
 
 <pre><code class="language-toml">[dependencies]
 tokio = &quot;0.1&quot;
@@ -247,7 +304,11 @@ use tokio::prelude::*;
 # fn main() {}
 </code></pre>
 
-<h1 id="creating-the-stream">Creating the stream</h1>
+<p>Here we use Tokio&rsquo;s own <a href="https://docs.rs/tokio/0.1/tokio/io/index.html"><code>io</code></a> and <a href="https://docs.rs/tokio/0.1/tokio/net/index.html"><code>net</code></a> modules. These modules provide the same
+abstractions over networking and I/O-operations as the corresponding modules in <code>std</code>
+with a small difference: all actions are performed asynchronously.</p>
+
+<h1 id="创建流">创建流</h1>
 
 <p>第一步是创建 <code>TcpStream</code>。我们使用 Tokio 提供的 <code>TcpStream</code>
 实现。</p>
@@ -257,16 +318,16 @@ use tokio::prelude::*;
 #
 # use tokio::net::TcpStream;
 fn main() {
-    // Parse the address of whatever server we're talking to
+    // 解析我们即将交互的任何服务器的地址
     let addr = &quot;127.0.0.1:6142&quot;.parse().unwrap();
-    let stream = TcpStream::connect(&amp;addr);
+    let client = TcpStream::connect(&amp;addr);
 
     // 后续片段写到这里……
 }
 </code></pre>
 
-<p>接下来，我们定义  <code>client</code> 任务。这个异步任务会 create the stream
-and then yield the stream once it&rsquo;s been created for additional processing.</p>
+<p>Next, we&rsquo;ll add some to the <code>client</code> <code>TcpStream</code>. This asynchronous task now creates
+the stream and then yields it once it&rsquo;s been created for additional processing.</p>
 
 <pre><code class="language-rust"># #![deny(deprecated)]
 # extern crate tokio;
@@ -275,7 +336,7 @@ and then yield the stream once it&rsquo;s been created for additional processing
 # use tokio::prelude::*;
 # fn main() {
 # let addr = &quot;127.0.0.1:6142&quot;.parse().unwrap();
-let hello_world = TcpStream::connect(&amp;addr).and_then(|stream| {
+let client = TcpStream::connect(&amp;addr).and_then(|stream| {
     println!(&quot;created stream&quot;);
 
     // 这里处理 stream。
@@ -292,15 +353,15 @@ let hello_world = TcpStream::connect(&amp;addr).and_then(|stream| {
 # }
 </code></pre>
 
-<p>调用 <code>TcpStream::connect</code> 会返回一个已创建的 TCP stream 的 <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>。
+<p>调用 <code>TcpStream::connect</code> 会返回一个已创建的 TCP 流的 <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>。
 我们会在指南的后续部分学习更多关于 [<code>Futures</code>] 的内容，不过现在你可以将
-[<code>Stream</code>] as a value that represents something that will eventually happen in the
-future (in this case the stream will be created). This means that <code>TcpStream::connect</code> does
-not wait for the stream to be created before it returns. Rather it returns immediately
-with a value representing the work of creating a TCP stream. We&rsquo;ll see down below when this work
-<em>actually</em> gets executed.</p>
+[<code>Stream</code>] 作为表示将来终究会发生的事物的值<!--
+-->（在本例中会创建流）。这意味着 <code>TcpStream::connect</code>  不会<!--
+-->等待流创建后再返回。而是立即返回<!--
+-->一个表示创建 TCP 流这项工作的值。当这项工作
+<em>实际</em> 执行时，我们会在下文看到。</p>
 
-<p>The <code>and_then</code> method yields the stream once it has been created. <code>and_then</code> 是<!--
+<p>上述 <code>and_then</code> 方法会在流创建后产生该流。<code>and_then</code> 是<!--
 -->定义了如何处理异步作业的组合子函数的一个示例。</p>
 
 <p>每个组合子函数都获得必要状态的所有权以及用<!--
@@ -311,21 +372,21 @@ with a value representing the work of creating a TCP stream. We&rsquo;ll see dow
 <p>值得重申的是返回的那些 future 都是惰性的，也就是说，在调用该组合子时不执行任何操作<!--
 -->。相反，一旦所有异步步骤都已顺次排入，
 最终的 <code>Future</code>（代表整个任务）就会“产生”（即运行）。这是<!--
--->之前定义的作业开始运行的时候。 In other words, the code
-we&rsquo;ve written so far does not actually create a TCP stream.</p>
+-->之前定义的作业开始运行的时候。换句话说，到目前为止我们编写的代码<!--
+-->实际上并没有创建 TCP 流。</p>
 
 <p>我们稍后会更深入地探讨这些 future（以及 stream 与 sink 的相关概念）<!--
 -->。</p>
 
-<p>It&rsquo;s also important to note that we&rsquo;ve called <code>map_err</code> to convert whatever error
-we may have gotten to <code>()</code> before we can actually run our future. This ensures that
-we acknowledge errors.</p>
+<p>同样重要需要注意的是，我们已经在可以真正运行 future 之前调用了 <code>map_err</code> 将<!--
+-->可以遇到的任何错误都转换成了 <code>()</code>。这确保我们已<!--
+-->知悉错误的可能。</p>
 
-<p>Next, we will process the stream.</p>
+<p>接下来，我们会处理该流。</p>
 
 <h1 id="写数据">写数据</h1>
 
-<p>我们的目标是将 <code>&quot;hello world\n&quot;</code> 写入到 stream。</p>
+<p>我们的目标是将 <code>&quot;hello world\n&quot;</code> 写入到流中。</p>
 
 <p>回到 <code>TcpStream::connect(addr).and_then</code> 块：</p>
 
@@ -349,17 +410,18 @@ let client = TcpStream::connect(&amp;addr).and_then(|stream| {
 # }
 </code></pre>
 
-<p>The <a href="https://docs.rs/tokio-io/0.1/tokio_io/io/fn.write_all.html"><code>io::write_all</code></a> function takes ownership of <code>stream</code>, returning a
-<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a> that completes once the entire message has been written to the
-stream. <code>then</code> is used to sequence a step that gets run once the write has
-completed. In our example, we just write a message to <code>STDOUT</code> indicating that
-the write has completed.</p>
+<p><a href="https://docs.rs/tokio-codec/0.1/tokio_codec/io/fn.write_all.html"><code>io::write_all</code></a> 函数取得 <code>stream</code> 的所有权，并返回一个
+<a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>，当整条消息都已写入到流时，该 future 就完成&lt;&ndash;
+&ndash;&gt;了。<code>then</code> 用于排入一个写入完成后的步骤<!--
+-->。在我们的示例中，我们只是向 <code>STDOUT</code> 写一条消息，以示<!--
+-->写操作已完成。</p>
 
-<p>Note that <code>result</code> is a <code>Result</code> that contains the original stream. This allows us
-to sequence additional reads or writes to the same stream. However, we have
-nothing more to do, so we just drop the stream, which automatically closes it.</p>
+<p>请注意 <code>result</code> 是包含原始流的 <code>Result</code> (compare to
+<code>and_then</code>, which passes the stream without the <code>Result</code> wrapper)。这让我们可以<!--
+-->对同一流排入附加的读或写操作。当然，我们并<!--
+-->没有任何要做的，所以只是丢弃了该流，这会自动关闭之。</p>
 
-<h1 id="running-the-client-task">Running the client task</h1>
+<h1 id="运行客户端任务">运行客户端任务</h1>
 
 <p>到目前为止，我们有一个表示程序会完成的作业的 <code>Future</code>，但是我们<!--
 -->并没有真正运行它。需要一种方式来“产生”该作业。我们需要一个执行子。</p>
@@ -392,15 +454,30 @@ that our Future has been run to completion.</p>
 
 <p>可以在<a href="https://github.com/tokio-rs/tokio/blob/master/examples/hello_world.rs">这里</a>找到完整的示例。</p>
 
-<h2 id="下一步">下一步</h2>
+<h1 id="running-the-code">Running the code</h1>
+
+<p><a href="http://netcat.sourceforge.net/">Netcat</a> is a tool for quickly creating TCP sockets from the command line. The following
+command starts a listening TCP socket on the previously specified port.</p>
+
+<pre><code class="language-bash">$ nc -l 6142
+</code></pre>
+
+<p>In a different terminal we&rsquo;ll run our project.</p>
+
+<pre><code class="language-bash">$ cargo run
+</code></pre>
+
+<p>If everything goes well, you should see <code>hello world</code> printed from Netcat.</p>
+
+<h1 id="下一步">下一步</h1>
 
 <p>我们这里只是对 Tokio 及其异步模型小试牛刀。本指南的下一页<!--
--->会开始深入探讨 Tokio 运行时模型。</p>
+-->会开始稍深入探讨 Future 与 Tokio 运行时模型。</p>
 
       
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/docs/getting-started/runtime-model/">运行时模型</a>
+          <b>下一篇</b>：<a href ="/docs/getting-started/futures/">Futures</a>
         </div>
       
     </main>

@@ -61,23 +61,91 @@
   </url>
   
   <url>
-    <loc>https://tokio-cn.github.io/docs/getting-started/runtime-model/</loc>
-  </url>
-  
-  <url>
     <loc>https://tokio-cn.github.io/docs/getting-started/futures/</loc>
   </url>
   
   <url>
-    <loc>https://tokio-cn.github.io/docs/getting-started/tasks/</loc>
+    <loc>https://tokio-cn.github.io/docs/getting-started/runtime/</loc>
   </url>
   
   <url>
-    <loc>https://tokio-cn.github.io/docs/getting-started/io/</loc>
+    <loc>https://tokio-cn.github.io/docs/getting-started/echo/</loc>
   </url>
   
   <url>
-    <loc>https://tokio-cn.github.io/docs/getting-started/chat/</loc>
+    <loc>https://tokio-cn.github.io/docs/futures/overview/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/futures/basic/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/futures/getting_asynchronous/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/futures/combinators/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/futures/streams/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/futures/spawning/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/futures/leaf-futures/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/futures/runtime-model/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/io/overview/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/io/reading_writing_data/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/io/async_read_write/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/io/impl_async_read_write/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/io/filesystem/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/io/datagrams/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/going-deeper/futures/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/going-deeper/tasks/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/going-deeper/runtime-model/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/going-deeper/io/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/going-deeper/chat/</loc>
   </url>
   
   <url>
