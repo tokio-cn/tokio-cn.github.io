@@ -144,7 +144,7 @@ Tokio is a platform for writing fast networking code in Rust. It&amp;rsquo;s bui
 首先，生成一个新的 crate。
 $ cargo new hello-world $ cd hello-world  接下来，在 Cargo.toml 中添加必要的依赖项：
 [dependencies] tokio = &amp;quot;0.1&amp;quot;  还有 main.rs 中的 crate 与类型：
-# #![deny(deprecated)] extern crate tokio; use tokio::io; use tokio::net::TcpStream; use tokio::prelude::*; # fn main() {}  Here we use Tokio&amp;rsquo;s own io and net modules.</description>
+# #![deny(deprecated)] extern crate tokio; use tokio::io; use tokio::net::TcpStream; use tokio::prelude::*; # fn main() {}  这里我们使用 Tokio 自己的 io 与 net 模块。这俩模块提供与 std 中相应模块几乎相同的网络与 I/O 操作的抽象， 只有很小的差异：所有操作都是异步执行的。</description>
     </item>
     
     <item>

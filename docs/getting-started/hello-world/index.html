@@ -256,7 +256,7 @@
 <li><a href="#创建流">创建流</a></li>
 <li><a href="#写数据">写数据</a></li>
 <li><a href="#运行客户端任务">运行客户端任务</a></li>
-<li><a href="#running-the-code">Running the code</a></li>
+<li><a href="#运行该代码">运行该代码</a></li>
 <li><a href="#下一步">下一步</a></li>
 </ul>
 </nav>
@@ -304,9 +304,9 @@ use tokio::prelude::*;
 # fn main() {}
 </code></pre>
 
-<p>Here we use Tokio&rsquo;s own <a href="https://docs.rs/tokio/0.1/tokio/io/index.html"><code>io</code></a> and <a href="https://docs.rs/tokio/0.1/tokio/net/index.html"><code>net</code></a> modules. These modules provide the same
-abstractions over networking and I/O-operations as the corresponding modules in <code>std</code>
-with a small difference: all actions are performed asynchronously.</p>
+<p>这里我们使用 Tokio 自己的 <a href="https://docs.rs/tokio/0.1/tokio/io/index.html"><code>io</code></a> 与 <a href="https://docs.rs/tokio/0.1/tokio/net/index.html"><code>net</code></a> 模块。这俩模块提供与
+<code>std</code> 中相应模块几乎相同的网络与 I/O 操作的抽象，
+只有很小的差异：所有操作都是异步执行的。</p>
 
 <h1 id="创建流">创建流</h1>
 
@@ -326,8 +326,8 @@ fn main() {
 }
 </code></pre>
 
-<p>Next, we&rsquo;ll add some to the <code>client</code> <code>TcpStream</code>. This asynchronous task now creates
-the stream and then yields it once it&rsquo;s been created for additional processing.</p>
+<p>接下来，我们会向 <code>client</code> <code>TcpStream</code> 中添加一些内容。这个异步任务现在创建了<!--
+-->流，一旦创建完成就会产生（yield）之以进行后续处理。</p>
 
 <pre><code class="language-rust"># #![deny(deprecated)]
 # extern crate tokio;
@@ -416,8 +416,8 @@ let client = TcpStream::connect(&amp;addr).and_then(|stream| {
 -->。在我们的示例中，我们只是向 <code>STDOUT</code> 写一条消息，以示<!--
 -->写操作已完成。</p>
 
-<p>请注意 <code>result</code> 是包含原始流的 <code>Result</code> (compare to
-<code>and_then</code>, which passes the stream without the <code>Result</code> wrapper)。这让我们可以<!--
+<p>请注意 <code>result</code> 是包含原始流的 <code>Result</code> (（与
+<code>and_then</code> 相比，后者传递没有 <code>Result</code> 包装的流）。这让我们可以<!--
 -->对同一流排入附加的读或写操作。当然，我们并<!--
 -->没有任何要做的，所以只是丢弃了该流，这会自动关闭之。</p>
 
@@ -449,25 +449,25 @@ println!(&quot;Stream has been created and written to.&quot;);
 -->都已完成并且所有资源（如文件与套接字）都已释放。</p>
 
 <p>至此，我们仅仅在执行子上执行了单个任务，因此 <code>client</code> 任务<!--
--->是阻塞 <code>run</code> 返回的唯一任务。 Once <code>run</code> has returned we can be sure
-that our Future has been run to completion.</p>
+-->是阻塞 <code>run</code> 返回的唯一任务。 一旦 <code>run</code> 返回，就可以确定<!--
+-->我们的 Future 已经运行完成。</p>
 
 <p>可以在<a href="https://github.com/tokio-rs/tokio/blob/master/examples/hello_world.rs">这里</a>找到完整的示例。</p>
 
-<h1 id="running-the-code">Running the code</h1>
+<h1 id="运行该代码">运行该代码</h1>
 
-<p><a href="http://netcat.sourceforge.net/">Netcat</a> is a tool for quickly creating TCP sockets from the command line. The following
-command starts a listening TCP socket on the previously specified port.</p>
+<p><a href="http://netcat.sourceforge.net/">Netcat</a> 是一个在命令行快速创建 TCP 套接字的工具。以下<!--
+-->命令在先前指定的端口上启动 TCP 套接字监听。</p>
 
 <pre><code class="language-bash">$ nc -l 6142
 </code></pre>
 
-<p>In a different terminal we&rsquo;ll run our project.</p>
+<p>在另一个终端运行我们的项目。</p>
 
 <pre><code class="language-bash">$ cargo run
 </code></pre>
 
-<p>If everything goes well, you should see <code>hello world</code> printed from Netcat.</p>
+<p>如果一切顺利，你会看到 Netcat 输出的 <code>hello world</code>。</p>
 
 <h1 id="下一步">下一步</h1>
 
