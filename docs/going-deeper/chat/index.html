@@ -475,7 +475,7 @@ consumes lines.</p>
 
 <p>A codec is a loose term for a type that takes a byte stream type (<code>AsyncRead +
 AsyncWrite</code>) and exposes a read and write API at the frame level. The
-<a href="https://docs.rs/tokio-codec/0.1/tokio_codec"><code>tokio-io</code></a> crate provides additional helpers for writing codecs, in this
+<a href="https://docs.rs/tokio-io/0.1/tokio_io"><code>tokio-io</code></a> crate provides additional helpers for writing codecs, in this
 example, we are going to do it by hand.</p>
 
 <p>The <code>Lines</code> codec is defined as such:</p>
@@ -716,7 +716,7 @@ others.</p>
 </ol>
 
 <p>Implementing this logic entirely with combinators is also possible, but requires
-using <a href="https://docs.rs/tokio-codec/0.1/tokio_codec/trait.AsyncRead.html#method.split"><code>split</code></a>, which hasn&rsquo;t been covered yet. Also, this provides an
+using <a href="https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncRead.html#method.split"><code>split</code></a>, which hasn&rsquo;t been covered yet. Also, this provides an
 opportunity to see how to implement a non-trivial <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a> by hand.</p>
 
 <p>Here is the definition of the future that processes the broadcast logic for a

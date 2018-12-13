@@ -410,7 +410,7 @@ let client = TcpStream::connect(&amp;addr).and_then(|stream| {
 # }
 </code></pre>
 
-<p><a href="https://docs.rs/tokio-codec/0.1/tokio_codec/io/fn.write_all.html"><code>io::write_all</code></a> 函数取得 <code>stream</code> 的所有权，并返回一个
+<p><a href="https://docs.rs/tokio-io/0.1/tokio_io/io/fn.write_all.html"><code>io::write_all</code></a> 函数取得 <code>stream</code> 的所有权，并返回一个
 <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>，当整条消息都已写入到流时，该 future 就完成&lt;&ndash;
 &ndash;&gt;了。<code>then</code> 用于排入一个写入完成后的步骤<!--
 -->。在我们的示例中，我们只是向 <code>STDOUT</code> 写一条消息，以示<!--

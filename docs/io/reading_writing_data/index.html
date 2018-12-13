@@ -272,7 +272,7 @@
 
 <p>In <a href="https://tokio-cn.github.io/docs/io/overview/">the overview</a> we mentioned briefly that Tokio&rsquo;s I/O types implement
 non-blocking variants of <code>std::io::Read</code> and <code>std::io::Write</code> called
-<a href="https://docs.rs/tokio-codec/0.1/tokio_codec/trait.AsyncRead.html"><code>AsyncRead</code></a> and <a href="https://docs.rs/tokio-codec/0.1/tokio_codec/trait.AsyncWrite.html"><code>AsyncWrite</code></a>. These are an integral part of Tokio&rsquo;s
+<a href="https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncRead.html"><code>AsyncRead</code></a> and <a href="https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncWrite.html"><code>AsyncWrite</code></a>. These are an integral part of Tokio&rsquo;s
 I/O story, and are important to understand when working with I/O code.</p>
 
 <blockquote>
@@ -281,7 +281,7 @@ I/O story, and are important to understand when working with I/O code.</p>
 an I/O resource (like a TCP socket) instead of reading from it.</p>
 </blockquote>
 
-<p>So, let&rsquo;s take a look at <a href="https://docs.rs/tokio-codec/0.1/tokio_codec/trait.AsyncRead.html"><code>AsyncRead</code></a> and see what all the fuss is
+<p>So, let&rsquo;s take a look at <a href="https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncRead.html"><code>AsyncRead</code></a> and see what all the fuss is
 about:</p>
 
 <pre><code class="language-rust,no_run">use std::io::Read;
@@ -513,7 +513,7 @@ reference to it to pass as the second argument! <em>We</em> know that <a href="h
 won&rsquo;t read and write <em>at the same time</em> to those, but that&rsquo;s not
 expressed in <code>copy</code>&rsquo;s types.</p>
 
-<p>Enter <a href="https://docs.rs/tokio-codec/0.1/tokio_codec/trait.AsyncRead.html##method.split"><code>split</code></a>, a provided method on the <code>AsyncRead</code> trait when the
+<p>Enter <a href="https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncRead.html##method.split"><code>split</code></a>, a provided method on the <code>AsyncRead</code> trait when the
 type <em>also</em> implements <code>AsyncWrite</code>. If we look at the signature, we see</p>
 
 <pre><code class="language-rust,ignore">fn split(self) -&gt; (ReadHalf&lt;Self&gt;, WriteHalf&lt;Self&gt;)
@@ -525,7 +525,7 @@ implements <code>AsyncWrite</code>. And crucially, we now have two <em>separate<
 pointers into our type, which we can pass around separately. This comes
 in handy for <a href="https://docs.rs/tokio/0.1/tokio/io/fn.copy.html"><code>copy</code></a>, but it also means that we can pass each half to
 a different future, and handle the reads and writes completely
-independently! Behind the scenes, <a href="https://docs.rs/tokio-codec/0.1/tokio_codec/trait.AsyncRead.html##method.split"><code>split</code></a> ensures that if we both try
+independently! Behind the scenes, <a href="https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncRead.html##method.split"><code>split</code></a> ensures that if we both try
 to read and write at the same time, only one of them happen at a time.</p>
 
 <h1 id="transports">Transports</h1>
