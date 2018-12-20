@@ -6,10 +6,20 @@
     <description>Recent content in Blogs on Tokio——Rust 编程语言的异步运行时。</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Thu, 04 Oct 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 19 Dec 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://tokio-cn.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>A great 2018, an even better 2019</title>
+      <link>https://tokio-cn.github.io/blog/2018-12-recap-2018/</link>
+      <pubDate>Wed, 19 Dec 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/blog/2018-12-recap-2018/</guid>
+      <description>A year ago, Tokio was a very different library. It includes the (now deprecated) tokio-core which provided a future executor, I/O selector, and basic TCP/UDP types in a single library. It also included tokio-proto, but we won&amp;rsquo;t talk about that. Over the past year, Tokio has grown to become Rust&amp;rsquo;s asynchronous I/O platform. It has been adopted by a number of large companies to build apps.
+A lot was achieved in 2018.</description>
+    </item>
     
     <item>
       <title>Announcing the Tokio Doc Push (we need you!)</title>

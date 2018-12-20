@@ -54,7 +54,7 @@
           <li class="nav-item">
             
             
-            <a class="nav-link " href="https://tokio-cn.github.io/blog/2018-10-doc-blitz/">博客</a>
+            <a class="nav-link " href="https://tokio-cn.github.io/blog/2018-12-recap-2018/">博客</a>
           </li>
         </ul>
       </div>
@@ -391,10 +391,10 @@ fn main() {
     let addr = &quot;127.0.0.1:1234&quot;.parse().unwrap();
     let connect_future = TcpStream::connect(&amp;addr);
     let hello_world = HelloWorld::Connecting(connect_future);
-# let hello_world = futures::future::ok::&lt;(), ()&gt;(());
+# let hello_world = futures::future::ok::&lt;(), io::Error&gt;(());
 
-    // Run it
-    tokio::run(hello_world)
+    // Run it, here we map the error since tokio::run expects a Future&lt;Item=(), Error=()&gt;
+    tokio::run(hello_world.map_err(|e| println!(&quot;{0}&quot;, e)))
 }
 </code></pre>
 

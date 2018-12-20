@@ -27,7 +27,7 @@
 
     <title>
       
-        An RFC for a Tokio revamp · Tokio 中文站
+        A great 2018, an even better 2019 · Tokio 中文站
       
     </title>
   </head>
@@ -95,7 +95,7 @@
     <div class="col-12 col-md-3 col-xl-2 tk-sidebar">
       
       <div class="tk-docs-toggle d-md-none p-0 d-flex ml-3 collapsed align-item-center">
-        <h1 class="tk-title">An RFC for a Tokio revamp</h1>
+        <h1 class="tk-title">A great 2018, an even better 2019</h1>
         <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#tk-docs-nav" aria-controls="tk-docs-nav" aria-expanded="false" aria-label="Toggle docs navigation">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30" focusable="false"><title>Menu</title><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M4 7h22M4 15h22M4 23h22"></path></svg>
         </button>
@@ -108,7 +108,7 @@
             <ul class="nav tk-sidenav">
               
               
-                  <li><a href="https://tokio-cn.github.io/blog/2018-12-recap-2018/" class="">A great 2018, an even better 2019</a></li>
+                  <li><a href="https://tokio-cn.github.io/blog/2018-12-recap-2018/" class="active">A great 2018, an even better 2019</a></li>
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-10-doc-blitz/" class="">Announcing the Tokio Doc Push (we need you!)</a></li>
               
@@ -124,7 +124,7 @@
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-02-tokio-reform-shipped/" class="">Tokio Reform is Shipped and the Road to 0.2</a></li>
               
-                  <li><a href="https://tokio-cn.github.io/blog/2017-09-tokio-reform/" class="active">An RFC for a Tokio revamp</a></li>
+                  <li><a href="https://tokio-cn.github.io/blog/2017-09-tokio-reform/" class="">An RFC for a Tokio revamp</a></li>
               
                   <li><a href="https://tokio-cn.github.io/blog/2017-03-tokio-io/" class="">Announcing the tokio-io Crate</a></li>
               
@@ -136,69 +136,212 @@
     </div>
     <div class="d-none d-xl-block col-xl-2 tk-toc">
       <div class="section-nav">
-        
+        <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#async-await">Async / await</a></li>
+<li><a href="#tokio-trace">Tokio Trace</a></li>
+<li><a href="#teams">Teams</a></li>
+</ul></li>
+</ul>
+</nav>
       </div>
 
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">An RFC for a Tokio revamp</h1>
+      <h1 class="tk-title">A great 2018, an even better 2019</h1>
       
-      <p>Hi there, Tokio community!</p>
+      
 
-<p>Carl, Alex, and myself have been hard at work developing ways to simplify,
-streamline, and focus the Tokio project. As part of this effort, we have
-written the first-ever Tokio <a href="https://github.com/carllerche/tokio-rfcs/pull/2">RFC</a>!</p>
+<p>A year ago, Tokio was a very different library. It includes the (now deprecated)
+<code>tokio-core</code> which provided a future executor, I/O selector, and basic TCP/UDP
+types in a single library. It also included <code>tokio-proto</code>, but we won&rsquo;t talk
+about that. Over the past year, Tokio has grown to become Rust&rsquo;s asynchronous
+I/O platform. It has been adopted by a <a href="http://github.com/linkerd/linkerd2-proxy/">number</a> of <a href="https://github.com/firecracker-microvm/firecracker">large</a>
+<a href="https://github.com/Azure/iotedge">companies</a> to build <a href="https://github.com/tikv/tikv">apps</a>.</p>
 
-<p>Here&rsquo;s a quick run-down of what&rsquo;s being proposed.</p>
-
-<ul>
-<li><p>Add a global event loop in <code>tokio-core</code> that is managed automatically by
-default. This change eliminates the need for setting up and managing your own
-event loop in the vast majority of cases.</p>
+<p>A lot was achieved in 2018. Some highlights include:</p>
 
 <ul>
-<li>Moreover, remove the distinction between <code>Handle</code> and <code>Remote</code> in
-<code>tokio-core</code> by making <code>Handle</code> both <code>Send</code> and <code>Sync</code> and deprecating
-<code>Remote</code>. Thus, even working with custom event loops becomes simpler.</li>
-</ul></li>
-
-<li><p>Decouple all task execution functionality from Tokio, instead providing it
-through a standard futures component. As with event loops, provide a default
-global thread pool that suffices for the majority of use-cases, removing the
-need for any manual setup.</p>
-
-<ul>
-<li>Moreover, when running tasks thread-locally (for non-<code>Send</code> futures),
-provide more fool-proof APIs that help avoid lost wakeups.</li>
-</ul></li>
-
-<li><p>Provide the above changes in a new <code>tokio</code> crate, which is a slimmed down
-version of today&rsquo;s <code>tokio-core</code>, and may <em>eventually</em> re-export the contents
-of <code>tokio-io</code>. The <code>tokio-core</code> crate is deprecated, but will remain available
-for backward compatibility. In the long run, most users should only need to
-depend on <code>tokio</code> to use the Tokio stack.</p></li>
-
-<li><p>Focus documentation primarily on <code>tokio</code>, rather than on
-<code>tokio-proto</code>. Provide a much more extensive set of cookbook-style examples
-and general guidelines, as well as a more in-depth guide to working with
-futures.</p></li>
+<li>A high-performance, multi-threaded, work-stealing, scheduler was introduced.</li>
+<li>Timers were rebuilt from the ground up.</li>
+<li>A file system API was introduced.</li>
+<li>UDS, TLS, signals, and other APIs were added to Tokio.</li>
+<li>Most importantly, the Tokio runtime was introduced as a batteries included
+platform upon which asynchronous applications can be built.</li>
 </ul>
 
-<p>Altogether, these changes, together with <a href="https://internals.rust-lang.org/t/help-test-async-await-generators-coroutines/5835">async/await</a>, should go a long
-distance toward making Tokio a newcomer-friendly library. Please take a look at
-the <a href="https://github.com/carllerche/tokio-rfcs/pull/2">RFC</a> and leave your feedback!</p>
+<p>This is not including the myriad of smaller improvements.  Improvements like
+revamped documentation, bug fixes, performance improvements, and refined APIs.
+These improvements were contributed by an impressive <a href="https://github.com/tokio-rs/tokio/graphs/contributors">165 individual
+contributors</a>.</p>
 
-<p>Once we&rsquo;ve reached consensus on the RFC, we plan to form an impl period <em>working
-group</em>, focused primarily on docs and examples. And from there, we will be
-working with the Hyper team to figure out the next chapter of that story. Stay tuned!</p>
+<p>Indeed, 2018 was a great year for Tokio and it is all thanks to you. That said,
+we are just getting started and 2019 is setting up to be even better. I want to
+highlight a few big things (already in the works) expected to land in 2019.</p>
 
-<div style="text-align:right">&mdash;Aaron Turon</div>
+<h2 id="async-await">Async / await</h2>
+
+<p>Async / await is being built into the Rust language. It enables writing
+asynchronous code (almost) as if it were synchronous. This work has been on
+going for a while, and should land in Rust stable sometime in 2019. The
+implication of async / await is a large ergonomic improvements when using Tokio.</p>
+
+<p>If you are willing to use the Rust nightly compiler, you can use async / await
+with Tokio <a href="http://tokio.rs/blog/2018-08-async-await/">today</a>. In short, depend on <code>tokio</code> with the
+<code>async-await-preview</code> feature and try it out.</p>
+
+<p>Here is a taste:</p>
+
+<pre><code class="language-rust,ignore">pub fn main() {
+    tokio::run_async(async {
+        let client = Client::new();
+
+        let uri = &quot;http://httpbin.org/ip&quot;.parse().unwrap();
+
+        let response = await!({
+            client.get(uri)
+                .timeout(Duration::from_secs(10))
+        }).unwrap();
+
+        println!(&quot;Response: {}&quot;, response.status());
+
+        let mut body = response.into_body();
+
+        while let Some(chunk) = await!(body.next()) {
+            let chunk = chunk.unwrap();
+            println!(&quot;chunk = {}&quot;, str::from_utf8(&amp;chunk[..]).unwrap());
+        }
+    });
+}
+</code></pre>
+
+<p><a href="https://github.com/tokio-rs/tokio/blob/master/tokio-async-await/examples/src/hyper.rs">Full example</a></p>
+
+<p>So, what is the path for Tokio to fully adopt async/await? Let&rsquo;s talk a bit
+about that.</p>
+
+<p>First, async/await has to land on Rust stable. The exact target date is unknown,
+but it is expected to happen on 2019. Once this happens, Tokio will immediately
+add support in a backwards compatible way. The strategy by which this will
+happen is being explored today with the experimental <code>async-await-preview</code>
+feature flag. At a high level, async/await specific APIs will be added with an
+<code>_async</code> suffix. For example, <code>tokio::run_async</code> will be the way to start the
+Tokio runtime using an async fn (or a <code>std::future::Future</code>).</p>
+
+<p>Once async/await support has had a moment to mature, Tokio will issue a breaking
+change and drop the <code>_async</code> suffix. <code>tokio::run</code> will take an async function by
+default.</p>
+
+<p>What about futures 0.1? We can&rsquo;t immediately drop support for futures 0.1. There
+is a growing ecosystem, including production apps, built on top of Tokio and
+that includes using futures 0.1. It will take time to transition off. This will
+be done in a multi step way.</p>
+
+<p>First, support for async/await is added in a backwards compatible way. This
+adds simultaneous support for both async/await <strong>and</strong> futures 0.1. Then,
+async/await becomes the primary API and futures 0.1 can be used via a
+compatibility layer. This will enable using libraries that haven&rsquo;t been updated
+yet with the latest Tokio.</p>
+
+<p>We are sensitive to the fact that change is hard for an established ecosystem
+and look forward to discussing the transition process with the community.</p>
+
+<p>A tracking issue has been opened <a href="https://github.com/tokio-rs/tokio/issues/804">here</a>. This is the place to discuss Tokio&rsquo;s
+async/await plans and track progress.</p>
+
+<h2 id="tokio-trace">Tokio Trace</h2>
+
+<p>Visibility into execution behavior is critical when dealing with production
+applications. This includes questions like:</p>
+
+<ul>
+<li>How many tasks are currently executing?</li>
+<li>Why did this task hang?</li>
+<li>Which tasks are taking longer than expected to poll, and what was the cause?</li>
+</ul>
+
+<p>Right now, there is no good way to answer. To help improve the visibility and
+debuggability of Tokio, we (mostly <a href="https://github.com/hawkw/tokio-trace-prototype/">hawkw</a>) are working on a major new feature:
+Tokio Trace.</p>
+
+<p>Tokio trace has been discussed in <a href="https://github.com/tokio-rs/tokio/issues/561">this</a> issue. At a high level,
+Tokio trace is a structured logging system in which log events cover periods of
+time instead of a fixed point. &ldquo;Period of time&rdquo; is a crucial feature. The
+instrumentation API will allow specifying when an event starts and when it ends.
+By doing this, we can infer a parent / child relationship. Events that are
+contained within other events are children, building out a tree.</p>
+
+<p>Once the parent / child dependency is built, it becomes easy to do things like
+filtering log events related to a buggy task. It also becomes possible to track
+log events related to a buggy task across multiple tasks.</p>
+
+<p>The second part of Tokio trace is the &ldquo;structured&rdquo; part. Instead of logging
+basic strings, event data can be included using primitive types. For example, a
+<code>Stream</code> combinator can be instrumented to track the number of messages
+processed per <code>poll</code> by doing something like:</p>
+
+<pre><code class="language-rust,ignore">trace!(messages = num_processed);
+</code></pre>
+
+<p>where <code>num_processed</code> is a <code>usize</code>. Subscribers are able to receive the event
+with the <code>usize</code> value.</p>
+
+<p>By combining the parent/child structure and the structured logging, we can
+answer the &ldquo;Which tasks are taking longer than expected to poll, and what was
+the cause?&rdquo; question by tracking the 99.9th percentile of task poll durations,
+and checking common causes for increased latencies, such as processing streams
+with many messages without yielding. Many of these checks could be implemented
+by tools that listen to the events emitted by Tokio trace.</p>
+
+<p>More about this will be blogged about once the feature lands in Tokio proper.</p>
+
+<h2 id="teams">Teams</h2>
+
+<p>The final big thing for Tokio in 2019 is something that I&rsquo;ve had on my mind for
+a while. Tokio has grown in terms of functionality and adoption past a point
+that is sane for me to manage, even with the group of amazing regular
+contributors who make up an informal Tokio team. It is time to scale out Tokio
+development and maintenance.</p>
+
+<p>The strategy by which to do this is not new and I think Rust provides a good
+model to follow. We will need to introduce a set of teams, each of which focus
+on various aspects of Tokio.</p>
+
+<p>The specifics regarding what teams will exist and who will be part of them are
+still to be determined and will change over time. There will be blog posts
+throughout the year discussing the evolution on that front.</p>
+
+<p>We also need newcomers to help join in the effort of building and growing Tokio.
+This includes us spending time mentoring. So, consider this a pre call to
+action. Do you rely on Tokio at work or do you simply have an interest in Rust
+asynchronous I/O? It doesn&rsquo;t matter if you feel like you don&rsquo;t have the
+experience needed or are too much of a &ldquo;newbie&rdquo;. Join us now in the <a href="https://gitter.im/tokio-rs/dev/">Gitter</a>
+channel and help us figure out the process of transitioning to teams.</p>
+
+<p>Finally, an extra big thanks to those who are going above and beyond, spending
+significant time helping out with the Tokio dev, maintenance, docs, and helping
+users in Gitter.</p>
+
+<ul>
+<li><a href="https://github.com/davidbarsky">@davidbarsky</a></li>
+<li><a href="https://github.com/hawkw">@hawkw</a></li>
+<li><a href="https://github.com/ipetkov">@ipetkov</a></li>
+<li><a href="https://github.com/jonhoo">@jonhoo</a></li>
+<li><a href="https://github.com/kpp">@kpp</a></li>
+<li><a href="https://github.com/ralith">@ralith</a></li>
+<li><a href="https://github.com/rylev">@rylev</a></li>
+<li><a href="https://github.com/stjepang">@stjepang</a></li>
+<li><a href="https://github.com/tobz">@tobz</a></li>
+<li><a href="https://github.com/vorner">@vorner</a></li>
+</ul>
 
       
 
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/blog/2017-03-tokio-io/">Announcing the tokio-io Crate</a>
+          <b>下一篇</b>：<a href ="/blog/2018-10-doc-blitz/">Announcing the Tokio Doc Push (we need you!)</a>
         </div>
       
     </main>
