@@ -207,6 +207,10 @@
   </url>
   
   <url>
+    <loc>https://tokio-cn.github.io/gsoc/</loc>
+  </url>
+  
+  <url>
     <loc>https://tokio-cn.github.io/tags/</loc>
     <priority>0</priority>
   </url>

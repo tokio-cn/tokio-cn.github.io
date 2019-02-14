@@ -450,7 +450,7 @@ let echo_fut = TcpStream::connect(&amp;addr)
 <p>Pretty neat!</p>
 
 <p>The combinators we&rsquo;ve talked about so far are all for pretty low-level
-operations: read these bytes, write these bytes, copy these bites. Often
+operations: read these bytes, write these bytes, copy these bytes. Often
 times though, you want to operate on higher-level representations, like
 &ldquo;lines&rdquo;. Tokio has you covered there too! <a href="https://docs.rs/tokio/0.1/tokio/io/fn.lines.html"><code>lines</code></a> takes an
 <code>AsyncRead</code>, and returns a <code>Stream</code> that yields each line from the input

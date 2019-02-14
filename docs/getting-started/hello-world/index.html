@@ -354,7 +354,7 @@ let client = TcpStream::connect(&amp;addr).and_then(|stream| {
 </code></pre>
 
 <p>调用 <code>TcpStream::connect</code> 会返回一个已创建的 TCP 流的 <a href="https://docs.rs/futures/0.1/futures/future/trait.Future.html"><code>Future</code></a>。
-我们会在指南的后续部分学习更多关于 [<code>Futures</code>] 的内容，不过现在你可以将
+我们会在指南的后续部分学习更多关于 <a href="https://tokio-cn.github.io/docs/getting-started/futures/"><code>Futures</code></a> 的内容，不过现在你可以将
 [<code>Stream</code>] 作为表示将来终究会发生的事物的值<!--
 -->（在本例中会创建流）。这意味着 <code>TcpStream::connect</code>  不会<!--
 -->等待流创建后再返回。而是立即返回<!--
@@ -459,8 +459,14 @@ println!(&quot;Stream has been created and written to.&quot;);
 <p><a href="http://netcat.sourceforge.net/">Netcat</a> 是一个在命令行快速创建 TCP 套接字的工具。以下<!--
 -->命令在先前指定的端口上启动 TCP 套接字监听。</p>
 
-<pre><code class="language-bash">$ nc -l 6142
+<pre><code class="language-bash">$ nc -l -p 6142
 </code></pre>
+
+<blockquote>
+<p>The command above is used with the GNU version of netcat that comes stock on many
+unix based operating systems. The following command can be used with the
+<a href="https://nmap.org">NMap.org</a> version: <code>$ ncat -l -p 6142</code></p>
+</blockquote>
 
 <p>在另一个终端运行我们的项目。</p>
 

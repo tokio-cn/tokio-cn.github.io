@@ -547,7 +547,7 @@ fn fibonacci() -&gt; impl Stream&lt;Item = u64, Error = ()&gt; {
 
 <p>Just like with futures, using stream combinators requires a functional style of
 programming. Also, <code>impl Stream</code> is used to return the stream from the function.
-The <a href="https://tokio-cn.github.io/docs/futures/combinators/#returning-futures#">returning futures</a> strategies apply equality to returning streams.</p>
+The <a href="https://tokio-cn.github.io/docs/futures/combinators/#returning-futures#">returning futures</a> strategies apply equally to returning streams.</p>
 
 <p><code>Display10</code> is reimplemented using <a href="#"><code>take</code></a> and <a href="#"><code>for_each</code></a>:</p>
 
