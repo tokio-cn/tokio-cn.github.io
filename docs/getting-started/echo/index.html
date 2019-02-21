@@ -375,10 +375,10 @@ we handle all values and errors before handing off the future to the runtime.</p
 <p>Now that we have incoming client connections, we should handle them.</p>
 
 <p>We just want to copy all data read from the socket back onto the socket itself
-(e.g. &ldquo;echo&rdquo;). We can use the standard <a href="https://docs.rs/tokio-io/0.1/tokio_io/fn.copy.html"><code>io::copy</code></a> function to do precisely this.</p>
+(e.g. &ldquo;echo&rdquo;). We can use the standard <a href="https://docs.rs/tokio/0.1/tokio/io/fn.copy.html"><code>io::copy</code></a> function to do precisely this.</p>
 
 <p>The <code>copy</code> function takes two arguments, where to read from and where to write to.
-We only have one argument, though, with <code>socket</code>. Luckily there&rsquo;s a method, <a href="https://docs.rs/tokio-io/0.1/tokio_io/trait.AsyncRead.html#method.split"><code>split</code></a>
+We only have one argument, though, with <code>socket</code>. Luckily there&rsquo;s a method, <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html#method.split"><code>split</code></a>
 , which will split a readable and writeable stream into its two halves. This
 operation allows us to work with each stream independently, such as pass them as two
 arguments to the <code>copy</code> function.</p>

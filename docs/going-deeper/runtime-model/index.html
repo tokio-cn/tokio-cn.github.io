@@ -400,7 +400,7 @@ impl Future for MyTask {
 
 <p>执行子负责对任务重复调用 <code>poll</code>，直到返回 <code>Ready</code>
 。有许多不同的方法可以做到这一点。例如，
-<a href="https://docs.rs/tokio/0.1/tokio/executor/current_thread/index.html"><code>CurrentThread</code></a> 执行子会阻塞当前线程并循环遍历所有<!--
+<a href="https://docs.rs/tokio-current-thread"><code>CurrentThread</code></a> 执行子会阻塞当前线程并循环遍历所有<!--
 -->已产生的任务，并对它们轮询调用。<a href="http://docs.rs/tokio-threadpool"><code>ThreadPool</code></a> 会在线程池上调度任务<!--
 -->。这也是<a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">运行时</a>所使用的默认执行子。</p>
 

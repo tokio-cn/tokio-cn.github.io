@@ -285,7 +285,7 @@ job of the runtime.</p>
 
 <p>The runtime is responsible for repeatedly calling <code>poll</code> on a <code>Future</code> until its
 value is returned. There are many different ways to do this and thus many types of
-runtime configurations. For example, the <a href="https://docs.rs/tokio/0.1/tokio/executor/current_thread/index.html"><code>CurrentThread</code></a> runtime configuration
+runtime configurations. For example, the <a href="https://docs.rs/tokio-current-thread"><code>CurrentThread</code></a> runtime configuration
 will block the current thread and loop through all spawned Futures, calling poll on
 them. The <a href="http://docs.rs/tokio-threadpool"><code>ThreadPool</code></a> configuration schedules Futures across a thread pool. This
 is also the default configuration used by the Tokio <a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">runtime</a>.</p>

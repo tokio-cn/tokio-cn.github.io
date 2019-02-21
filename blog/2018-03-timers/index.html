@@ -214,8 +214,8 @@ types:</p>
 
 <ul>
 <li><a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Delay.html"><code>Delay</code></a>: A future that completes at a set instant in time.</li>
-<li><a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Deadline.html"><code>Deadline</code></a>: Decorates a future ensuring it completes before the
-deadline is reached.</li>
+<li><a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Timeout.html"><code>Timeout</code></a>: Decorates a future ensuring it completes before the
+timeout is reached.</li>
 <li><a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Interval.html"><code>Interval</code></a>: A stream that yields values at a fixed intervals.</li>
 </ul>
 
@@ -262,7 +262,7 @@ directly, a thread pool is started. Each worker thread will get one timer
 instance. So, this means that if the runtime starts 4 worker threads, there will
 be 4 timer instances, one per thread. Doing this allows using the timer without
 paying a synchronization cost since the timer will be located on the same thread
-as the code that uses the various timer types (<code>Delay</code>, <code>Deadline</code>, <code>Interval</code>).</p>
+as the code that uses the various timer types (<code>Delay</code>, <code>Timeout</code>, <code>Interval</code>).</p>
 
 <p>And with that, have a great weekend!</p>
 

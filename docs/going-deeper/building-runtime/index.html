@@ -307,13 +307,13 @@ waiting to anything else, so the reactor goes to the bottom of our stack.</p>
 
 <p>The reactor is able to notify our futures of data coming over the network and
 similar events, but we need an executor to actually run them. We&rsquo;ll be using the
-<a href="https://docs.rs/tokio/0.1/tokio/executor/current_thread/struct.CurrentThread.html"><code>CurrentThread</code></a> executor, because we&rsquo;re building a single-threaded runtime.
+<a href="https://docs.rs/tokio-current-thread/0.1.4/tokio_current_thread/struct.CurrentThread.html"><code>CurrentThread</code></a> executor, because we&rsquo;re building a single-threaded runtime.
 Use any other executor that suits your needs. The executor needs a <code>Park</code>
 underneath to wait when there are no futures ready to run. It doesn&rsquo;t implement
 <code>Park</code>, therefore it must go on the top of the whole stack.</p>
 
 <p>While not strictly necessary, it is useful to be able to run delayed futures ‒
-timeouts and similar. Therefore, we place the <a href="https://docs.rs/tokio-timer/0.2/timer/struct.Timer.html"><code>Timer</code></a> in the middle ‒
+timeouts and similar. Therefore, we place the <a href="https://docs.rs/tokio-timer/0.2/tokio_timer/timer/struct.Timer.html"><code>Timer</code></a> in the middle ‒
 fortunately, it can be placed on top of one <code>Park</code> and also implements <code>Park</code>.
 This plays a similar role for timeouts as reactor does for IO-based futures.</p>
 

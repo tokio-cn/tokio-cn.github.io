@@ -189,7 +189,7 @@ executing user submitted tasks.</p>
 create Tokio-backed networking types from <em>any</em> thread, making it easy to create
 either single or multi threaded Tokio-backed apps.</p>
 
-<p>For task execution, Tokio provides the <a href="https://docs.rs/tokio/0.1/tokio/executor/current_thread/index.html"><code>current_thread</code></a> executor, which
+<p>For task execution, Tokio provides the <a href="https://docs.rs/tokio-current-thread"><code>current_thread</code></a> executor, which
 behaves similarly to how the built-in tokio-core executor did. The plan is to
 eventually move this executor into the <a href="https://github.com/rust-lang-nursery/futures-rs"><code>futures</code></a> crate, but for now it is
 provided directly by Tokio.</p>
