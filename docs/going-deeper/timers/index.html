@@ -373,7 +373,7 @@ message on a socket, or checking a configuration file every so often. This can
 be implemented by repeatedly creating <a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Delay.html"><code>Delay</code></a> values. However, because
 this is a common pattern, <a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Interval.html"><code>Interval</code></a> is provided.</p>
 
-<p>The [<code>Interval</code>] type implements <code>Stream</code>, yielding at the specified rate.</p>
+<p>The <a href="https://docs.rs/tokio/0.1/tokio/timer/struct.Interval.html"><code>Interval</code></a> type implements <code>Stream</code>, yielding at the specified rate.</p>
 
 <pre><code class="language-rust"># #![deny(deprecated)]
 # extern crate tokio;
