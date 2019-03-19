@@ -206,7 +206,7 @@ A future is a value that represents the completion of an asynchronous computatio
       <guid>https://tokio-cn.github.io/docs/futures/basic/</guid>
       <description>Implementing futures is very common when using Tokio. Let&amp;rsquo;s start with a very basic future that performs no asynchronous logic and simply returns a message (the venerable &amp;ldquo;hello world&amp;rdquo;).
 The Future trait. The Future trait is as follows:
-trait Future { /// The type of the value returned when the future completes. type Item; /// The type representing errors that occurred while processing the computation. type Error; /// The function that will be repeatedly called to see if the future is /// has completed or not.</description>
+trait Future { /// The type of the value returned when the future completes. type Item; /// The type representing errors that occurred while processing the computation. type Error; /// The function that will be repeatedly called to see if the future /// has completed or not.</description>
     </item>
     
     <item>
