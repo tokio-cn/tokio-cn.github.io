@@ -308,6 +308,8 @@ impl Future for HelloWorld {
         Ok(Async::Ready(&quot;hello world&quot;.to_string()))
     }
 }
+
+# fn main() {}
 </code></pre>
 
 <p>The <code>Item</code> and <code>Error</code> associated types define the types returned by the future
@@ -370,6 +372,8 @@ where
         Ok(Async::Ready(()))
     }
 }
+
+# fn main() {}
 </code></pre>
 
 <p>The <code>Display</code> takes a future that yields items that can be displayed. When it is
@@ -400,8 +404,10 @@ extern crate tokio;
 #     }
 # }
 
+# fn main() {
 let future = Display(HelloWorld);
 tokio::run(future);
+# }
 </code></pre>
 
 <p>Running this results in &ldquo;hello world&rdquo; being outputted to standard out.</p>

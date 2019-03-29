@@ -290,6 +290,7 @@ pub trait AsyncRead: Read {
     // various provided methods
     // ...
 }
+# fn main() {}
 </code></pre>
 
 <p>Huh. What&rsquo;s going on here? Well, <code>AsyncRead</code> is really just <a href="https://doc.rust-lang.org/std/io/trait.Read.html"><code>Read</code></a>
@@ -640,6 +641,7 @@ impl Decoder for LinesCodec {
         })
     }
 }
+# fn main() {}
 </code></pre>
 
       

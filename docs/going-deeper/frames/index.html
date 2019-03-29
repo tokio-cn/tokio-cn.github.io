@@ -294,6 +294,8 @@ decoding and encoding of the line delimited message.</p>
     // only look at `de\n` before returning.
     next_index: usize,
 }
+
+# fn main() {}
 </code></pre>
 
 <p>The comments here explain how, since the bytes are buffered until a line is
@@ -316,7 +318,7 @@ keep growing.</p>
 # use std::str;
 # use bytes::BytesMut;
 # use tokio_io::codec::*;
-# struct LinesCodec { next_index: usize };
+# struct LinesCodec { next_index: usize }
 # impl Decoder for LinesCodec {
 #    type Item = String;
 #    type Error = io::Error;
@@ -358,6 +360,7 @@ fn decode(&amp;mut self, buf: &amp;mut BytesMut) -&gt; Result&lt;Option&lt;Strin
     }
 }
 # }
+# fn main() {}
 </code></pre>
 
 <p>The <code>Encoder::encode</code> method is called when a frame must be written to the
@@ -373,7 +376,7 @@ stream as it becomes ready to send the data.</p>
 # use std::str;
 # use bytes::*;
 # use tokio_io::codec::*;
-# struct LinesCodec { next_index: usize };
+# struct LinesCodec { next_index: usize }
 # impl Encoder for LinesCodec {
 #    type Item = String;
 #    type Error = io::Error;
@@ -394,6 +397,7 @@ fn encode(&amp;mut self, line: String, buf: &amp;mut BytesMut) -&gt; Result&lt;(
     Ok(())
 }
 # }
+# fn main() {}
 </code></pre>
 
 <p>It&rsquo;s often simpler to encode information. Here we simply reserve the space
@@ -415,6 +419,7 @@ and <code>AsyncWrite</code> traits using the <code>AsyncRead::framed</code> meth
 # use futures::prelude::*;
 # use tokio::net::TcpStream;
 # use tokio_codec::{Framed, LinesCodec};
+# fn main() {
 # let addr = &quot;127.0.0.1:5000&quot;.parse().expect(&quot;invalid socket address&quot;);
 TcpStream::connect(&amp;addr).and_then(|sock| {
     let framed_sock = Framed::new(sock, LinesCodec::new());
@@ -423,6 +428,7 @@ TcpStream::connect(&amp;addr).and_then(|sock| {
         Ok(())
     })
 });
+# }
 </code></pre>
 
       

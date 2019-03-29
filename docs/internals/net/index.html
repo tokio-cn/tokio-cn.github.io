@@ -302,6 +302,7 @@ may be <code>None</code>:</p>
 # fn dox(addr: SocketAddr) {
 let listener = TcpListener::bind(&amp;addr).unwrap();
 # }
+# fn main() {}
 </code></pre>
 
 <p>In this case, the reference to the driver is not yet set. However, if a
@@ -315,6 +316,7 @@ will be set to driver represented by the given handle:</p>
 # fn dox(std_listener: StdListener, my_reactor_handle: &amp;Handle) {
 let listener = TcpListener::from_std(std_listener, &amp;my_reactor_handle);
 # }
+# fn main() {}
 </code></pre>
 
 <p>Once a driver is associated with a resource, it is set for the lifetime of the
@@ -377,6 +379,7 @@ tokio::spawn({
         .map_err(|_| panic!())
 });
 # }
+# fn main() {}
 </code></pre>
 
 <p>Futures may also be used directly from other future implementations:</p>
@@ -489,6 +492,7 @@ pool.spawn({
     .map_err(|_| panic!(&quot;error&quot;))
 });
 # }
+# fn main() {}
 </code></pre>
 
 <p>In order to make the above example work, a reactor must be set for the
@@ -530,6 +534,7 @@ tokio::run(future::lazy(move || {
     Ok(())
 }));
 # }
+# fn main() {}
 </code></pre>
 
 <h1 id="the-network-driver">The network driver</h1>
@@ -689,6 +694,7 @@ loop {
     reactor.turn(None);
 }
 # }
+# fn main() {}
 </code></pre>
 
 <p>The implementation of <code>turn</code> does the following:</p>

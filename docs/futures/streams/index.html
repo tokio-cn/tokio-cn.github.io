@@ -368,6 +368,8 @@ impl Stream for Fibonacci {
         Ok(Async::Ready(Some(curr)))
     }
 }
+
+# fn main() {}
 </code></pre>
 
 <p>To use the stream, a future must be built that consumes it. The following future
@@ -426,17 +428,19 @@ where
 # extern crate futures;
 # struct Fibonacci;
 # impl Fibonacci { fn new() { } }
-# struct Display10&lt;T&gt; { v: T };
+# struct Display10&lt;T&gt; { v: T }
 # impl&lt;T&gt; Display10&lt;T&gt; {
 # fn new(_: T) -&gt; futures::future::FutureResult&lt;(), ()&gt; {
 # futures::future::ok(())
 # }
 # }
 
+# fn main() {
 let fib = Fibonacci::new();
 let display = Display10::new(fib);
 
 tokio::run(display);
+# }
 </code></pre>
 
 <h2 id="getting-asynchronous">Getting asynchronous</h2>
@@ -509,7 +513,7 @@ updated.</p>
 # extern crate futures;
 # struct Fibonacci;
 # impl Fibonacci { fn new(dur: Duration) { } }
-# struct Display10&lt;T&gt; { v: T };
+# struct Display10&lt;T&gt; { v: T }
 # impl&lt;T&gt; Display10&lt;T&gt; {
 # fn new(_: T) -&gt; futures::future::FutureResult&lt;(), ()&gt; {
 # futures::future::ok(())
@@ -518,10 +522,12 @@ updated.</p>
 
 use std::time::Duration;
 
+# fn main() {
 let fib = Fibonacci::new(Duration::from_secs(1));
 let display = Display10::new(fib);
 
 tokio::run(display);
+# }
 </code></pre>
 
 <h1 id="combinators">Combinators</h1>
@@ -543,6 +549,7 @@ fn fibonacci() -&gt; impl Stream&lt;Item = u64, Error = ()&gt; {
         Some(Ok((curr, (next, new_next))))
     })
 }
+# fn main() {}
 </code></pre>
 
 <p>Just like with futures, using stream combinators requires a functional style of
@@ -560,6 +567,7 @@ use futures::Stream;
 # stream::once(Ok(1))
 # }
 
+# fn main() {
 tokio::run(
     fibonacci().take(10)
         .for_each(|num| {
@@ -567,6 +575,7 @@ tokio::run(
             Ok(())
         })
 );
+# }
 </code></pre>
 
 <p>The <a href="#"><code>take</code></a> combinator limits the fibonacci stream to 10 values. The <a href="#"><code>for_each</code></a>
@@ -600,6 +609,7 @@ extern crate futures;
 
 use futures::{stream, Stream};
 
+# fn main() {
 let values = vec![&quot;one&quot;, &quot;two&quot;, &quot;three&quot;];
 
 tokio::run(
@@ -608,6 +618,7 @@ tokio::run(
         Ok(())
     })
 )
+# }
 </code></pre>
 
 <h2 id="adapters">Adapters</h2>

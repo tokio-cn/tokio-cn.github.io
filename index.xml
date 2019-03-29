@@ -359,8 +359,7 @@ Tasks are passed to executors, which handle scheduling the task. An executor usu
       <description>现在我们要介绍 Tokio / future 运行时模型。Tokio 建立在 futures crate 之上并使用其运行时模型。这让 Tokio 可以与其他也使用 futures crate 的库进行互操作。
 注：这个运行时模型与其他语言中的异步库非常不同。虽然在高级别的 API 上看起来很相似，但是代码执行的方式却并不相同。
 同步模型 首先，我们来简要谈谈同步（或阻塞）模型。这是 Rust 标准库使用的模型。
-# use std::io::prelude::*; # use std::net::TcpStream; # fn dox(mut socket: TcpStream) { // let socket = ……; let mut buf = [0; 1024]; let n = socket.read(&amp;amp;mut buf).unwrap(); // 使用 &amp;amp;buf[..n]; # }  当调用 socket.read 时，要么该套接字在其接收缓冲区有待读取的数据， 要么没有。如果有待读取的数据，那么对 read 的调用会立即返回并且以相应数据填充 buf。而如果没有待读取的数据，那么 read 函数会阻塞当前线程直到收到数据。这时，会以这次新接收到的数据填充 buf 并且 read 函数会返回。
-为了对多个不同的套接字并发执行读取操作，需要每个套接字一个线程。每个套接字使用一个线程不能很好地伸缩到大量的套接字。这就是所谓的 c10k 问题。</description>
+# use std::io::prelude::*; # use std::net::TcpStream; # fn dox(mut socket: TcpStream) { // let socket = ……; let mut buf = [0; 1024]; let n = socket.read(&amp;amp;mut buf).unwrap(); // 使用 &amp;amp;buf[..n]; # } # fn main() {}  当调用 socket.read 时，要么该套接字在其接收缓冲区有待读取的数据， 要么没有。如果有待读取的数据，那么对 read 的调用会立即返回并且以相应数据填充 buf。而如果没有待读取的数据，那么 read 函数会阻塞当前线程直到收到数据。这时，会以这次新接收到的数据填充 buf 并且 read 函数会返回。</description>
     </item>
     
     <item>

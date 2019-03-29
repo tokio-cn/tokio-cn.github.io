@@ -320,6 +320,7 @@ impl Future for MyTask {
         }
     }
 }
+# fn main() {}
 </code></pre>
 
 <p>Tasks are submitted to an executor using <code>tokio::spawn</code> or by calling a <code>spawn</code>
@@ -539,6 +540,7 @@ use futures::Async;
 task::current().notify();
 return Ok(Async::NotReady);
 # }
+# fn main() {}
 </code></pre>
 
 <p>Yield can be used to break up a CPU expensive computation:</p>
@@ -567,6 +569,7 @@ impl Future for Count {
         Ok(Async::Ready(()))
     }
 }
+# fn main() {}
 </code></pre>
 
 <h1 id="executors">Executors</h1>
