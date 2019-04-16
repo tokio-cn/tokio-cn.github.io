@@ -438,7 +438,7 @@ the asynchronous code by hand.</p>
 <p>For now it&rsquo;s just important to know that futures have two associated types: <code>Item</code>
 and <code>Error</code>. <code>Item</code> is the type of the value that the <code>Future</code> will yield when it
 completes. <code>Error</code> is the type of Error that the <code>Future</code> may yield if there&rsquo;s an
-error before that causes the <code>Future</code> from being able to complete.</p>
+error before that prevents the <code>Future</code> from completing successfully.</p>
 
 <p>Finally, <code>Future</code>s have one method named <code>poll</code>. We won&rsquo;t go into too much detail
 about <code>poll</code> in this section since you don&rsquo;t need to know about <code>poll</code> to use
