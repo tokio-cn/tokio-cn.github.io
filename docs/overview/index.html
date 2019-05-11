@@ -400,7 +400,7 @@ a good fit for <a href="https://en.wikipedia.org/wiki/Real-time_computing">real-
 Each component lives in a separate library. If needed, applications may opt to
 pick and choose the needed components and avoid pulling in the rest.</p>
 
-<p>Tokio leverages <a href="https://carllerche.github.io/mio/mio/index.html"><code>mio</code></a> for the system event queue and <a href="https://docs.rs/futures/*/futures/"><code>futures</code></a> for defining
+<p>Tokio leverages <a href="https://github.com/tokio-rs/mio"><code>mio</code></a> for the system event queue and <a href="https://docs.rs/futures/*/futures/"><code>futures</code></a> for defining
 tasks.  Tokio implements <a href="https://tokio.rs/blog/2018-08-async-await/">async</a> syntax to improve readability of futures.
 <a href="https://crates.io/crates/tokio/reverse_dependencies">Many</a> libraries are implemented using Tokio, including <a href="https://hyper.rs/guides/"><code>hyper</code></a> and <a href="https://actix.rs/book/actix/"><code>actix</code></a>.</p>
 

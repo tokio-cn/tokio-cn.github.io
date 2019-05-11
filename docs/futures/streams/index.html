@@ -556,7 +556,7 @@ fn fibonacci() -&gt; impl Stream&lt;Item = u64, Error = ()&gt; {
 programming. Also, <code>impl Stream</code> is used to return the stream from the function.
 The <a href="https://tokio-cn.github.io/docs/futures/combinators/#returning-futures#">returning futures</a> strategies apply equally to returning streams.</p>
 
-<p><code>Display10</code> is reimplemented using <a href="#"><code>take</code></a> and <a href="#"><code>for_each</code></a>:</p>
+<p><code>Display10</code> is reimplemented using <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.take"><code>take</code></a> and <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.for_each"><code>for_each</code></a>:</p>
 
 <pre><code class="language-rust">extern crate tokio;
 extern crate futures;
@@ -578,8 +578,8 @@ tokio::run(
 # }
 </code></pre>
 
-<p>The <a href="#"><code>take</code></a> combinator limits the fibonacci stream to 10 values. The <a href="#"><code>for_each</code></a>
-combinator asynchronously iterates the stream values. <a href="#"><code>for_each</code></a> consumes the
+<p>The <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.take"><code>take</code></a> combinator limits the fibonacci stream to 10 values. The <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.for_each"><code>for_each</code></a>
+combinator asynchronously iterates the stream values. <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.for_each"><code>for_each</code></a> consumes the
 stream and returns a future that completes once the closure was called once for
 each stream value. It is the asynchronous equivalent to a rust <code>for</code> loop.</p>
 
@@ -662,12 +662,12 @@ methods. These methods all consume the stream, returning a new stream providing
 the requested behavior. Using these adapter combinators, it is possible to:</p>
 
 <ul>
-<li>Change the type of a stream (<a href="#"><code>map</code></a>, <a href="#"><code>map_err</code></a>, <a href="#"><code>and_then</code></a>).</li>
-<li>Handle stream errors (<a href="#"><code>or_else</code></a>).</li>
-<li>Filter stream values (<a href="#"><code>take</code></a>, <a href="#"><code>take_while</code></a>, <a href="#"><code>skip</code></a>, <a href="#"><code>skip_while</code></a>,
-<a href="#"><code>filter</code></a>, <a href="#"><code>filter_map</code></a>).</li>
-<li>Asynchronously iterate the values (<a href="#"><code>for_each</code></a>, <a href="#"><code>fold</code></a>).</li>
-<li>Combine multiple streams together (<a href="#"><code>zip</code></a>, <a href="#"><code>chain</code></a>, <a href="#"><code>select</code></a>).</li>
+<li>Change the type of a stream (<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.map"><code>map</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.map_err"><code>map_err</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.and_then"><code>and_then</code></a>).</li>
+<li>Handle stream errors (<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.or_else"><code>or_else</code></a>).</li>
+<li>Filter stream values (<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.take"><code>take</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.take_while"><code>take_while</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.skip"><code>skip</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.skip_while"><code>skip_while</code></a>,
+<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.filter"><code>filter</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.filter_map"><code>filter_map</code></a>).</li>
+<li>Asynchronously iterate the values (<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.for_each"><code>for_each</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.fold"><code>fold</code></a>).</li>
+<li>Combine multiple streams together (<a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.zip"><code>zip</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.chain"><code>chain</code></a>, <a href="https://docs.rs/futures/0.1/futures/stream/trait.Stream.html#method.select"><code>select</code></a>).</li>
 </ul>
 
       
