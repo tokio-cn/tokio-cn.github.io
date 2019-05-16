@@ -290,13 +290,14 @@ cd echo-server
 
 <pre><code class="language-toml">[dependencies]
 tokio = &quot;0.1&quot;
+# futures = &quot;0.1&quot;
 </code></pre>
 
 <p>and the crates and types into scope in <code>main.rs</code>:</p>
 
 <pre><code class="language-rust"># #![deny(deprecated)]
 extern crate tokio;
-extern crate futures;
+# extern crate futures;
 
 use tokio::io;
 use tokio::net::TcpListener;

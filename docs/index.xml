@@ -145,9 +145,7 @@ Previous examples defined a future and passed that future to tokio::run.</descri
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/docs/futures/runtime-model/</guid>
-      <description>Streams are similar to futures, but instead of yielding a single value, they asynchronously yield one or more values. They can be thought of as asynchronous iterators.
-Just like futures, streams are able to represent a wide range of things as long as those things produce discrete values at different points sometime in the future. For instance:
- UI Events caused by the user interacting with a GUI in different ways.</description>
+      <description>This page has not been worked on yet. If you&amp;rsquo;d like to contribute visit the doc-push repo.</description>
     </item>
     
     <item>

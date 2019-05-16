@@ -251,11 +251,7 @@
     </div>
     <div class="d-none d-xl-block col-xl-2 tk-toc">
       <div class="section-nav">
-        <nav id="TableOfContents">
-<ul>
-<li><a href="#the-stream-trait">The <code>Stream</code> trait</a></li>
-</ul>
-</nav>
+        
       </div>
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
@@ -263,56 +259,8 @@
       <div class="github-edit">
         <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/futures/runtime-model.md"> 在 GitHub 上编辑</a>
       </div>
-      
-
-<p>Streams are similar to futures, but instead of yielding a single value, they
-asynchronously yield one or more values. They can be thought of as asynchronous
-iterators.</p>
-
-<p>Just like futures, streams are able to represent a wide range of things as long
-as those things produce discrete values at different points sometime in the
-future. For instance:</p>
-
-<ul>
-<li><strong>UI Events</strong> caused by the user interacting with a GUI in different ways. When an
-event happens the stream yields a different message to your app over time.</li>
-<li><strong>Push Notifications from a server</strong>. Sometimes a request/response model is not
-what you need. A client can establish a notification stream with a server to be
-able to receive messages from the server without specifically being requested.</li>
-<li><strong>Incoming socket connections</strong>. As different clients connect to a server, the
-connections stream will yield socket connections.</li>
-</ul>
-
-<h1 id="the-stream-trait">The <code>Stream</code> trait</h1>
-
-<p>Just like <code>Future</code>, implementing <code>Stream</code> is common when using Tokio. Streams
-yield many values, so lets start with a stream that generates the fibonacci sequence.</p>
-
-<p>The <code>Stream</code> trait is as follows:</p>
-
-<pre><code class="language-rust,ignore">trait Stream {
-    /// The type of the value yielded by the stream.
-    type Item;
-
-    /// The type representing errors that occurred while processing the computation.
-    type Error;
-
-    /// The function that will be repeatedly called to see if the stream has
-    /// another value it can yield
-    fn poll(&amp;mut self) -&gt; Poll&lt;Option&lt;Self::Item&gt;, Self::Error&gt;;
-}
-</code></pre>
-
-<p>The <code>Item</code> associated type is the type yielded by the stream. The <code>Error</code>
-associated type is the type of the error yielded when something unexpected
-happens. The <code>poll</code> function is very similar to <code>Future</code>&rsquo;s <code>poll</code> function. The
-only difference is that, this time, <code>Option&lt;Self::Item&gt;</code> is returned.</p>
-
-<p>Stream implementations have the <code>poll</code> function called many times. When the next
-value is ready, <code>Ok(Async::Ready(Some(value)))</code> is returned. When the stream is
-<strong>not ready</strong> to yield a value, <code>Ok(Async::NotReady)</code> is returned. When the
-stream is exhausted and will yield no further values, <code>Ok(Async::Ready(None))</code>
-is returned.</p>
+      <p>This page has not been worked on yet. If you&rsquo;d like to contribute visit the <a href="https://github.com/tokio-rs/doc-push">doc-push</a>
+repo.</p>
 
       
       
