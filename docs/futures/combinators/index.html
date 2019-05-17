@@ -454,7 +454,8 @@ fn main() {
         .and_then(|(socket, buf)| {
             println!(&quot;got {:?}&quot;, buf);
             Ok(())
-        });
+        })
+        .map_err(|_| println!(&quot;failed&quot;));
 
 # let future = futures::future::ok::&lt;(), ()&gt;(());
     tokio::run(future);
