@@ -398,7 +398,7 @@ and wrote &ldquo;hello world&rdquo; to the peer using the <code>and_then</code> 
 the first operation completes, the value is passed to a function. The function
 uses that value to produce a new future and that future is then executed. The
 difference between <code>and_then</code> and <code>map</code> is that <code>and_then</code>&rsquo;s function returns a
-future where as <code>map</code>&rsquo;s function returns a value.</p>
+future whereas <code>map</code>&rsquo;s function returns a value.</p>
 
 <p>The original implementation is found <a href="https://tokio-cn.github.io/docs/futures/getting_asynchronous/#chaining-computations">here</a>. Once updated to
 use combinators, it becomes:</p>
@@ -746,7 +746,7 @@ if some_condition {
 <p>In situations where there are more than two branches, <code>Either</code> enums must be
 nested (<code>Either&lt;Either&lt;A, B&gt;, C&gt;</code>) or a custom, multi variant, enum is defined.</p>
 
-<p>This scenario comes up often when trying to conditional return errors.
+<p>This scenario comes up often when trying to conditionally return errors.
 Consider:</p>
 
 <pre><code class="language-rust"># extern crate futures;
