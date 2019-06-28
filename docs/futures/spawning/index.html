@@ -308,7 +308,7 @@ tokio::run(lazy(|| {
 </code></pre>
 
 <p>The <code>tokio::run</code> function will block until the the future passed to <code>run</code>
-teriminates as well as <strong>all other spawned tasks</strong>. In this case, <code>tokio::run</code>
+terminates as well as <strong>all other spawned tasks</strong>. In this case, <code>tokio::run</code>
 blocks until all four tasks output to STDOUT and terminate.</p>
 
 <p>The <a href="https://docs.rs/futures/0.1/futures/future/fn.lazy.html"><code>lazy</code></a> function runs the closure the first time the future is polled. It
