@@ -27,7 +27,7 @@
 
     <title>
       
-        Announcing the Tokio runtime · Tokio 中文站
+        Tokio alpha release with async &amp; await · Tokio 中文站
       
     </title>
   </head>
@@ -95,7 +95,7 @@
     <div class="col-12 col-md-3 col-xl-2 tk-sidebar">
       
       <div class="tk-docs-toggle d-md-none p-0 d-flex ml-3 collapsed align-item-center">
-        <h1 class="tk-title">Announcing the Tokio runtime</h1>
+        <h1 class="tk-title">Tokio alpha release with async &amp; await</h1>
         <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#tk-docs-nav" aria-controls="tk-docs-nav" aria-expanded="false" aria-label="Toggle docs navigation">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30" focusable="false"><title>Menu</title><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M4 7h22M4 15h22M4 23h22"></path></svg>
         </button>
@@ -108,7 +108,7 @@
             <ul class="nav tk-sidenav">
               
               
-                  <li><a href="https://tokio-cn.github.io/blog/2019-08-alphas/" class="">Tokio alpha release with async &amp; await</a></li>
+                  <li><a href="https://tokio-cn.github.io/blog/2019-08-alphas/" class="active">Tokio alpha release with async &amp; await</a></li>
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-12-recap-2018/" class="">A great 2018, an even better 2019</a></li>
               
@@ -122,7 +122,7 @@
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-03-timers/" class="">New Timer implementation</a></li>
               
-                  <li><a href="https://tokio-cn.github.io/blog/2018-03-tokio-runtime/" class="active">Announcing the Tokio runtime</a></li>
+                  <li><a href="https://tokio-cn.github.io/blog/2018-03-tokio-runtime/" class="">Announcing the Tokio runtime</a></li>
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-02-tokio-reform-shipped/" class="">Tokio Reform is Shipped and the Road to 0.2</a></li>
               
@@ -140,136 +140,223 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
-<li>
-<ul>
-<li><a href="#tl-dr">tl;dr</a></li>
-<li><a href="#what-is-the-tokio-runtime">What is the Tokio Runtime?</a></li>
-<li><a href="#using-the-tokio-runtime">Using the Tokio Runtime</a></li>
-<li><a href="#future-improvements">Future improvements</a></li>
-<li><a href="#tokio-core">Tokio-core</a></li>
-</ul></li>
+<li><a href="#the-road-so-far">The road so far</a></li>
+<li><a href="#what-we-have-now">What we have now</a></li>
+<li><a href="#towards-a-final-release">Towards a final release</a></li>
 </ul>
 </nav>
       </div>
 
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">Announcing the Tokio runtime</h1>
-      <p class="tk-date">08 March 2018</p>
+      <h1 class="tk-title">Tokio alpha release with async &amp; await</h1>
+      <p class="tk-date">August 08, 2019</p>
       
       
 
-<p>I&rsquo;m happy to announce a new release of Tokio. This release includes the first
-iteration of the Tokio Runtime.</p>
+<p>We&rsquo;re pleased to announce <a href="https://crates.io/crates/tokio/0.2.0-alpha.1">the release</a> of the first Tokio alpha with async &amp; await
+support. This includes updating all of the Tokio crates to use <code>std::future</code>
+instead of <code>futures</code> 0.1. It also includes adding <code>async fn</code> versions of the
+APIs.</p>
 
-<h2 id="tl-dr">tl;dr</h2>
+<p>Get it by adding:</p>
 
-<p>This is how a multi-threaded Tokio based server is now written:</p>
+<pre><code class="language-toml">tokio = &quot;=0.2.0-alpha.1&quot;
+</code></pre>
 
-<pre><code class="language-rust,ignore">extern crate tokio;
+<p>to your <code>Cargo.toml</code> file. This is how an echo server is now written:</p>
+
+<pre><code class="language-rust,ignore">#![feature(async_await)]
 
 use tokio::net::TcpListener;
 use tokio::prelude::*;
 
-fn process(s: TcpStream)
-  -&gt; impl Future&lt;Item = (), Error = ()&gt; + Send
-{ ... }
+#[tokio::main]
+async fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    let addr = &quot;127.0.0.1:8080&quot;.parse()?;
+    let mut listener = TcpListener::bind(&amp;addr)?;
 
-let addr = &quot;127.0.0.1:8080&quot;.parse().unwrap();
-let listener = TcpListener::bind(&amp;addr).unwrap();
+    loop {
+        let (mut socket, _) = listener.accept().await?;
 
-let server = listener.incoming()
-    .map_err(|e| println!(&quot;error = {:?}&quot;, e))
-    .for_each(|socket| {
-        tokio::spawn(process(socket))
-    });
+        tokio::spawn(async move {
+            let mut buf = [0; 1024];
 
-tokio::run(server);
+            // In a loop, read data from the socket and write the data back.
+            loop {
+                let n = match socket.read(&amp;mut buf).await {
+                    // socket closed
+                    Ok(n) if n == 0 =&gt; return,
+                    Ok(n) =&gt; n,
+                    Err(e) =&gt; {
+                        println!(&quot;failed to read from socket; err = {:?}&quot;, e);
+                        return;
+                    }
+                };
+
+                // Write the data back
+                if let Err(e) = socket.write_all(&amp;buf[0..n]).await {
+                    println!(&quot;failed to write to socket; err = {:?}&quot;, e);
+                    return;
+                }
+            }
+        });
+    }
+}
 </code></pre>
 
-<p>where <code>process</code> represents a user defined function that takes a socket and
-returns a future that process it. In the case of an echo server, that might be
-reading all data from the socket and writing it back to the same socket.</p>
+<p>More examples are in the <a href="https://github.com/tokio-rs/tokio/tree/master/tokio/examples">git repository</a>.</p>
 
-<p>The <a href="https://tokio-cn.github.io/docs/getting-started/hello-world/">guides</a> and <a href="https://github.com/tokio-rs/tokio/tree/v0.1.x/tokio/examples">examples</a> have been updated to use the runtime.</p>
+<h1 id="the-road-so-far">The road so far</h1>
 
-<h2 id="what-is-the-tokio-runtime">What is the Tokio Runtime?</h2>
+<p>Tokio was first announced almost exactly <a href="https://medium.com/@carllerche/announcing-tokio-df6bb4ddb34">three years
+ago</a>. When Tokio was first released, it contained a minimal,
+single-threaded, scheduler and APIs for TCP. Since then, it has grown to include
+a multi-threaded work-stealing scheduler, APIs for timers, TCP, UDP, UDS, file
+system access, signal handling, managing child processes, high performance async
+aware channels, and more. All this thanks to a <a href="https://github.com/orgs/tokio-rs/people">dedicated team of
+maintainers</a> and an <a href="https://github.com/tokio-rs/tokio/graphs/contributors">active community of contributors</a>. Tokio
+would not be where it is without you! Thank you so much.</p>
 
-<p>The Rust asynchronous stack is evolving to a set of loosely coupled components.
-To get a basic networking application running, you need at a minimum an
-asynchronous task executor and an instance of the Tokio reactor. Because
-everything is decoupled, there are multiple options for these various
-components, but this adds a bunch of boilerplate to all apps.</p>
+<p>Tokio&rsquo;s goal has always been to provide an ergonomic library for writing
+asynchronous applications for Rust without compromising on performance. The past
+three years have been spent building out the Rust I/O ecosystem and discovering
+idioms and patterns for writing asynchronous Rust. Over the past three years,
+the Rust community built a vibrant ecosystem around Tokio.</p>
 
-<p>To help mitigate this, Tokio now provides the concept of a runtime. This is a
-pre-configured package of all the various components that are necessary for
-running the application.</p>
-
-<p>This initial release of the runtime includes the reactor as well as a
-<a href="https://en.wikipedia.org/wiki/Work_stealing">work-stealing</a> based thread pool for scheduling and executing the application&rsquo;s
-code. This provides a multi-threaded default for applications.</p>
-
-<p>The work-stealing default is ideal for most applications. It uses a similar
-strategy as Go, Erlang, .NET, Java (the ForkJoin pool), etc&hellip; The
-implementation provided by Tokio is designed for use cases where many
-<strong>unrelated</strong> tasks are multiplexed on a single thread pool.</p>
-
-<h2 id="using-the-tokio-runtime">Using the Tokio Runtime</h2>
-
-<p>As illustrated in the example above, the easiest way to use the Tokio runtime
-is with two functions:</p>
+<p>Some libraries include:</p>
 
 <ul>
-<li><code>tokio::run</code></li>
-<li><code>tokio::spawn</code>.</li>
+<li>an <a href="https://github.com/hyperium/">HTTP client and server</a> (with <a href="https://github.com/hyperium/h2">HTTP/2.0 support</a>).</li>
+<li>web frameworks (<a href="https://github.com/seanmonstar/warp/">warp</a>, <a href="https://github.com/actix/actix-web">actix</a>).</li>
+<li>a <a href="https://github.com/djc/quinn">QUIC</a> implementation.</li>
+<li><a href="https://github.com/tower-rs/tower">composable components</a> for building robust servers and clients.</li>
+<li>a <a href="https://github.com/tower-rs/tower-grpc/">gRPC client and server</a></li>
 </ul>
 
-<p>The first function takes a future to seed the application and starts the
-runtime. Roughly, it does the following:</p>
+<p>(and of course, there are many more).</p>
 
-<ol>
-<li>Start the reactor.</li>
-<li>Start the thread pool.</li>
-<li>Spawn the future onto the thread pool.</li>
-<li>Blocks the thread until the runtime becomes idle.</li>
-</ol>
+<p>The number of users has been growing too! Users include:</p>
 
-<p>The runtime becomes idle once <strong>all</strong> spawned futures have completed and <strong>all</strong>
-I/O resources bound to the reactor are dropped.</p>
+<ul>
+<li><a href="https://linkerd.io/">Linkerd</a></li>
+<li><a href="https://github.com/Azure/iotedge">Microsoft</a></li>
+<li><a href="https://github.com/firecracker-microvm/firecracker">Amazon</a></li>
+<li><a href="https://github.com/facebookexperimental/mononoke">Facebook</a></li>
+<li><a href="https://vector.dev/">Vector</a></li>
+<li><a href="https://github.com/denoland/deno">Deno</a></li>
+<li><a href="https://github.com/libra/libra">Libra</a></li>
+<li><a href="https://pingcap.com">PingCAP</a></li>
+<li><a href="https://www.parity.io/">Parity</a></li>
+</ul>
 
-<p>From within the context of a runtime. The application may spawn additional
-futures onto the thread pool using <code>tokio::spawn</code>.</p>
+<p>Over the past three years, the Rust team has not been idle either. They have
+been working tirelessly on a huge feature that will greatly improve the
+experience of writing asynchronous code with Rust: <a href="https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md">async &amp; await
+syntax</a>. This new syntax is about to land on Rust stable.</p>
 
-<p>Alternatively, the <a href="#"><code>Runtime</code></a> type can be used directly. This allows for more
-flexibility around setting up and using the runtime.</p>
+<p>All of Tokio&rsquo;s iteration to date was done while maintaining API stability. Tokio
+has not had a breaking release since the very first 0.1.0 release on September
+9, 2016. Understandably, a long list of changes to make has been building up.
+The introduction of async &amp; await syntax is the right moment to make these
+breaking changes.</p>
 
-<h2 id="future-improvements">Future improvements</h2>
+<h1 id="what-we-have-now">What we have now</h1>
 
-<p>This is just the initial release of the Tokio runtime. Upcoming releases will
-include additional functionality that is useful for Tokio based applications. A
-blog post will be coming soon that goes into the roadmap in more detail.</p>
+<p>Today&rsquo;s release of Tokio <code>0.2.0-alpha.1</code> with async &amp; await updates all of Tokio&rsquo;s
+components to use <a href="https://doc.rust-lang.org/std/"><code>std::future</code></a>, and all usage of <code>futures</code> 0.1
+has been removed.</p>
 
-<p>The goal, as mentioned before, is to release early and often. Providing new
-features to enable the community to experiment with them. Sometime in the next
-few months, there will be a breaking release of the entire Tokio stack, so any
-changes in the API need to be discovered before then.</p>
+<p>Changes include:</p>
 
-<h2 id="tokio-core">Tokio-core</h2>
+<p><strong>Using async fns for asynchronous operations.</strong></p>
 
-<p>There has also been a new release of <code>tokio-core</code>. This release updates
-<code>tokio-core</code> to use <code>tokio</code> under the hood. This enables all existing
-applications and libraries that currently depend on <code>tokio-core</code> (like Hyper) to
-be able to use the improvements that come with the Tokio runtime without
-requiring a breaking change.</p>
+<p>When possible, <code>async fn</code> has been used to provide asynchronous operations. For
+example, acceping sockets from a <code>TcpListener</code> is done with the async <code>accept</code>
+function:</p>
 
-<p>Given the amount of churn that is expected to happen in the next few months,
-we&rsquo;re hoping to help ease the transition across releases.</p>
+<pre><code class="language-rust,ignore">let (mut socket, _) = listener.accept().await?;
+</code></pre>
+
+<p>I/O operations are provided as <code>async</code> functions:</p>
+
+<pre><code class="language-rust,ignore">let n = socket.read(&amp;mut buf).await?;
+
+let n = socket.write(&amp;buf).await?;
+</code></pre>
+
+<p>The same applies to most of the Tokio 0.2 APIs.</p>
+
+<p><strong>Starting the Tokio runtime</strong></p>
+
+<p>Setting the entry point of a Tokio application can now be done with a proc macro:</p>
+
+<pre><code class="language-rust,ignore">#[tokio::main]
+async fn main() {
+    println!(&quot;Hello from Tokio!&quot;);
+}
+</code></pre>
+
+<p>Creating a runtime by hand is still supported. The proc macro just provides some
+sugar. The equivalent application would be:</p>
+
+<pre><code class="language-rust,ignore">fn main() {
+    let mut rt = Runtime::new().unwrap();
+    rt.block_on(async {
+        println!(&quot;Hello from Tokio!&quot;);
+    });
+}
+</code></pre>
+
+<p>There is also a proc macro for tests that will set up a current thread runtime to run your tests:</p>
+
+<pre><code class="language-rust,ignore">#[tokio::test]
+async fn my_test() {
+    let addr = &quot;127.0.0.1:8080&quot;.parse().unwrap();
+    let mut listener = TcpListener::bind(&amp;addr).unwrap();
+    let addr = listener.local_addr().unwrap();
+
+    // Connect to the listener
+    TcpStream::connect(&amp;addr).await.unwrap();
+}
+</code></pre>
+
+<p><strong>Nightly only</strong></p>
+
+<p>Because async &amp; await are not available on the stable Rust channel yet, this
+alpha release requires using nightly Rust. Tokio includes a
+<a href="https://github.com/tokio-rs/tokio/blob/master/rust-toolchain">rust-toolchain</a> file that tracks the nightly Tokio tests again.</p>
+
+<h1 id="towards-a-final-release">Towards a final release</h1>
+
+<p>This alpha release represents the first step towards the next iteration of
+Tokio. Users are now able to experiment using Tokio and async &amp; await syntax,
+but nothing is set in stone.</p>
+
+<p>The availability of async &amp; await syntax is the perfect time to issue a major
+revision of the full stack. All of Tokio&rsquo;s components require more changes,
+including ecosystem crates such as <a href="https://github.com/tokio-rs/mio"><code>mio</code></a>, <a href="https://github.com/tokio-rs/bytes"><code>bytes</code></a>, and
+<a href="https://github.com/tokio-rs/tracing"><code>tracing</code></a>. Focus will be on tight integration and performance, i.e.
+providing ergonomic high level APIs without sacrificing speed. Lessons learned
+over the past three years will be applied. Follow up blog posts will cover these
+changes in more detail as they happen.</p>
+
+<p>As progress is made, alpha crates will be released. These releases will include
+breaking changes. Progress can be tracked on the <a href="https://github.com/tokio-rs/tokio/issues?q=is%3Aopen+is%3Aissue+milestone%3Av0.2">issue tracker</a>.</p>
+
+<p>Given the scope of the changes, it will take a few months before a final release
+is ready. Estimating software release dates is hard, but let&rsquo;s aim for before the
+end of the year.</p>
+
+<p>There is a ton of work to done on code, testing, and documentation. As always,
+your help is <strong>greatly</strong> appreciated! Check out the <a href="https://github.com/tokio-rs/tokio/issues?q=is%3Aopen+is%3Aissue+milestone%3Av0.2">issue tracker</a> or
+ping us on <a href="https://gitter.im/tokio-rs/tokio">Gitter</a>. We&rsquo;re always happy to mentor!</p>
 
       
 
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/blog/2018-02-tokio-reform-shipped/">Tokio Reform is Shipped and the Road to 0.2</a>
+          <b>下一篇</b>：<a href ="/blog/2018-12-recap-2018/">A great 2018, an even better 2019</a>
         </div>
       
     </main>

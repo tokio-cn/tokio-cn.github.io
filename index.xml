@@ -6,7 +6,7 @@
     <description>Recent content on Tokio——Rust 编程语言的异步运行时。</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Wed, 19 Dec 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 08 Aug 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://tokio-cn.github.io/index.xml" rel="self" type="application/rss+xml" />
     
@@ -19,6 +19,18 @@
       <guid>https://tokio-cn.github.io/docs/overview/</guid>
       <description>Tokio allows developers to write asynchronous programs in the Rust programming language. Instead of synchronously waiting for long-running operations (like reading a file or waiting for a timer to complete) before moving on to the next thing, Tokio allows developers to write programs where execution continues while the long-running operations are in progress.
 More specifically, Tokio is an event-driven, non-blocking I/O platform for writing asynchronous applications with Rust. At a high level, it provides a few major components:</description>
+    </item>
+    
+    <item>
+      <title>Tokio alpha release with async &amp; await</title>
+      <link>https://tokio-cn.github.io/blog/2019-08-alphas/</link>
+      <pubDate>Thu, 08 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/blog/2019-08-alphas/</guid>
+      <description>We&amp;rsquo;re pleased to announce the release of the first Tokio alpha with async &amp;amp; await support. This includes updating all of the Tokio crates to use std::future instead of futures 0.1. It also includes adding async fn versions of the APIs.
+Get it by adding:
+tokio = &amp;quot;=0.2.0-alpha.1&amp;quot;  to your Cargo.toml file. This is how an echo server is now written:
+#![feature(async_await)] use tokio::net::TcpListener; use tokio::prelude::*; #[tokio::main] async fn main() -&amp;gt; Result&amp;lt;(), Box&amp;lt;dyn std::error::Error&amp;gt;&amp;gt; { let addr = &amp;quot;127.</description>
     </item>
     
     <item>
