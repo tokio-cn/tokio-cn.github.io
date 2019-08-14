@@ -93,7 +93,7 @@ trait Future { /// The type of the value returned when the future completes. typ
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/docs/futures/getting_asynchronous/</guid>
-      <description>Futures are all about managing asynchronicity. Implementing a future that completes asynchonously requires correctly handling receiving Async::NotReady from the inner future.
+      <description>Futures are all about managing asynchronicity. Implementing a future that completes asynchronously requires correctly handling receiving Async::NotReady from the inner future.
 Let&amp;rsquo;s start by implementing a future that establishes a TCP socket with a remote peer and extracts the peer socket address, writing it to STDOUT.
 # #![deny(deprecated)] extern crate tokio; #[macro_use] extern crate futures; use tokio::net::{TcpStream, tcp::ConnectFuture}; use futures::{Future, Async, Poll}; struct GetPeerAddr { connect: ConnectFuture, } impl Future for GetPeerAddr { type Item = (); type Error = (); fn poll(&amp;amp;mut self) -&amp;gt; Poll&amp;lt;Self::Item, Self::Error&amp;gt; { match self.</description>
     </item>
