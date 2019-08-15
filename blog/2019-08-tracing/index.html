@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <link rel="apple-touch-icon" sizes="120x120" href="https://tokio-cn.github.io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://tokio-cn.github.io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://tokio-cn.github.io/favicon-16x16.png">
+    <link rel="manifest" href="https://tokio-cn.github.io/manifest.json">
+    <link rel="mask-icon" href="https://tokio-cn.github.io/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#ffffff">
+
+    
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/bootstrap-reboot.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/bootstrap.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://tokio-cn.github.io/css/tokio.css">
+
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.css"/>
+
+    
+    <link rel="alternate" type="application/rss+xml" href="https://tokio-cn.github.io/blog/index.xml" />
+
+    <title>
+      
+        Diagnostics with Tracing · Tokio 中文站
+      
+    </title>
+  </head>
+  <body>
+    <header class="navbar navbar-expand navbar-dark flex-column flex-md-row tk-navbar">
+      <a class="navbar-brand" href="https://tokio-cn.github.io/">
+        <img src="https://tokio-cn.github.io/img/Tokio_Mark_White.png" class="align-middle" alt="">
+      </a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link " href="https://tokio-cn.github.io/">首页</a>
+          </li>
+          <li class="nav-item">
+            
+            
+            
+            <a class="nav-link " href="https://tokio-cn.github.io/docs/getting-started/hello-world/">文档</a>
+          </li>
+          <li class="nav-item">
+            
+            <a class="nav-link " href="https://tokio-cn.github.io/community/">社区</a>
+          </li>
+          <li class="nav-item">
+            
+            
+            <a class="nav-link  active " href="https://tokio-cn.github.io/blog/2019-08-tracing/">博客</a>
+          </li>
+        </ul>
+      </div>
+
+      <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+        <li class="nav-item dropdown">
+          <a class="nav-item nav-link dropdown-toggle mr-md-2" href="#" id="tk-langs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            中文
+          </a>
+          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="tk-langs">
+            <a class="dropdown-item active" href="#">中文</a>
+            <a class="dropdown-item" href="https://tokio-zh.github.io/" rel="nofollow">官方中文</a>
+            <a class="dropdown-item" href="https://tokio.rs" rel="nofollow">English</a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link p-2" href="https://github.com/tokio-rs/tokio" target="_blank" rel="noopener" aria-label="GitHub">
+            <svg class="navbar-nav-svg" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 512 499.36" focusable="false"><title>GitHub</title><path d="M256 0C114.64 0 0 114.61 0 256c0 113.09 73.34 209 175.08 242.9 12.8 2.35 17.47-5.56 17.47-12.34 0-6.08-.22-22.18-.35-43.54-71.2 15.49-86.2-34.34-86.2-34.34-11.64-29.57-28.42-37.45-28.42-37.45-23.27-15.84 1.73-15.55 1.73-15.55 25.69 1.81 39.21 26.38 39.21 26.38 22.84 39.12 59.92 27.82 74.5 21.27 2.33-16.54 8.94-27.82 16.25-34.22-56.84-6.43-116.6-28.43-116.6-126.49 0-27.95 10-50.8 26.35-68.69-2.63-6.48-11.42-32.5 2.51-67.75 0 0 21.49-6.88 70.4 26.24a242.65 242.65 0 0 1 128.18 0c48.87-33.13 70.33-26.24 70.33-26.24 14 35.25 5.18 61.27 2.55 67.75 16.41 17.9 26.31 40.75 26.31 68.69 0 98.35-59.85 120-116.88 126.32 9.19 7.9 17.38 23.53 17.38 47.41 0 34.22-.31 61.83-.31 70.23 0 6.85 4.61 14.81 17.6 12.31C438.72 464.97 512 369.08 512 256.02 512 114.62 397.37 0 256 0z" fill="currentColor" fill-rule="evenodd"/></svg>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link p-2" href="https://twitter.com/tokio_rs" target="_blank" rel="noopener" aria-label="Twitter">
+            <svg class="navbar-nav-svg" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 512 416.32" focusable="false"><title>Twitter</title><path d="M160.83 416.32c193.2 0 298.92-160.22 298.92-298.92 0-4.51 0-9-.2-13.52A214 214 0 0 0 512 49.38a212.93 212.93 0 0 1-60.44 16.6 105.7 105.7 0 0 0 46.3-58.19 209 209 0 0 1-66.79 25.37 105.09 105.09 0 0 0-181.73 71.91 116.12 116.12 0 0 0 2.66 24c-87.28-4.3-164.73-46.3-216.56-109.82A105.48 105.48 0 0 0 68 159.6a106.27 106.27 0 0 1-47.53-13.11v1.43a105.28 105.28 0 0 0 84.21 103.06 105.67 105.67 0 0 1-47.33 1.84 105.06 105.06 0 0 0 98.14 72.94A210.72 210.72 0 0 1 25 370.84a202.17 202.17 0 0 1-25-1.43 298.85 298.85 0 0 0 160.83 46.92" fill="currentColor"/></svg>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link p-2" href="https://gitter.im/tokio-rs/tokio" target="_blank" rel="noopener" aria-label="Gitter">
+            <svg class="navbar-nav-svg" xmlns="http://www.w3.org/2000/svg" focusable="false"><title>Gitter</title><path fill="currentColor" d="M8.501 4.001H10.5V24H8.501V4.001zm6.999 0V24h-2V4.001h2zM3.5 0h2.001v15H3.5V0zm15 4.001h2V15h-2V4.001z"/></svg>
+          </a>
+        </li>
+      </ul>
+    </header>
+
+
+
+<div class="container-fluid tk-blog">
+  <div class="row flex-xl-nowrap">
+    <div class="col-12 col-md-3 col-xl-2 tk-sidebar">
+      
+      <div class="tk-docs-toggle d-md-none p-0 d-flex ml-3 collapsed align-item-center">
+        <h1 class="tk-title">Diagnostics with Tracing</h1>
+        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#tk-docs-nav" aria-controls="tk-docs-nav" aria-expanded="false" aria-label="Toggle docs navigation">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30" focusable="false"><title>Menu</title><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M4 7h22M4 15h22M4 23h22"></path></svg>
+        </button>
+      </div>
+      <nav class="tk-links collapse" id="tk-docs-nav">
+          <div class="tk-toc-item active">
+            <p class="tk-toc-link">
+              博文列表
+            </p>
+            <ul class="nav tk-sidenav">
+              
+              
+                  <li><a href="https://tokio-cn.github.io/blog/2019-08-tracing/" class="active">Diagnostics with Tracing</a></li>
+              
+                  <li><a href="https://tokio-cn.github.io/blog/2019-08-alphas/" class="">Tokio alpha release with async &amp; await</a></li>
+              
+                  <li><a href="https://tokio-cn.github.io/blog/2018-12-recap-2018/" class="">A great 2018, an even better 2019</a></li>
+              
+                  <li><a href="https://tokio-cn.github.io/blog/2018-10-doc-blitz/" class="">Announcing the Tokio Doc Push (we need you!)</a></li>
+              
+                  <li><a href="https://tokio-cn.github.io/blog/2018-08-async-await/" class="">Experimental async / await support for Tokio</a></li>
+              
+                  <li><a href="https://tokio-cn.github.io/blog/2018-08-incremental-improvements/" class="">Tokio 0.1.8 with many incremental improvements</a></li>
+              
+                  <li><a href="https://tokio-cn.github.io/blog/2018-05-tokio-fs/" class="">New Tokio release, now with filesystem support</a></li>
+              
+                  <li><a href="https://tokio-cn.github.io/blog/2018-03-timers/" class="">New Timer implementation</a></li>
+              
+                  <li><a href="https://tokio-cn.github.io/blog/2018-03-tokio-runtime/" class="">Announcing the Tokio runtime</a></li>
+              
+                  <li><a href="https://tokio-cn.github.io/blog/2018-02-tokio-reform-shipped/" class="">Tokio Reform is Shipped and the Road to 0.2</a></li>
+              
+                  <li><a href="https://tokio-cn.github.io/blog/2017-09-tokio-reform/" class="">An RFC for a Tokio revamp</a></li>
+              
+                  <li><a href="https://tokio-cn.github.io/blog/2017-03-tokio-io/" class="">Announcing the tokio-io Crate</a></li>
+              
+                  <li><a href="https://tokio-cn.github.io/blog/2017-01-tokio-0-1/" class="">Announcing Tokio 0.1</a></li>
+              
+            </ul>
+          </div>
+      </nav>
+    </div>
+    <div class="d-none d-xl-block col-xl-2 tk-toc">
+      <div class="section-nav">
+        <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#why-do-we-need-another-logging-library">Why do we need another logging library?</a></li>
+<li><a href="#application-level-tracing">Application-Level Tracing</a>
+<ul>
+<li><a href="#spans">Spans</a></li>
+<li><a href="#structure">Structure</a></li>
+</ul></li>
+<li><a href="#a-worked-example">A Worked Example</a></li>
+<li><a href="#getting-started-with-tracing">Getting Started with Tracing</a></li>
+<li><a href="#building-an-ecosystem">Building an Ecosystem</a></li>
+</ul></li>
+</ul>
+</nav>
+      </div>
+
+    </div>
+    <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
+      <h1 class="tk-title">Diagnostics with Tracing</h1>
+      <p class="tk-date">August 14, 2019</p>
+      
+      
+
+<p>Effectively developing systems and operating them in production requires
+visibility into their behavior at runtime. While conventional logging can
+provide some of this visibility, asynchronous software &mdash; like applications
+using the Tokio runtime &mdash; introduces new challenges.</p>
+
+<p><a href="https://crates.io/crates/tracing"><code>tracing</code></a> is a collection of libraries that provide a framework
+for instrumenting Rust programs to collect structured, context-aware, event
+driven diagnostics. Note that <code>tracing</code> was originally released under the name
+<code>tokio-trace</code>; the name was changed to reflect that, although it is part of the
+Tokio project, the <code>tokio</code> runtime is not required to use <code>tracing</code>.</p>
+
+<h2 id="why-do-we-need-another-logging-library">Why do we need another logging library?</h2>
+
+<p>Rust already has a robust logging ecosystem based around the
+<a href="https://crates.io/crates/log">log</a> crate&rsquo;s logging facade, with libraries such as
+<code>env_logger</code> and <code>fern</code> in widespread use. This raises reasonable
+questions&ndash; why is <code>tracing</code> necessary, and what benefit does it provide
+that existing libraries don&rsquo;t? To answer these questions, we need to
+consider the challenges introduced by diagnostics in asynchronous
+systems.</p>
+
+<p>In synchronous code, we can simply log individual messages as the program
+executes, and expect them to be printed in order. A programmer can interpret the
+logs fairly easily, since the log records are output sequentially. For example,
+in a synchronous system, if I see a group of log messages like this:</p>
+
+<pre><code class="language-plain">DEBUG server: accepted connection from 106.42.126.8:56975
+DEBUG server::http: received request
+ WARN server::http: invalid request headers
+DEBUG server: closing connection
+</code></pre>
+
+<p>I can infer that the request from the client with the IP address 106.42.126.8 was
+the one that failed, and that the connection from that client was then closed by
+the server. The <em>context</em> is implied by previous messages: because the
+synchronous server must serve each request before accepting the next connection,
+we can determine that any log records occurring after an &ldquo;accepted
+connection&hellip;&rdquo; message and before a &ldquo;closing connection&rdquo; message refer to that
+connection.</p>
+
+<p>However, in asynchronous systems like Tokio, interpreting traditional log
+messages can often be quite challenging. A single thread in an asynchronous
+system might be executing any number of tasks, switching between them as IO
+resources become available, and an application might consist of a number of such
+worker threads running concurrently. In this world, we can no longer rely on the
+ordering of log messages to determine context or cause and effect. A task might
+log some messages and yield, allowing the executor to poll another task that
+logs its own unrelated messages. Log messages from threads running concurrently
+might be printed out interleaved. To understand asynchronous systems, the
+contextual and causal relationships must be recorded explicitly, rather than
+implied by sequential ordering.</p>
+
+<p>If the log lines in the above example were emitted by a asynchronous
+application, the server task may continue accepting new
+connections while previously-accepted ones are being processed by other tasks; multiple
+requests might be processed concurrently by worker threads. We might see
+something like this:</p>
+
+<pre><code class="language-plain">DEBUG server: accepted connection from 106.42.126.8:56975
+DEBUG server: closing connection
+DEBUG server::http: received request
+DEBUG server: accepted connection from 11.103.8.9:49123
+DEBUG server::http: received request
+DEBUG server: accepted connection from 102.12.37.105:51342
+ WARN server::http: invalid request headers
+TRACE server: closing connection
+</code></pre>
+
+<p>We don&rsquo;t know that the request with invalid headers was received from
+106.42.126.8 any longer. Since multiple connections are being processed
+concurrently, the invalid headers might have been sent on another connection
+while we waited to receive more data from that client. What can we do to make
+sense of this mess?</p>
+
+<p>Conventional logging often captures <em>static</em> contexts about the program &mdash;
+such as what file, module, or function an event was recorded in &mdash; but
+that&rsquo;s of limited use to us in understanding the program&rsquo;s runtime behavior.
+Instead, visibility into asynchronous code requires diagnostics that track the
+<em>dynamic</em> runtime contexts in which events occur.</p>
+
+<h2 id="application-level-tracing">Application-Level Tracing</h2>
+
+<p><code>tracing</code> is more than a logging library: it implements scoped, contextual, and
+structured diagnostic instrumentation. This allows users to trace logical
+contexts in the application through time, even as the actual flow of execution moves
+between those contexts.</p>
+
+<h3 id="spans">Spans</h3>
+
+<p>To record the flow of execution, <code>tracing</code> introduces the concept of <em>spans</em>. Unlike a log
+line that represents a moment in time, a span models a period of time with a
+beginning and an end. When a program begins executing in a context or performing
+a unit of work, it <em>enters</em> a span, and when it stops executing in that context,
+it <em>exits</em> the span.</p>
+
+<p>Any events that occur between when a span is entered and when it is exited are
+considered to have occurred within that span. Similarly,
+spans may be nested: when a thread enters a span inside of another span, it
+is in <strong>both</strong> spans, with the newly-entered span considered the <em>child</em> and the
+outer span the <em>parent</em>. We can then construct a tree of nested spans and follow
+them throughout different parts of a program.</p>
+
+<p><code>tracing</code> also supports <em>events</em>, which model instantaneous points in time.
+Events are similar to traditional log messages, but exist within the tree of
+spans as well. When we record an event, we can pinpoint the context in which it
+occurred.</p>
+
+<h3 id="structure">Structure</h3>
+
+<p>By attaching <em>structured data</em> to spans, we can model contexts. Rather than
+simply recording unstructured, human-readable messages, <code>tracing</code>
+instrumentation points record typed key-value data called <em>fields</em>. For example,
+in an HTTP server, a span representing an accepted connection might record fields
+such as the client&rsquo;s IP address, the requested path, request method, headers,
+and so on. If we revisit the example above, with the addition of spans, we might
+see something like this:</p>
+
+<pre><code class="language-plain">DEBUG server{client.addr=106.42.126.8:56975}: accepted connection
+DEBUG server{client.addr=82.5.70.2:53121}: closing connection
+DEBUG server{client.addr=89.56.1.12:55601} request{path=&quot;/posts/tracing&quot; method=GET}: received request
+DEBUG server{client.addr=111.103.8.9:49123}: accepted connection
+DEBUG server{client.addr=106.42.126.8:56975} request{path=&quot;/&quot; method=PUT}: received request
+DEBUG server{client.addr=113.12.37.105:51342}: accepted connection
+ WARN server{client.addr=106.42.126.8:56975} request{path=&quot;/&quot; method=PUT}: invalid request headers
+TRACE server{client.addr=106.42.126.8:56975} request{path=&quot;/&quot; method=PUT}: closing connection
+</code></pre>
+
+<p>Notice how the events are annotated with spans that record the client IP
+address, and the request&rsquo;s path and method. Although multiple events are
+happening concurrently in different contexts, we can now follow the flow of the
+request from 106.42.126.8 through the system, and determine that it was the
+request containing the invalid headers that generated the warning.</p>
+
+<p>This machine-readable structured data also gives us the ability to consume diagnostic
+data in more sophisticated ways than simply formatting it to be read by a human.
+For example, we might also consume the above data by counting the number of
+requests recieved for different paths or HTTP methods. By looking at the
+structure of the span tree as well as at key-value data, we can even do things
+like recording the entire lifespan of a request only when it ended with an
+error.</p>
+
+<h2 id="a-worked-example">A Worked Example</h2>
+
+<p>To demonstrate the value of this kind of diagnostics, let&rsquo;s take a look at an
+example. In this example, we&rsquo;ve written a small HTTP service, using <a href="https://crates.io/crates/tower"><code>tower</code></a>,
+that implements &ldquo;character repetition as a service&rdquo;. The service recieves
+requests for paths consisting of a single ASCII character, and responds with
+that character duplicated a number of times equal to the value of the
+<code>Content-Length</code> header.</p>
+
+<p>We&rsquo;ve instrumented the example service using <code>tracing</code>, and used the
+<a href="https://crates.io/crates/tracing-subscriber"><code>tracing-subscriber</code></a> crate to implement an admin endpoint that
+allows us to <a href="https://docs.rs/tracing-subscriber/latest/tracing_subscriber/reload/index.html">change the filter configuration</a> that determines what
+<code>tracing</code> instrumentation is enabled at runtime. A load generator runs in the background
+that constantly sends requests for random alphabetic characters to the demo service.</p>
+
+<p>With a version of the example service instrumented using the <a href="https://crates.io/crates/log"><code>log</code></a> and
+<a href="https://crates.io/crates/env_logger"><code>env_logger</code></a> crates, we get  output like this:</p>
+
+<pre><code class="language-log">...
+[DEBUG load_log] accepted connection from [::1]:55257
+[DEBUG load_log] received request for path &quot;/z&quot;
+[DEBUG load_log] accepted connection from [::1]:55258
+[DEBUG load_log] received request for path &quot;/Z&quot;
+[ERROR load_log] error received from server! status: 500
+[DEBUG load_log] accepted connection from [::1]:55259
+[DEBUG load_log] accepted connection from [::1]:55260
+[DEBUG load_log] received request for path &quot;/H&quot;
+[DEBUG load_log] accepted connection from [::1]:55261
+[DEBUG load_log] received request for path &quot;/S&quot;
+[DEBUG load_log] received request for path &quot;/C&quot;
+[DEBUG load_log] accepted connection from [::1]:55262
+[DEBUG load_log] received request for path &quot;/x&quot;
+[DEBUG load_log] accepted connection from [::1]:55263
+[DEBUG load_log] accepted connection from [::1]:55264
+[WARN  load_log] path &quot;/&quot; not found; returning 404
+[DEBUG load_log] accepted connection from [::1]:55265
+[ERROR load_log] error received from server! status: 404
+[DEBUG load_log] received request for path &quot;/Q&quot;
+[DEBUG load_log] accepted connection from [::1]:55266
+[DEBUG load_log] received request for path &quot;/l&quot;
+...
+</code></pre>
+
+<p>Because the service is under load, these messages scroll past very fast. I&rsquo;ve
+included just a small sample of the output here.</p>
+
+<p>Although the errors do show up in the logs, it&rsquo;s difficult to associate them
+with any context that might help us determine their cause. For the 404 error,
+we&rsquo;re lucky enough that whomever added the warning line logged by the server
+thought to include the path in the human-readable log message, but for the 500
+error, we&rsquo;re flying blind.</p>
+
+<p>Now, let&rsquo;s switch to a version of the demo application that&rsquo;s instrumented with
+<code>tracing</code>:</p>
+
+<pre><code class="language-log">...
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60891}: load: accepted connection
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60890}: load: accepted connection
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60891}:request{req.method=GET req.path=&quot;/I&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;18&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60890}:request{req.method=GET req.path=&quot;/T&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;4&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60892}: load: accepted connection
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60892}:request{req.method=GET req.path=&quot;/x&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;6&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60893}: load: accepted connection
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60895}:request{req.method=GET req.path=&quot;/&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;13&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+ WARN server{name=serve local=[::1]:3000}:conn{remote=[::1]:60895}:request{req.method=GET req.path=&quot;/&quot;}: load: rsp.status=404
+ERROR gen: error received from server! status=404
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60893}:request{req.method=GET req.path=&quot;/a&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;11&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60894}: load: accepted connection
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60894}:request{req.method=GET req.path=&quot;/V&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;12&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60896}: load: accepted connection
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60998}: load: accepted connection
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60996}:request{req.method=GET req.path=&quot;/z&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;17&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+ERROR gen: error received from server! status=500
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60987}: load: accepted connection
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60911}: load: accepted connection
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60911}:request{req.method=GET req.path=&quot;/m&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;7&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+DEBUG server{name=serve local=[::1]:3000}:conn{remote=[::1]:60912}: load: accepted connection
+...
+</code></pre>
+
+<p>Notice how in addition to printing individual events, the span contexts in which
+they occurred are also printed. In particular, each connection and request
+creates its own span. However, these events are recorded very frequently, so the
+logs are still scrolling by quite fast.</p>
+
+<p>If we send a request to the demo app&rsquo;s admin endpoint, we can reload the
+filter configuration to look only at the events recorded by the load generators:</p>
+
+<pre><code class="language-bash">:; curl -X PUT localhost:3001/filter -d &quot;gen=debug&quot;
+</code></pre>
+
+<p>These filters are specified using a syntax similar to that of the <a href="https://crates.io/crates/env_logger"><code>env_logger</code></a>
+crate.</p>
+
+<p>The rate at which the logs scroll by slows down significantly, and we see output
+like this:</p>
+
+<pre><code class="language-log">...
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: gen: error received from server! status=404
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: error received from server! status=500
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: error received from server! status=500
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: error received from server! status=500
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: error received from server! status=500
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: gen: error received from server! status=404
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: error received from server! status=500
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: gen: error received from server! status=404
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: gen: error received from server! status=404
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: error received from server! status=500
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: gen: error received from server! status=404
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: error received from server! status=500
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: gen: error received from server! status=404
+...
+</code></pre>
+
+<p>Looking at the <code>request</code> spans outut by the load generator, we start to notice a
+pattern. The value of the <code>req.path</code> field is always either <code>&quot;/&quot;</code> or <code>&quot;/z&quot;</code>.</p>
+
+<p>We can reload the filter configuration again, setting the verbosity to maximum
+only when we&rsquo;re inside a span with the field <code>req.path</code> with the value <code>&quot;/&quot;</code>:</p>
+
+<pre><code class="language-bash">:; curl -X PUT localhost:3001/filter -d &quot;[{req.path=\&quot;/\&quot;}]=trace&quot;
+</code></pre>
+
+<p>The <code>[]</code> indicates that we wish to filter on <code>tracing</code> spans rather than on
+static targets, and the <code>{}</code> indicate that we want to match span fields.</p>
+
+<pre><code class="language-log">...
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: gen: sending request...
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: tower_buffer::service: sending request to buffer worker
+DEBUG request{req.method=GET req.path=&quot;/&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;21&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+TRACE request{req.method=GET req.path=&quot;/&quot;}: load: handling request...
+TRACE request{req.method=GET req.path=&quot;/&quot;}: load: rsp.error=path must be a single ASCII character
+ WARN request{req.method=GET req.path=&quot;/&quot;}: load: rsp.status=404
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: gen: error received from server! status=404
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: gen: response complete. rsp.body=path must be a single ASCII character
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: gen: sending request...
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: tower_buffer::service: sending request to buffer worker
+DEBUG request{req.method=GET req.path=&quot;/&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;18&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+TRACE request{req.method=GET req.path=&quot;/&quot;}: load: handling request...
+TRACE request{req.method=GET req.path=&quot;/&quot;}: load: rsp.error=path must be a single ASCII character
+ WARN request{req.method=GET req.path=&quot;/&quot;}: load: rsp.status=404
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: gen: error received from server! status=404
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: gen: response complete. rsp.body=path must be a single ASCII character
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: gen: sending request...
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&quot;}: tower_buffer::service: sending request to buffer worker
+DEBUG request{req.method=GET req.path=&quot;/&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;2&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+...
+</code></pre>
+
+<p>Now we see what&rsquo;s going on. The service doesn&rsquo;t support requests to <code>/</code> and is,
+quite correctly, responding with a 404. But what about those 500 errors? We
+remember that they seemed to only occur when the requested path is &ldquo;/z&rdquo;&hellip;</p>
+
+<pre><code class="language-bash">:; curl -X PUT localhost:3001/filter -d &quot;[{req.path=\&quot;/z\&quot;}]=trace&quot;
+</code></pre>
+
+<pre><code class="language-log">...
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: sending request...
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: tower_buffer::service: sending request to buffer worker
+DEBUG request{req.method=GET req.path=&quot;/z&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;0&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+TRACE request{req.method=GET req.path=&quot;/z&quot;}: load: handling request...
+TRACE request{req.method=GET req.path=&quot;/z&quot;}: load: error=i don't like this letter. letter=&quot;z&quot;
+TRACE request{req.method=GET req.path=&quot;/z&quot;}: load: rsp.error=unknown internal error
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: error received from server! status=500
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: response complete. rsp.body=unknown internal error
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: sending request...
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: tower_buffer::service: sending request to buffer worker
+DEBUG request{req.method=GET req.path=&quot;/z&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;16&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+TRACE request{req.method=GET req.path=&quot;/z&quot;}: load: handling request...
+TRACE request{req.method=GET req.path=&quot;/z&quot;}: load: error=i don't like this letter. letter=&quot;z&quot;
+TRACE request{req.method=GET req.path=&quot;/z&quot;}: load: rsp.error=unknown internal error
+ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: error received from server! status=500
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: response complete. rsp.body=unknown internal error
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: gen: sending request...
+TRACE load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/z&quot;}: tower_buffer::service: sending request to buffer worker
+DEBUG request{req.method=GET req.path=&quot;/z&quot;}: load: received request. req.headers={&quot;content-length&quot;: &quot;24&quot;, &quot;host&quot;: &quot;[::1]:3000&quot;} req.version=HTTP/1.1
+TRACE request{req.method=GET req.path=&quot;/z&quot;}: load: handling request...
+TRACE request{req.method=GET req.path=&quot;/z&quot;}: load: error=i don't like this letter. letter=&quot;z&quot;
+TRACE request{req.method=GET req.path=&quot;/z&quot;}: load: rsp.error=unknown internal error
+...
+</code></pre>
+
+<p>We can now trace the entire life-cycle of a request to <code>/z</code>, ignoring everything
+else that&rsquo;s happening concurrently. And, looking at the logged events, we see
+that the service records that &ldquo;I don&rsquo;t like this letter&rdquo; and returns an internal
+error. We&rsquo;ve found the (admittedly, entirely fake) bug!</p>
+
+<p>This kind of dynamic filtering is only possible with context-aware, structured
+diagnostic instrumentation. Because nesting spans and events lets us construct a
+a tree of related contexts, we can interpret the diagnostics in terms of events
+that are <em>logically</em> or <em>causally</em> linked (e.g., they occurred while handling
+the same request) rather than those that are <em>temporally</em> linked (they occurred
+near each other in time).</p>
+
+<p>If you&rsquo;re interested in seeing the code that produced these logs, or
+interactively experimenting with this demo, you can check out the example
+<a href="https://github.com/tokio-rs/tracing/blob/master/tracing-tower/examples/load.rs">here</a>.</p>
+
+<h2 id="getting-started-with-tracing">Getting Started with Tracing</h2>
+
+<p><code>tracing</code> is available <a href="https://crates.io/crates/tracing">on crates.io</a>:</p>
+
+<pre><code class="language-toml">tracing = &quot;0.1.5&quot;
+</code></pre>
+
+<p>The easiest way to get started with <code>tracing</code> is to use the
+<a href="https://docs.rs/tracing-attributes/latest/tracing_attributes/attr.instrument.html"><code>tracing::instrument</code></a> attribute on a function. This attribute will
+instrument the function to create and enter a new span when the function is
+called, with the function&rsquo;s arguments recorded as fields on that span. For
+example:</p>
+
+<pre><code class="language-rust">use tracing::instrument;
+
+#[instrument]
+pub async fn connect_to(remote: SocketAddr) -&gt; io::Result&lt;TcpStream&gt; {
+    // ...
+}
+</code></pre>
+
+<p><code>tracing</code> also provides a set of <a href="https://docs.rs/tracing/0.1.5/tracing/#macros">function-like macros</a> for constructing
+spans and events. Users of the <code>log</code> crate should note that <code>tracing</code>&rsquo;s
+<code>trace!</code>, <code>debug!</code>, <code>info!</code>, <code>warn!</code> and <code>error!</code> macros are a superset of the
+similarly-named macros in <code>log</code> and should be drop-in compatible:</p>
+
+<pre><code class="language-rust">use log::info;
+
+info!(&quot;hello world!&quot;);
+</code></pre>
+
+<pre><code class="language-rust">use tracing::info;
+
+info!(&quot;hello world!&quot;);
+</code></pre>
+
+<p>The more idiomatic style, however, is to use these macros to record structured
+data rather than unstructured messages. For example:</p>
+
+<pre><code class="language-rust">use tracing::trace;
+
+let bytes_read = ...;
+let num_processed = ...;
+
+// ...
+
+trace!(bytes_read, messages = num_processed);
+</code></pre>
+
+<p>A <a href="https://docs.rs/tracing/0.1.5/tracing/trait.Subscriber.html"><code>Subscriber</code></a> implementation collects and records trace data,
+similarly to a logger in conventional logging. Applications must set up a
+<a href="https://docs.rs/tracing/0.1.5/tracing/dispatcher/index.html#setting-the-default-subscriber">default subscriber</a>.</p>
+
+<p>The <code>Subscriber</code> interface is <code>tracing</code>&rsquo;s main extension point; different
+methods and policies for recording and processing trace data can be represented
+as <code>Subscriber</code> implementations. Currently, the <a href="https://crates.io/crates/tracing-fmt/"><code>tracing-fmt</code></a> crate
+provides a <code>Subscriber</code> implementation that logs trace data to
+the console, and more implementations are soon to come.</p>
+
+<p>More <a href="https://docs.rs/tracing/0.1.5/tracing/">API documentation</a> is available on docs.rs, and examples are
+provided in the <a href="https://github.com/tokio-rs/tracing"><code>tracing</code> github repository</a>.</p>
+
+<h2 id="building-an-ecosystem">Building an Ecosystem</h2>
+
+<p>The <code>tracing</code> ecosystem is centered around the <a href="https://crates.io/crates/tracing"><code>tracing</code></a> crate,
+which provides the API used to instrument libraries and applications, and the
+<a href="https://crates.io/crates/tracing-core"><code>tracing-core</code></a>, which provides the minimal, stable kernel of
+functionality necessary to connect that instrumentation with <code>Subscriber</code>s.
+However, this is just the tip of the iceberg. The <a href="https://github.com/tokio-rs/tracing"><code>tokio-rs/tracing</code></a>
+repository contains a number of additional crates, in varying degrees of
+stability. These crates include:</p>
+
+<ul>
+<li>Compatibility layers with other libraries, such as <a href="https://github.com/tokio-rs/tracing/blob/master/tracing-tower"><code>tracing-tower</code></a> and
+<a href="https://crates.io/crates/tracing-log"><code>tracing-log</code></a>.</li>
+<li><code>Subscriber</code> implementations, such as <a href="https://crates.io/crates/tracing-fmt"><code>tracing-fmt</code></a>.</li>
+<li>The <a href="https://crates.io/crates/tracing-subscriber"><code>tracing-subscriber</code></a> crate, which provides utilities for implementing
+and composing <code>Subscriber</code>s.</li>
+</ul>
+
+<p>Stable releases of the central crates have been published to crates.io, and
+<code>tracing</code> is already seeing adoption by projects like <a href="https://github.com/linkerd/linkerd2-proxy">Linkerd 2</a> and
+<a href="https://github.com/timberio/vector">Vector</a>. However, there is a lot of future work, including:</p>
+
+<ul>
+<li>Integrating with distributed tracing systems such as <a href="https://opentelemetry.io/">OpenTelemetry</a> or
+<a href="https://www.jaegertracing.io/">Jaeger</a>.</li>
+<li>Building out richer instrumentation in the Tokio runtime.</li>
+<li>Integration with more libraries and frameworks.</li>
+<li>Writing <code>Subscriber</code>s to implement more ways of collecting trace data, such as
+metrics, profiling, et cetera.</li>
+<li>Helping to stabilize experimental crates.</li>
+</ul>
+
+<p>Contributions in all these areas will be welcomed eagerly. We&rsquo;re all looking
+forward to seeing what the community will build on top of the platform
+that <code>tracing</code> provides!</p>
+
+<p>If you&rsquo;re interested, check out <code>tracing</code> <a href="https://github.com/tokio-rs/tracing">on GitHub</a> or join the
+<a href="https://gitter.im/tokio-rs/tracing">Gitter</a> chat channel!</p>
+
+<div style="text-align:right">&mdash;Eliza Weisman</div>
+
+      
+
+      
+        <div class="tk-next">
+          <b>下一篇</b>：<a href ="/blog/2019-08-alphas/">Tokio alpha release with async &amp; await</a>
+        </div>
+      
+    </main>
+  </div>
+</div>
+
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
+    <script src="https://tokio-cn.github.io/js/bootstrap.min.js"></script>
+    <script src="https://tokio-cn.github.io/js/highlight.js"></script>
+    <script>
+      $(function () {
+        $("pre code").each(function(i, block) {
+          
+          if (block.className.indexOf('language-rust') >= 0) {
+            var new_content = '';
+            var lines = block.textContent.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+              if (lines[i].indexOf('# ') == 0 || lines[i] == '#') {
+                continue
+              }
+              new_content += lines[i].trimRight() + '\n';
+            }
+            block.textContent = new_content.replace(/\n\n\n/g, "\n\n").trimRight();
+          }
+          hljs.highlightBlock(block);
+        });
+      });
+    </script>
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.js"></script>
+    <script type="text/javascript"> docsearch({
+    apiKey: 'd7b5b785798fe748621bcaa8301a2201',
+    indexName: 'tokio',
+    inputSelector: '#search-input',
+    debug: false 
+    });
+    </script>
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-122396021-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

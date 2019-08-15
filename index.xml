@@ -6,7 +6,7 @@
     <description>Recent content on Tokio——Rust 编程语言的异步运行时。</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Thu, 08 Aug 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 14 Aug 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://tokio-cn.github.io/index.xml" rel="self" type="application/rss+xml" />
     
@@ -19,6 +19,16 @@
       <guid>https://tokio-cn.github.io/docs/overview/</guid>
       <description>Tokio allows developers to write asynchronous programs in the Rust programming language. Instead of synchronously waiting for long-running operations (like reading a file or waiting for a timer to complete) before moving on to the next thing, Tokio allows developers to write programs where execution continues while the long-running operations are in progress.
 More specifically, Tokio is an event-driven, non-blocking I/O platform for writing asynchronous applications with Rust. At a high level, it provides a few major components:</description>
+    </item>
+    
+    <item>
+      <title>Diagnostics with Tracing</title>
+      <link>https://tokio-cn.github.io/blog/2019-08-tracing/</link>
+      <pubDate>Wed, 14 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/blog/2019-08-tracing/</guid>
+      <description>Effectively developing systems and operating them in production requires visibility into their behavior at runtime. While conventional logging can provide some of this visibility, asynchronous software &amp;mdash; like applications using the Tokio runtime &amp;mdash; introduces new challenges.
+tracing is a collection of libraries that provide a framework for instrumenting Rust programs to collect structured, context-aware, event driven diagnostics. Note that tracing was originally released under the name tokio-trace; the name was changed to reflect that, although it is part of the Tokio project, the tokio runtime is not required to use tracing.</description>
     </item>
     
     <item>

@@ -6,10 +6,20 @@
     <description>Recent content in Blogs on Tokio——Rust 编程语言的异步运行时。</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Thu, 08 Aug 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 14 Aug 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://tokio-cn.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Diagnostics with Tracing</title>
+      <link>https://tokio-cn.github.io/blog/2019-08-tracing/</link>
+      <pubDate>Wed, 14 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/blog/2019-08-tracing/</guid>
+      <description>Effectively developing systems and operating them in production requires visibility into their behavior at runtime. While conventional logging can provide some of this visibility, asynchronous software &amp;mdash; like applications using the Tokio runtime &amp;mdash; introduces new challenges.
+tracing is a collection of libraries that provide a framework for instrumenting Rust programs to collect structured, context-aware, event driven diagnostics. Note that tracing was originally released under the name tokio-trace; the name was changed to reflect that, although it is part of the Tokio project, the tokio runtime is not required to use tracing.</description>
+    </item>
     
     <item>
       <title>Tokio alpha release with async &amp; await</title>
