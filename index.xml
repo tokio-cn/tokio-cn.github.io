@@ -205,7 +205,7 @@ We&amp;rsquo;ll be taking a closer look at the runtime in the upcoming sections,
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/docs/getting-started/echo/</guid>
-      <description>We&amp;rsquo;re going to use what has been covered so far to build an echo server. This is a Tokio application that encorporates everything we&amp;rsquo;ve learned so far. The server will simply receive messages from the connected client and send back the same message it received to the client.
+      <description>We&amp;rsquo;re going to use what has been covered so far to build an echo server. This is a Tokio application that incorporates everything we&amp;rsquo;ve learned so far. The server will simply receive messages from the connected client and send back the same message it received to the client.
 We&amp;rsquo;ll be able to test this echo server using the basic Tcp client we created in the hello world section.
 The full code can be found here.</description>
     </item>
