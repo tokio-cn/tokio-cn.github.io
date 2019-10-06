@@ -420,7 +420,7 @@ ERROR load_gen{remote.addr=[::1]:3000}:request{req.method=GET req.path=&quot;/&q
 ...
 </code></pre>
 
-<p>Looking at the <code>request</code> spans outut by the load generator, we start to notice a
+<p>Looking at the <code>request</code> spans output by the load generator, we start to notice a
 pattern. The value of the <code>req.path</code> field is always either <code>&quot;/&quot;</code> or <code>&quot;/z&quot;</code>.</p>
 
 <p>We can reload the filter configuration again, setting the verbosity to maximum
