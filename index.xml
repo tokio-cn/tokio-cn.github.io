@@ -6,7 +6,7 @@
     <description>Recent content on Tokio——Rust 编程语言的异步运行时。</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Wed, 14 Aug 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 13 Oct 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://tokio-cn.github.io/index.xml" rel="self" type="application/rss+xml" />
     
@@ -19,6 +19,15 @@
       <guid>https://tokio-cn.github.io/docs/overview/</guid>
       <description>Tokio allows developers to write asynchronous programs in the Rust programming language. Instead of synchronously waiting for long-running operations (like reading a file or waiting for a timer to complete) before moving on to the next thing, Tokio allows developers to write programs where execution continues while the long-running operations are in progress.
 More specifically, Tokio is an event-driven, non-blocking I/O platform for writing asynchronous applications with Rust. At a high level, it provides a few major components:</description>
+    </item>
+    
+    <item>
+      <title>Making the Tokio scheduler 10x faster</title>
+      <link>https://tokio-cn.github.io/blog/2019-10-scheduler/</link>
+      <pubDate>Sun, 13 Oct 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/blog/2019-10-scheduler/</guid>
+      <description>We&amp;rsquo;ve been hard at work on the next major revision of Tokio, Rust&amp;rsquo;s asynchronous runtime. Today, a complete rewrite of the scheduler has been submitted as a pull request. The result is huge performance and latency improvements. Some benchmarks saw a 10x speed up! It is always unclear how much these kinds of improvements impact &amp;ldquo;full stack&amp;rdquo; use cases, so we&amp;rsquo;ve also tested how these scheduler improvements impacted use cases like Hyper and Tonic (spoiler: it&amp;rsquo;s really good).</description>
     </item>
     
     <item>
