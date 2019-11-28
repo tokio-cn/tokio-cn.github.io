@@ -54,7 +54,7 @@
           <li class="nav-item">
             
             
-            <a class="nav-link " href="https://tokio-cn.github.io/blog/2019-10-scheduler/">博客</a>
+            <a class="nav-link " href="https://tokio-cn.github.io/blog/2019-11-tokio-0-2/">博客</a>
           </li>
         </ul>
       </div>
@@ -127,7 +127,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/hello-world/" class="">Hello World!</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="">Futures</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="">async fn</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime/" class="">Runtime</a></li>
                 
@@ -141,7 +141,7 @@
               
               <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/futures/overview/">
-                  使用 future
+                  [0.1] 使用 future
                 </a>
                 <ul class="nav tk-sidenav">
                 
@@ -169,7 +169,7 @@
               
               <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/io/overview/">
-                  使用 Tokio 的 I/O
+                  [0.1] 使用 Tokio 的 I/O
                 </a>
                 <ul class="nav tk-sidenav">
                 
@@ -193,7 +193,7 @@
               
               <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/futures/">
-                  深入
+                  [0.1] 深入
                 </a>
                 <ul class="nav tk-sidenav">
                 
@@ -225,7 +225,7 @@
               
               <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/internals/intro/">
-                  Tokio 内部原理
+                  [0.1] Tokio 内部原理
                 </a>
                 <ul class="nav tk-sidenav">
                 
@@ -276,7 +276,7 @@ received to the client.</p>
 <p>We&rsquo;ll be able to test this echo server using the basic Tcp client we created in the
 <a href="https://tokio-cn.github.io/docs/getting-started/hello-world/">hello world</a> section.</p>
 
-<p>The full code can be found <a href="https://github.com/tokio-rs/tokio/tree/v0.1.x/tokio/examples/echo.rs">here</a>.</p>
+<p>The full code can be found <a href="https://github.com/tokio-rs/tokio/blob/master/examples/echo.rs">here</a>.</p>
 
 <h1 id="setup">Setup</h1>
 
@@ -289,16 +289,13 @@ cd echo-server
 <p>Next, add the necessary dependencies:</p>
 
 <pre><code class="language-toml">[dependencies]
-tokio = &quot;0.1&quot;
-# futures = &quot;0.1&quot;
+tokio = &quot;0.2&quot;
+futures = &quot;0.3&quot;
 </code></pre>
 
 <p>and the crates and types into scope in <code>main.rs</code>:</p>
 
-<pre><code class="language-rust"># #![deny(deprecated)]
-extern crate tokio;
-# extern crate futures;
-
+<pre><code class="language-rust"># #![allow(unused_imports)]
 use tokio::io;
 use tokio::net::TcpListener;
 use tokio::prelude::*;
@@ -319,57 +316,52 @@ use tokio::prelude::*;
 executor.</p>
 
 <pre><code class="language-rust"># #![deny(deprecated)]
-# extern crate tokio;
-# extern crate futures;
-#
-# use tokio::prelude::*;
+# use futures::prelude::*;
 # use tokio::net::TcpListener;
-fn main() {
-    let addr = &quot;127.0.0.1:6142&quot;.parse().unwrap();
-    let listener = TcpListener::bind(&amp;addr).unwrap();
+#
+#[tokio::main]
+async fn main() {
+    let addr = &quot;127.0.0.1:6142&quot;;
+    let mut listener = TcpListener::bind(addr).await.unwrap();
 
     // Here we convert the `TcpListener` to a stream of incoming connections
     // with the `incoming` method. We then define how to process each element in
     // the stream with the `for_each` combinator method
-    let server = listener.incoming().for_each(|socket| {
-        // TODO: Process socket
-        Ok(())
-    })
-    .map_err(|err| {
-        // Handle error by printing to STDOUT.
-        println!(&quot;accept error = {:?}&quot;, err);
-    });
+    let server = async move {
+        let mut incoming = listener.incoming();
+        while let Some(socket_res) = incoming.next().await {
+            match socket_res {
+                Ok(socket) =&gt; {
+                    println!(&quot;Accepted connection from {:?}&quot;, socket.peer_addr());
+                    // TODO: Process socket
+                }
+                Err(err) =&gt; {
+                    // Handle error by printing to STDOUT.
+                    println!(&quot;accept error = {:?}&quot;, err);
+                }
+            }
+        }
+    };
 
-    println!(&quot;server running on localhost:6142&quot;);
+    println!(&quot;Server running on localhost:6142&quot;);
 #    // `select` completes when the first of the two futures completes. Since
-#    // future::ok() completes immediately, the server won't hang waiting for
+#    // future::ready() completes immediately, the server won't hang waiting for
 #    // more connections. This is just so the doc test doesn't hang.
-#    let server = server.select(futures::future::ok(())).then(|_| Ok(()));
+#    let server = future::select(Box::pin(server), future::ready(Ok::&lt;_, ()&gt;(())));
 
-    // Start the server
-    //
-    // This does a few things:
-    //
-    // * Start the Tokio runtime
-    // * Spawns the `server` task onto the runtime.
-    // * Blocks the current thread until the runtime becomes idle, i.e. all
-    //   spawned tasks have completed.
-    tokio::run(server);
+    // Start the server and block this async fn until `server` spins down.
+    server.await;
 }
 </code></pre>
 
 <p>Here we&rsquo;ve created a TcpListener that can listen for incoming TCP connections. On the
 listener we call <code>incoming</code> which turns the listener into a <code>Stream</code> of inbound client
-connections. We then call <code>for_each</code> which will yield each inbound client connection.
+connections. We then call <code>StreamExt::next()</code> trait method and <code>await</code> on it to get new inbound client connection.
 For now we&rsquo;re not doing anything with this inbound connection - that&rsquo;s our next step.</p>
 
-<p>Once we have our server, we can give it to <code>tokio::run</code>. Up until this point our
+<p>Once we have our server, we <code>.await</code> on it. Up until this point our
 server feature has done nothing. It&rsquo;s up to the Tokio runtime to drive our future to
 completion.</p>
-
-<p>Note: We must call <code>map_err</code> on our <code>server</code> future because <code>tokio::run</code> expects
-a future with <code>Item</code> of type <code>()</code> and <code>Error</code> of type <code>()</code>. This is to ensure that
-we handle all values and errors before handing off the future to the runtime.</p>
 
 <h2 id="handling-the-connections">Handling the connections</h2>
 
@@ -384,62 +376,68 @@ We only have one argument, though, with <code>socket</code>. Luckily there&rsquo
 operation allows us to work with each stream independently, such as pass them as two
 arguments to the <code>copy</code> function.</p>
 
-<p>The <code>copy</code> function then returns a future, and this future will be resolved when the
+<p>The <code>copy</code> method then returns a future, and this future will be resolved when the
 copying operation is complete, resolving to the amount of data that was copied.</p>
 
-<p>Let&rsquo;s take a look at the closure we passed to <code>for_each</code> again.</p>
+<p>Let&rsquo;s take a look at the connection accept code again.</p>
 
-<pre><code class="language-rust,"># #![deny(deprecated)]
-# extern crate tokio;
-# extern crate futures;
-#
-# use tokio::prelude::*;
+<pre><code class="language-rust"># #![deny(warnings)]
+# use std::env;
+# use futures::prelude::*;
 # use tokio::net::TcpListener;
-# use tokio::io;
-# fn main() {
-# let addr = &quot;127.0.0.1:6142&quot;.parse().unwrap();
-# let listener = TcpListener::bind(&amp;addr).unwrap();
-let server = listener.incoming().for_each(|socket| {
-  // split the socket stream into readable and writable parts
-  let (reader, writer) = socket.split();
-  // copy bytes from the reader into the writer
-  let amount = io::copy(reader, writer);
+# #[tokio::main]
+# async fn main() {
+# let addr = env::args().nth(1).unwrap_or(&quot;127.0.0.1:8080&quot;.to_string());
+# // Bind the server's socket.
+# let mut listener = TcpListener::bind(&amp;addr)
+#     .await
+#     .expect(&quot;unable to bind TCP listener&quot;);
+#
+# let mut incoming = listener.incoming();
+let server = {
+  async move {
+    while let Some(conn) = incoming.next().await {
+      match conn {
+        Err(e) =&gt; eprintln!(&quot;accept failed = {:?}&quot;, e),
+        Ok(mut sock) =&gt; {
+          // Spawn the future that echos the data and returns how
+          // many bytes were copied as a concurrent task.
+          tokio::spawn(async move {
+            // Split up the reading and writing parts of the
+            // socket.
+            let (mut reader, mut writer) = sock.split();
 
-  let msg = amount.then(|result| {
-    match result {
-      Ok((amount, _, _)) =&gt; println!(&quot;wrote {} bytes&quot;, amount),
-      Err(e)             =&gt; println!(&quot;error: {}&quot;, e),
+            match tokio::io::copy(&amp;mut reader, &amp;mut writer).await {
+              Ok(amt) =&gt; {
+                println!(&quot;wrote {} bytes&quot;, amt);
+              }
+              Err(err) =&gt; {
+                eprintln!(&quot;IO error {:?}&quot;, err);
+              }
+            }
+          });
+        }
+      }
     }
-
-    Ok(())
-  });
-
-  // spawn the task that handles the client connection socket on to the
-  // tokio runtime. This means each client connection will be handled
-  // concurrently
-  tokio::spawn(msg);
-  Ok(())
-})
-# .map_err(|_| ());
-# let server = server.select(futures::future::ok(())).then(|_| Ok(()));
-# tokio::run(server);
+  }
+};
+# let server = future::select(Box::pin(server), future::ready(Ok::&lt;_, ()&gt;(())));
+# server.await;
 # }
 </code></pre>
 
 <p>As you can see we&rsquo;ve split the <code>socket</code> stream into readable and writable parts. We
-then used <code>io::copy</code> to read from <code>reader</code> and write into <code>writer</code>. We use the <code>then</code>
-combinator to look at the <code>amount</code> future&rsquo;s <code>Item</code> and <code>Error</code> as a <code>Result</code> printing
-some diagnostics.</p>
+then used <code>io::copy</code> to read from <code>reader</code> and write into <code>writer</code>. We <code>await</code> on the result and inspect it printing some diagnostics.</p>
 
-<p>The call to <a href="https://docs.rs/tokio-executor/0.1/tokio_executor/fn.spawn.html"><code>tokio::spawn</code></a> is the key here. We crucially want all clients to make
+<p>The call to <a href="https://docs.rs/tokio/0.1/tokio/fn.spawn.html"><code>tokio::spawn</code></a> is the key here. We crucially want all clients to make
 progress concurrently, rather than blocking one on completion of another. To achieve
 this we use the <code>tokio::spawn</code> function to execute the work in the background.</p>
 
-<p>If we did not do this then each invocation of the block in <code>for_each</code> would be
+<p>If we did not do this then each invocation of the block in the loop would be
 resolved at a time meaning we could never have two client connections processed
 concurrently!</p>
 
-<p>The full code can be found <a href="https://github.com/tokio-rs/tokio/tree/v0.1.x/tokio/examples/echo.rs">here</a>.</p>
+<p>The full code can be found <a href="https://github.com/tokio-rs/tokio/blob/master/examples/echo.rs">here</a>.</p>
 
       
       

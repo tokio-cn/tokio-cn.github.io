@@ -27,7 +27,7 @@
 
     <title>
       
-        Announcing the Tokio Doc Push (we need you!) · Tokio 中文站
+        Announcing Tokio 0.2 and a Roadmap to 1.0 · Tokio 中文站
       
     </title>
   </head>
@@ -95,7 +95,7 @@
     <div class="col-12 col-md-3 col-xl-2 tk-sidebar">
       
       <div class="tk-docs-toggle d-md-none p-0 d-flex ml-3 collapsed align-item-center">
-        <h1 class="tk-title">Announcing the Tokio Doc Push (we need you!)</h1>
+        <h1 class="tk-title">Announcing Tokio 0.2 and a Roadmap to 1.0</h1>
         <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#tk-docs-nav" aria-controls="tk-docs-nav" aria-expanded="false" aria-label="Toggle docs navigation">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30" focusable="false"><title>Menu</title><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M4 7h22M4 15h22M4 23h22"></path></svg>
         </button>
@@ -108,7 +108,7 @@
             <ul class="nav tk-sidenav">
               
               
-                  <li><a href="https://tokio-cn.github.io/blog/2019-11-tokio-0-2/" class="">Announcing Tokio 0.2 and a Roadmap to 1.0</a></li>
+                  <li><a href="https://tokio-cn.github.io/blog/2019-11-tokio-0-2/" class="active">Announcing Tokio 0.2 and a Roadmap to 1.0</a></li>
               
                   <li><a href="https://tokio-cn.github.io/blog/2019-10-scheduler/" class="">Making the Tokio scheduler 10x faster</a></li>
               
@@ -118,7 +118,7 @@
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-12-recap-2018/" class="">A great 2018, an even better 2019</a></li>
               
-                  <li><a href="https://tokio-cn.github.io/blog/2018-10-doc-blitz/" class="active">Announcing the Tokio Doc Push (we need you!)</a></li>
+                  <li><a href="https://tokio-cn.github.io/blog/2018-10-doc-blitz/" class="">Announcing the Tokio Doc Push (we need you!)</a></li>
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-08-async-await/" class="">Experimental async / await support for Tokio</a></li>
               
@@ -148,11 +148,19 @@
 <ul>
 <li>
 <ul>
-<li><a href="#the-tokio-documentation-push">The Tokio documentation push</a></li>
-<li><a href="#writing-new-guides">Writing new guides</a></li>
-<li><a href="#an-experiment">An experiment</a></li>
-<li><a href="#faq">FAQ</a></li>
-<li><a href="#tl-dr">tl;dr</a></li>
+<li>
+<ul>
+<li><a href="#async-await"><code>async / await</code></a></li>
+<li><a href="#a-new-scheduler">A new scheduler</a></li>
+<li><a href="#a-lightweight-tokio-dependency">A lightweight Tokio dependency</a></li>
+</ul></li>
+<li><a href="#thanks">Thanks</a></li>
+<li><a href="#a-roadmap-to-1-0">A Roadmap to 1.0</a>
+<ul>
+<li><a href="#tokio-1-0-in-q3-2020-with-lts-support">Tokio 1.0 in Q3 2020 with LTS support</a></li>
+<li><a href="#how-to-get-there">How to get there</a></li>
+<li><a href="#what-is-expected-to-change">What is expected to change</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -160,116 +168,222 @@
 
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">Announcing the Tokio Doc Push (we need you!)</h1>
-      <p class="tk-date">October 04, 2018</p>
+      <h1 class="tk-title">Announcing Tokio 0.2 and a Roadmap to 1.0</h1>
+      <p class="tk-date">November 26, 2019</p>
       
       
 
-<p>In the past, there has been reoccurring feedback that Tokio is hard to
-understand. I believe a lack of good documentation plays a significant part.
-It&rsquo;s time to fix this problem.</p>
+<p>We are very excited to announce Tokio 0.2. This is a ground up rework of Tokio
+based on <code>async / await</code> and experience gained over the past three years.</p>
 
-<p>And because Tokio is open source, it is on us (the community) to make this
-happen! 👏</p>
+<p>Add the following to <code>Cargo.toml</code>:</p>
 
-<p>But don&rsquo;t worry, this isn&rsquo;t an aimless request to contribute documentation. It
-does, however, require participation. There are ways to get involved at any
-level of prior Tokio experience.</p>
+<pre><code class="language-toml">tokio = { version = &quot;0.2&quot;, features = [&quot;full&quot;] }
+</code></pre>
 
-<h2 id="the-tokio-documentation-push">The Tokio documentation push</h2>
-
-<p>Here is the plan. A temporary repository
-<a href="http://github.com/tokio-rs/doc-push"><code>doc-push</code></a> has been setup, and that is
-where the documentation effort will be coordinated. The README has steps on how
-to get started. Roughly, the process will be:</p>
-
-<p>1) Read the existing documentation, tracking parts that are confusing or leave
-questions unanswered.</p>
-
-<p>2) Open an issue on the doc-push repository to report the confusion.</p>
-
-<p>3) Fix the issue.</p>
-
-<p>4) Repeat.</p>
-
-<p>Where &ldquo;fix the issue&rdquo; is fix an existing guide or write a new guide.</p>
-
-<h2 id="writing-new-guides">Writing new guides</h2>
-
-<p>To get the effort of writing new guides bootstrapped, the doc-push repository
-has been seeded with an <a href="https://github.com/tokio-rs/doc-push/blob/master/outline/README.md">outline</a> representing my best guess of how the guides
-should be structured.</p>
-
-<p>Anyone can volunteer to write a page from this outline. Just submit a PR adding
-your Github handle next to the page. For example, if you wanted to volunteer to
-write a guide on timeouts, you would submit a PR updating the
-<a href="https://github.com/tokio-rs/doc-push/blob/master/outline/tracking-time.md#timeouts">section</a>,
-changing <strong>Status: Unassigned</strong> to <strong>Status: Assigned (@myname)</strong>.</p>
-
-<p>Also, feedback and suggestions on the outline structure is greatly appreciated.
-Please open issues and PRs agains the outline.</p>
-
-<p>There is also a new <a href="https://gitter.im/tokio-rs/doc-blitz">Gitter</a> channel dedicated to the doc push. If you want to
-get involved, but need some guidance. Join the channel and ping us.  Perhaps you
-want to try to write a guide, but don&rsquo;t quite feel up to the task yet. Ping us,
-and we will help you through it.</p>
-
-<h2 id="an-experiment">An experiment</h2>
-
-<p>The doc push is an experiment. I don&rsquo;t know how it will go, but I am
-hopeful that it will be successful.</p>
-
-<p>It is also an iterative effort. Once a pass at improving the guides happens, we
-need to go back to step 1) and have new comers try to learn Tokio using the new
-documentation. This will expose new gaps which will need to be addressed.</p>
-
-<h2 id="faq">FAQ</h2>
-
-<p><strong>I don&rsquo;t know Tokio yet!</strong></p>
-
-<p>First, this isn&rsquo;t a question.</p>
-
-<p>Second, great! You are who we want to get involved. We need fresh eyes to go
-over the guides and report issues that they hit.</p>
-
-<p>Things that you can do:</p>
+<p>This is a major update, and as such there are changes to almost all parts of the
+library. To highlight a few:</p>
 
 <ul>
-<li>Read the existing guide and report <a href="https://github.com/tokio-rs/doc-push/issues/new">issues</a>.</li>
-<li>Brainstorm items for the <a href="https://github.com/tokio-rs/doc-push/issues/23">cookbook</a> or <a href="https://github.com/tokio-rs/doc-push/issues/14">&ldquo;gotchas&rdquo;</a> sections.</li>
-<li>Review and provide feedback on <a href="https://github.com/tokio-rs/website/pulls">PRs to the website</a>.</li>
+<li><p>Based on <code>async / await</code> for superior ergonomics.</p></li>
+
+<li><p>A brand new, much faster, scheduler.</p></li>
+
+<li><p>Focus on making the Tokio dependency as lightweight as possible.</p></li>
 </ul>
 
-<p><strong>I would like to contribute guides, but I am uncertain that I am able to</strong></p>
+<h3 id="async-await"><code>async / await</code></h3>
 
-<p>Still not a question!</p>
+<p>If you have used Tokio to date, then you are familiar with the &ldquo;old&rdquo; way of
+writing asynchronous Rust&hellip; it was not fun. Most ended up writing state
+machines by hand. This was cumbersome and error prone.</p>
 
-<p>You know what <em>they</em> say: &ldquo;teaching is the best way to learn&rdquo;. This is a great
-opportunity to learn Tokio. First, there are some outlines to get you started.
-These outlines will probably result in you having questions or need some
-pointers. Perhaps you need to learn the topic first before writing the guide!</p>
+<p>As of Rust 1.39, the <code>async / await</code> is available on the stable channel and
+Tokio 0.2 takes full advantage of it. Whenever possible, Tokio provides an
+<code>async fn</code> based API, usually modeled after <code>std</code>.</p>
 
-<p>We are in the <a href="https://gitter.im/tokio-rs/doc-blitz">Gitter</a> channel waiting eagerly to help you along. We will help
-you learn what you need to. In exchange, you will contribute a guide 😊.</p>
+<p>For example, accepting sockets from a <code>TcpListener</code> is done with the async
+<code>accept</code> function:</p>
 
-<h2 id="tl-dr">tl;dr</h2>
+<pre><code class="language-rust,ignore">let (mut socket, _peer_addr) = listener.accept().await?;
+</code></pre>
 
-<p>This is your opportunity to help make Tokio easier to learn. It won&rsquo;t happen
-without volunteering for the doc push. In short:</p>
+<p>I/O operations are provided as <code>async</code> functions:</p>
 
-<p>1) Join the <a href="https://gitter.im/tokio-rs/doc-blitz">Gitter</a>.</p>
+<pre><code class="language-rust,ignore">let n = socket.read(&amp;mut buf).await?;
 
-<p>2) Watch the <a href="https://github.com/tokio-rs/doc-push">repo</a>.</p>
+let n = socket.write(&amp;buf).await?;
+</code></pre>
 
-<p>3) Get involved!</p>
+<p>The same applies to the rest of the Tokio API surface.</p>
 
-<div style="text-align:right">&mdash; <a href="https://github.com/carllerche">@carllerche</a></div>
+<p><strong>Starting the Tokio runtime</strong></p>
+
+<p>Setting the entry point of a Tokio application can now be done with a proc macro:</p>
+
+<pre><code class="language-rust,ignore">#[tokio::main]
+async fn main() {
+    println!(&quot;Hello from Tokio!&quot;);
+}
+</code></pre>
+
+<p>This starts up the Tokio runtime and all necessary infrastructure to power the
+application.</p>
+
+<h3 id="a-new-scheduler">A new scheduler</h3>
+
+<p>The new Tokio comes with a scheduler that was built from the ground up to take
+advantage of the new asynchronous task system. It is based on the experience
+gained from Tokio 0.1 as well as all the hard work put into <strong>other</strong> ecosystems
+like Go, Erlang, Java, and others.</p>
+
+<p>There are still improvements to make, but initial testing using <a href="https://hyper.rs">Hyper</a> shows a
+30+% speed up in macro level benchmarks between the old scheduler and the new
+scheduler.</p>
+
+<p>You can read more about it <a href="https://tokio.rs/blog/2019-10-scheduler/">here</a>.</p>
+
+<p>Since it landed on master, some Tokio users have been experimenting with the new
+scheduler and have seen some very impressive real world improvements in their
+applications. Hopefully they will blog about them soon!</p>
+
+<h3 id="a-lightweight-tokio-dependency">A lightweight Tokio dependency</h3>
+
+<p>One of the biggest complaints users have about Tokio to date is the weight of
+the depenedency. Adding a dependency on Tokio has historically added a large
+number of transitive dependencies and added time spent compiling.</p>
+
+<p>For example, a &ldquo;hello world&rdquo; Tokio 0.1 application on my laptop would pull in 43
+crates and take 50 seconds to compile (not counting time spent downloading the
+dependencies).</p>
+
+<p>Tokio addresses this issue on two fronts. First, most Tokio components have been
+collapsed into a single crate: <code>tokio</code> and transitive dependencies were pruned
+aggressively. Second, Tokio components have been made <strong>opt-in</strong> using feature
+flags instead of always on. Simply pulling in the <code>tokio</code> dependency will only
+get you a few traits.</p>
+
+<p>To get started with Tokio 0.2, you will need to request feature flags. A <code>full</code>
+feature flag includes everything and is an easy way to get started:</p>
+
+<pre><code class="language-toml">tokio = { version = &quot;0.2&quot;, features = [&quot;full&quot;] }
+</code></pre>
+
+<p>On my laptop, this reduces the total number of crates to 23. Compile time only
+drops to 40 seconds.</p>
+
+<p>Real benefits start happening when the user of Tokio starts only requesting the
+components that are needed to run the application. To run the TCP echo server
+example, the <code>io-util</code>, <code>rt-threaded</code>, and <code>tcp</code> feature flags are needed. Now,
+Tokio pulls in 13 crates and compiling takes <strong>13 seconds</strong>.</p>
+
+<p>There is more work to be done on pruning dependencies. Mio 0.7, which prunes
+further dependencies, is not included with Tokio 0.2. Tokio 0.3 will include Mio
+0.7.</p>
+
+<h2 id="thanks">Thanks</h2>
+
+<p>Of course, none of this would be possible without our amazing team and
+contributors who worked on this release. Many individuals submitted PRs ranging
+from doc fixes to migrating entire crates to <code>std::future::Future</code>. Some names I
+want to call out, in no particular order:</p>
+
+<ul>
+<li><a href="https://github.com/hawkw">@hawkw</a></li>
+<li><a href="https://github.com/ipetkov">@ipetkov</a></li>
+<li><a href="https://github.com/jonhoo">@jonhoo</a></li>
+<li><a href="https://github.com/LucioFranco">@LucioFranco</a></li>
+<li><a href="https://github.com/seanmonstar">@seanmonstar</a></li>
+<li><a href="https://github.com/taiki-e">@taiki-e</a></li>
+</ul>
+
+<p>A pre-emptive thanks to all those working on Mio 0.7, which sadly didn&rsquo;t make
+the cut for this release, but will happen soon!</p>
+
+<ul>
+<li><a href="https://github.com/dtacalau">@dtacalau</a></li>
+<li><a href="https://github.com/kleimkuhler">@kleimkuhler</a></li>
+<li><a href="https://github.com/PerfectLaugh">@PerfectLaugh</a></li>
+<li><a href="https://github.com/piscisaureus">@piscisaureus</a></li>
+<li><a href="https://github.com/Thomasdezeeuw">@Thomasdezeeuw</a></li>
+</ul>
+
+<p>And a big thanks to <a href="https://buoyant.io/">Buoyant</a>, the makers of <a href="https://github.com/linkerd/linkerd2">Linkerd</a> (the proxy is written in
+Rust), who sponsored most of the work.</p>
+
+<h2 id="a-roadmap-to-1-0">A Roadmap to 1.0</h2>
+
+<p>All that being said, we are shipping version 0.2. The question of &ldquo;why not 1.0?&rdquo;
+has come up a few times. After all, Tokio 0.1 has been stable for three years.
+The short answer: because it isn&rsquo;t time. There is nobody who would rather ship a
+Tokio 1.0 than us. It also isn&rsquo;t something to rush.</p>
+
+<p>After all, <code>async / await</code> only landed in the stable Rust channel weeks ago.
+There has been no significant production validation yet, except maybe fuchsia
+and that seems like a fairly specialized use case. This release of Tokio
+includes significant new code and new strategies with feature flags. Also, there
+are still big open questions, such as the <a href="https://github.com/tokio-rs/tokio/pull/1744">proposed changes</a> to
+<code>AsyncRead</code> and <code>AsyncWrite</code>.</p>
+
+<p>Tokio 1.0 will be released as soon as the APIs are proven to handle real-world
+production cases.</p>
+
+<h3 id="tokio-1-0-in-q3-2020-with-lts-support">Tokio 1.0 in Q3 2020 with LTS support</h3>
+
+<p>The Tokio 1.0 release will be <strong>no later</strong> than Q3 2020. It will also come with
+&ldquo;long-term support&rdquo; guarantees:</p>
+
+<ul>
+<li>A minimum of 5 years of maintenance.</li>
+<li>A minimum of 3 years before a hypothetical 2.0 release.</li>
+</ul>
+
+<p>When Tokio 1.0 is released in Q3 2020, on-going support, security fixes, and
+critical bug fixes are guaranteed until <strong>at least</strong> Q3 2025. Tokio 2.0 will not
+be released until <strong>at least</strong> Q3 2023 (though, ideally there will never been a
+Tokio 2.0 release).</p>
+
+<h3 id="how-to-get-there">How to get there</h3>
+
+<p>While Tokio 0.1 probably should have been a 1.0, Tokio 0.2 will be a <strong>true</strong>
+0.2 release. There will breaking change releases every 2 ~ 3 months until 1.0.
+These changes will be <strong>much</strong> smaller than going from 0.1 -&gt; 0.2. It is
+expected that the 1.0 release will look a lot like 0.2.</p>
+
+<h3 id="what-is-expected-to-change">What is expected to change</h3>
+
+<p>The biggest change will be the <code>AsyncRead</code> and <code>AsyncWrite</code> traits. Based on
+experience gained over the past 3 years, there are a couple of issues to
+address:</p>
+
+<ul>
+<li>Be able to <strong>safely</strong> use uninitialized memory as a read buffer.</li>
+<li>Practical read vectored and write vectored APIs.</li>
+</ul>
+
+<p>There are a few strategies to solve these problems. These strategies need to be
+investigated and the solution validated. You can see <a href="https://github.com/tokio-rs/tokio/pull/1744#issuecomment-553575438">this comment</a> for a
+detailed statement of the problem.</p>
+
+<p>The other major change, which has been in the works for a while, is updating
+Mio. Mio 0.6 was first released almost 4 years ago and has not had a breaking
+change since. Mio 0.7 has been in the works for a while. It includes a full
+rewrite of the windows support as well as a refined API. More will be written
+about this shortly.</p>
+
+<p>Finally, now that the API is starting to stabilize, effort will be put into
+documentation. Tokio 0.2 is being released before updating the website and many
+of the old content will no longer be relevant. In the coming weeks, expect to
+see updates there.</p>
+
+<p>So, we have our work cut out for us. We hope you enjoy this 0.2 release and are
+looking forward to your feedback and help.</p>
 
       
 
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/blog/2018-08-async-await/">Experimental async / await support for Tokio</a>
+          <b>下一篇</b>：<a href ="/blog/2019-10-scheduler/">Making the Tokio scheduler 10x faster</a>
         </div>
       
     </main>

@@ -54,7 +54,7 @@
           <li class="nav-item">
             
             
-            <a class="nav-link " href="https://tokio-cn.github.io/blog/2019-10-scheduler/">博客</a>
+            <a class="nav-link " href="https://tokio-cn.github.io/blog/2019-11-tokio-0-2/">博客</a>
           </li>
         </ul>
       </div>
@@ -127,7 +127,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/hello-world/" class="">Hello World!</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="">Futures</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="">async fn</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime/" class="active">Runtime</a></li>
                 
@@ -141,7 +141,7 @@
               
               <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/futures/overview/">
-                  使用 future
+                  [0.1] 使用 future
                 </a>
                 <ul class="nav tk-sidenav">
                 
@@ -169,7 +169,7 @@
               
               <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/io/overview/">
-                  使用 Tokio 的 I/O
+                  [0.1] 使用 Tokio 的 I/O
                 </a>
                 <ul class="nav tk-sidenav">
                 
@@ -193,7 +193,7 @@
               
               <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/going-deeper/futures/">
-                  深入
+                  [0.1] 深入
                 </a>
                 <ul class="nav tk-sidenav">
                 
@@ -225,7 +225,7 @@
               
               <div class="tk-toc-item ">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/internals/intro/">
-                  Tokio 内部原理
+                  [0.1] Tokio 内部原理
                 </a>
                 <ul class="nav tk-sidenav">
                 
@@ -269,83 +269,58 @@
       </div>
       
 
-<p>In the previous section we explored Futures and Streams which allow us to represent
-a value (in the case of a <code>Future</code>) or a series of values (in the case of <code>Stream</code>)
-that will be available &ldquo;at some point in the future&rdquo;. We talked about <code>poll</code> on
-<code>Future</code> and <code>Stream</code> which the runtime will call to figure out if the <code>Future</code> or
-the <code>Stream</code> are ready to yield a value.</p>
-
-<p>Lastly, we said that the runtime is needed to poll Futures and Streams driving them
-to completion. We&rsquo;ll take a closer look at the runtime now.</p>
+<p>In the previous section we explored <code>async fn</code> Futures which allow us to represent
+a value that will be available &ldquo;at some point in the future&rdquo;. We mentioned that
+a Rust <code>Future</code> requires <strong>something</strong> to poll it for completion and hinted that
+the <strong>something</strong> is the Tokio runtime.</p>
 
 <h2 id="tokio-runtime">Tokio runtime</h2>
 
-<p>In order for a <code>Future</code> to make progress, something has to call <code>poll</code>. This is the
-job of the runtime.</p>
+<p>The <a href="https://docs.rs/tokio/0.2/tokio/runtime/struct.Runtime.html"><code>Runtime</code></a> is responsible for repeatedly calling <code>poll</code> on a <code>Future</code> until
+its value is returned. There are a few different ways this can happen in
+practice. For example, the <a href="https://docs.rs/tokio/0.2/tokio/runtime/struct.Builder.html#method.basic_scheduler"><code>basic_scheduler</code></a> configuration will block the
+current thread and process all spawned tasks in place. The
+<a href="https://docs.rs/tokio/0.2/tokio/runtime/struct.Builder.html#method.threaded_scheduler"><code>threaded_scheduler</code></a> configuration uses a work-stealing thread pool and
+distributes load across multiple threads. The <code>threaded_scheduler</code> is the
+default for applications and the <code>basic_scheduler</code> is the default for tests.</p>
 
-<p>The runtime is responsible for repeatedly calling <code>poll</code> on a <code>Future</code> until its
-value is returned. There are many different ways to do this and thus many types of
-runtime configurations. For example, the <a href="https://docs.rs/tokio-current-thread"><code>CurrentThread</code></a> runtime configuration
-will block the current thread and loop through all spawned Futures, calling poll on
-them. The <a href="http://docs.rs/tokio-threadpool"><code>ThreadPool</code></a> configuration schedules Futures across a thread pool. This
-is also the default configuration used by the Tokio <a href="https://docs.rs/tokio/0.1/tokio/runtime/index.html">runtime</a>.</p>
-
-<p>It&rsquo;s important to remember that all futures <strong>must</strong> be spawned on the runtime or no
-work will be performed.</p>
+<p>It&rsquo;s important to remember that all async tasks <strong>must</strong> be spawned on the
+runtime or no work will be performed.</p>
 
 <h2 id="spawning-tasks">Spawning Tasks</h2>
 
-<p>One of the unique aspects of Tokio is that futures can be spawned on the runtime from
-within other futures or streams. When we use futures in this way, we usually refer to
-them as tasks. Tasks are the application’s “unit of logic”. They are similar to <a href="https://www.golang-book.com/books/intro/10">Go’s
-goroutine</a> and <a href="http://erlang.org/doc/reference_manual/processes.html">Erlang’s process</a>, but asynchronous. In other words, tasks are
-asynchronous green threads.</p>
+<p>One of the unique aspects of Tokio is that futures can be spawned on the runtime
+from within other async tasks. Tasks are the application’s “unit of logic”.
+They are similar to [Go’s goroutine] and [Erlang’s process], but asynchronous.
+In other words, tasks are asynchronous green threads.</p>
 
-<p>Given that a task runs an asynchronous bit of logic, they are represented by the
-Future trait. The task’s future implementation completes with a <code>()</code> value once the
-task is done processing.</p>
-
-<p>Tasks are passed to the runtime, which handle scheduling the task. The runtime is
-usually scheduling many tasks across a single or small set of threads. Tasks must not
-perform computation-heavy logic or they will prevent other tasks from executing. So
-don’t try to compute the fibonacci sequence as a task!</p>
-
-<p>Tasks are implemented by either building up a future using the various combinator
-functions available in the futures and tokio crates or by implementing the Future
-trait directly.</p>
+<p>Tasks are passed to the runtime, which handle scheduling the task. The runtime
+is usually scheduling many tasks across a single or small set of threads. Tasks
+must not perform computation-heavy logic or they will prevent other tasks from
+executing. So don’t try to compute the fibonacci sequence as a task!</p>
 
 <p>We can spawn tasks using <code>tokio::spawn</code>. For example:</p>
 
-<pre><code class="language-rust"># extern crate tokio;
-# extern crate futures;
-#
-# use tokio::prelude::*;
-# use futures::stream;
-# fn main() {
-# let my_outer_stream = stream::once(Ok(1));
-// Create some kind of future that we want our runtime to execute
-let program = my_outer_stream.for_each(|my_outer_value| {
-  println!(&quot;Got value {:?} from the stream&quot;, my_outer_value);
+<pre><code class="language-rust">#[tokio::main]
+async fn main() {
+    let handle = tokio::spawn(async {
+        println!(&quot;doing some work, asynchronously&quot;);
 
-  let my_inner_future = future::ok(1);
+        // Return a value for the example
+        &quot;result of the computation&quot;
+    });
 
-  let task = my_inner_future.and_then(|my_inner_value| {
-    println!(&quot;Got a value {:?} from second future&quot;, my_inner_value);
-    Ok(())
-  });
+    // Wait for the spawned task to finish
+    let res = handle.await;
 
-  tokio::spawn(task);
-  Ok(())
-});
-
-tokio::run(program);
-# }
+    println!(&quot;got {:?}&quot;, res);
+}
 </code></pre>
 
-<p>Again spawning tasks can happen within other futures or streams allowing multiple
-things to happen concurrently. In the above example we&rsquo;re spawning the inner future
-from within the outer stream. Each time we get a value from the stream we&rsquo;ll simply
-run inner future.</p>
+<p>Again spawning tasks can happen within other futures or streams allowing
+multiple things to happen concurrently. In the above example we&rsquo;re spawning the
+inner future from within the outer stream. Each time we get a value from the
+stream we&rsquo;ll simply run inner future.</p>
 
 <p>In the next section, we&rsquo;ll take a look at a more involved example than our hello-
 world example that takes everything we&rsquo;ve learned so far into account.</p>

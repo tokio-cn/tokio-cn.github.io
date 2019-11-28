@@ -6,7 +6,7 @@
     <description>Recent content on Tokio——Rust 编程语言的异步运行时。</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Sun, 13 Oct 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 26 Nov 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://tokio-cn.github.io/index.xml" rel="self" type="application/rss+xml" />
     
@@ -19,6 +19,18 @@
       <guid>https://tokio-cn.github.io/docs/overview/</guid>
       <description>Tokio allows developers to write asynchronous programs in the Rust programming language. Instead of synchronously waiting for long-running operations (like reading a file or waiting for a timer to complete) before moving on to the next thing, Tokio allows developers to write programs where execution continues while the long-running operations are in progress.
 More specifically, Tokio is an event-driven, non-blocking I/O platform for writing asynchronous applications with Rust. At a high level, it provides a few major components:</description>
+    </item>
+    
+    <item>
+      <title>Announcing Tokio 0.2 and a Roadmap to 1.0</title>
+      <link>https://tokio-cn.github.io/blog/2019-11-tokio-0-2/</link>
+      <pubDate>Tue, 26 Nov 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/blog/2019-11-tokio-0-2/</guid>
+      <description>We are very excited to announce Tokio 0.2. This is a ground up rework of Tokio based on async / await and experience gained over the past three years.
+Add the following to Cargo.toml:
+tokio = { version = &amp;quot;0.2&amp;quot;, features = [&amp;quot;full&amp;quot;] }  This is a major update, and as such there are changes to almost all parts of the library. To highlight a few:
+ Based on async / await for superior ergonomics.</description>
     </item>
     
     <item>
@@ -180,21 +192,20 @@ Tokio is a platform for writing fast networking code in Rust. It&amp;rsquo;s bui
       
       <guid>https://tokio-cn.github.io/docs/getting-started/hello-world/</guid>
       <description>为了开始我们的 Tokio 之旅，我们会以惯例“hello world”开始。 这个程序会创建一个 TCP 流并将“hello, world!”写入到流中。 这与未使用 Tokio 写入到 TCP 流的 Rust 程序之间的区别在于，这个程序在创建流或者将“hello, world!”消息写入到流中的时候不会阻塞程序执行。
-在开始之前，你应该对 TCP 流的工作原理有最基本的了解。 了解 Rust 的标准库实现也很有帮助。
+在开始之前，你应该对 TCP 流的工作原理有最基本的了解。了解 Rust 的标准库实现也很有帮助。
 我们开始吧。
 首先，生成一个新的 crate。
 $ cargo new hello-world $ cd hello-world  接下来，在 Cargo.toml 中添加必要的依赖项：
-[dependencies] tokio = &amp;quot;0.1&amp;quot;  还有 main.rs 中的 crate 与类型：
-# #![deny(deprecated)] extern crate tokio; use tokio::io; use tokio::net::TcpStream; use tokio::prelude::*; # fn main() {}  这里我们使用 Tokio 自己的 io 与 net 模块。这俩模块提供与 std 中相应模块几乎相同的网络与 I/O 操作的抽象， 只有很小的差异：所有操作都是异步执行的。</description>
+[dependencies] tokio = { version = &amp;quot;0.2&amp;quot;, features = [&amp;quot;full&amp;quot;] }  Tokio requires specifying the requested components using feature flags. This allows the user to only include what is needed to run the application, resulting in smaller binaries.</description>
     </item>
     
     <item>
-      <title>Futures</title>
+      <title>async fn</title>
       <link>https://tokio-cn.github.io/docs/getting-started/futures/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/docs/getting-started/futures/</guid>
-      <description>Let&amp;rsquo;s take a closer look at futures. Tokio is built on top of the futures crate and uses its runtime model. This allows Tokio to interop with other libraries also using the futures crate.
+      <description>Let&amp;rsquo;s take a closer look at Rust&amp;rsquo;s async fn feature. Tokio is built on top of Rust&amp;rsquo;s asynchronous model. This allows Tokio to interop with other libraries also using the futures crate.
 Note: This runtime model is very different than async libraries found in other languages. While, at a high level, APIs can look similar, the way code gets executed differs.
 We&amp;rsquo;ll be taking a closer look at the runtime in the upcoming sections, but a basic understanding of the runtime is necessary to understand futures.</description>
     </item>
@@ -205,7 +216,8 @@ We&amp;rsquo;ll be taking a closer look at the runtime in the upcoming sections,
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/docs/getting-started/runtime/</guid>
-      <description>In the previous section we explored Futures and Streams which allow us to represent a value (in the case of a Future) or a series of values (in the case of Stream) that will be available &amp;ldquo;at some point in the future&amp;rdquo;. We talked about poll on Future and Stream which the runtime will call to figure out if the Future or the Stream are ready to yield a value.</description>
+      <description>In the previous section we explored async fn Futures which allow us to represent a value that will be available &amp;ldquo;at some point in the future&amp;rdquo;. We mentioned that a Rust Future requires something to poll it for completion and hinted that the something is the Tokio runtime.
+Tokio runtime The Runtime is responsible for repeatedly calling poll on a Future until its value is returned. There are a few different ways this can happen in practice.</description>
     </item>
     
     <item>
