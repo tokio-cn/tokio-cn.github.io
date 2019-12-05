@@ -289,16 +289,18 @@ cd echo-server
 <p>Next, add the necessary dependencies:</p>
 
 <pre><code class="language-toml">[dependencies]
-tokio = &quot;0.2&quot;
+tokio = { version = &quot;0.2&quot;, features = &quot;full&quot; }
 futures = &quot;0.3&quot;
 </code></pre>
 
-<p>and the crates and types into scope in <code>main.rs</code>:</p>
+<p>Note that Tokio is split into many features. In this case we simply enable all
+features for simplicity, but you can speed up compilation by only enabling the
+features you use. Next, add the crates and types into scope in <code>main.rs</code>:</p>
 
 <pre><code class="language-rust"># #![allow(unused_imports)]
-use tokio::io;
 use tokio::net::TcpListener;
 use tokio::prelude::*;
+use futures::stream::StreamExt;
 
 # fn main() {}
 </code></pre>
@@ -308,16 +310,15 @@ use tokio::prelude::*;
 <ul>
 <li>Bind a <code>TcpListener</code> to a local port.</li>
 <li>Define a task that accepts inbound connections and processes them.</li>
-<li>Spawn the server task.</li>
-<li>Start the Tokio runtime</li>
+<li>Start running the task using <code>await</code>.</li>
 </ul>
 
-<p>Again, no work actually happens until the server task is spawned on the
-executor.</p>
+<p>Again, no work actually happens when creating the <code>server</code> variable. You have to
+actually <code>await</code> it or otherwise spawn it on the executor using e.g. <a href="https://docs.rs/tokio/0.1/tokio/fn.spawn.html"><code>tokio::spawn</code></a>.</p>
 
 <pre><code class="language-rust"># #![deny(deprecated)]
-# use futures::prelude::*;
 # use tokio::net::TcpListener;
+# use futures::stream::StreamExt;
 #
 #[tokio::main]
 async fn main() {
@@ -347,6 +348,7 @@ async fn main() {
 #    // `select` completes when the first of the two futures completes. Since
 #    // future::ready() completes immediately, the server won't hang waiting for
 #    // more connections. This is just so the doc test doesn't hang.
+#    use futures::future;
 #    let server = future::select(Box::pin(server), future::ready(Ok::&lt;_, ()&gt;(())));
 
     // Start the server and block this async fn until `server` spins down.
@@ -354,14 +356,14 @@ async fn main() {
 }
 </code></pre>
 
-<p>Here we&rsquo;ve created a TcpListener that can listen for incoming TCP connections. On the
-listener we call <code>incoming</code> which turns the listener into a <code>Stream</code> of inbound client
-connections. We then call <code>StreamExt::next()</code> trait method and <code>await</code> on it to get new inbound client connection.
-For now we&rsquo;re not doing anything with this inbound connection - that&rsquo;s our next step.</p>
+<p>Here we&rsquo;ve created a <code>TcpListener</code> that can listen for incoming TCP connections. On
+the listener we call <code>incoming</code> which turns the listener into a <code>Stream</code> of inbound
+client connections. We then call the <a href="https://docs.rs/futures/0.3/futures/stream/trait.StreamExt.html#method.next"><code>StreamExt::next()</code></a> trait method and <code>await</code>
+on it to get new inbound client connection.  For now we&rsquo;re not doing anything with
+this inbound connection - that&rsquo;s our next step.</p>
 
-<p>Once we have our server, we <code>.await</code> on it. Up until this point our
-server feature has done nothing. It&rsquo;s up to the Tokio runtime to drive our future to
-completion.</p>
+<p>Once we have our server, we <code>.await</code> on it. Up until this point our server future has
+done nothing. It&rsquo;s up to the Tokio runtime to drive our future to completion.</p>
 
 <h2 id="handling-the-connections">Handling the connections</h2>
 
@@ -370,14 +372,15 @@ completion.</p>
 <p>We just want to copy all data read from the socket back onto the socket itself
 (e.g. &ldquo;echo&rdquo;). We can use the standard <a href="https://docs.rs/tokio/0.1/tokio/io/fn.copy.html"><code>io::copy</code></a> function to do precisely this.</p>
 
-<p>The <code>copy</code> function takes two arguments, where to read from and where to write to.
-We only have one argument, though, with <code>socket</code>. Luckily there&rsquo;s a method, <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html#method.split"><code>split</code></a>
-, which will split a readable and writeable stream into its two halves. This
+<p>The <code>copy</code> function takes two arguments: where to read from and where to write to.
+We only have one argument, though, with <code>socket</code>. Luckily there&rsquo;s a method, <a href="https://docs.rs/tokio/0.1/tokio/io/trait.AsyncRead.html#method.split"><code>split</code></a>,
+which will split a readable and writeable stream into its two halves. This
 operation allows us to work with each stream independently, such as pass them as two
 arguments to the <code>copy</code> function.</p>
 
-<p>The <code>copy</code> method then returns a future, and this future will be resolved when the
-copying operation is complete, resolving to the amount of data that was copied.</p>
+<p>The <code>copy</code> method then returns a future that represents the task of copying the data.
+When the data has been transferred, the future will complete to the number of bytes
+that were copied.</p>
 
 <p>Let&rsquo;s take a look at the connection accept code again.</p>
 
@@ -393,9 +396,9 @@ copying operation is complete, resolving to the amount of data that was copied.<
 #     .await
 #     .expect(&quot;unable to bind TCP listener&quot;);
 #
-# let mut incoming = listener.incoming();
 let server = {
   async move {
+    let mut incoming = listener.incoming();
     while let Some(conn) = incoming.next().await {
       match conn {
         Err(e) =&gt; eprintln!(&quot;accept failed = {:?}&quot;, e),
@@ -426,8 +429,9 @@ let server = {
 # }
 </code></pre>
 
-<p>As you can see we&rsquo;ve split the <code>socket</code> stream into readable and writable parts. We
-then used <code>io::copy</code> to read from <code>reader</code> and write into <code>writer</code>. We <code>await</code> on the result and inspect it printing some diagnostics.</p>
+<p>As you can see we&rsquo;ve split the <code>socket</code> stream into readable and writeable parts. We
+then used <code>io::copy</code> to read from <code>reader</code> and write into <code>writer</code>. We <code>await</code> on the
+result and inspect it printing some diagnostics.</p>
 
 <p>The call to <a href="https://docs.rs/tokio/0.1/tokio/fn.spawn.html"><code>tokio::spawn</code></a> is the key here. We crucially want all clients to make
 progress concurrently, rather than blocking one on completion of another. To achieve
