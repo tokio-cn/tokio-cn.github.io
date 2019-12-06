@@ -510,7 +510,7 @@ This guide will be focused on TCP types.</description>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/gsoc/</guid>
-      <description>This is the list of ideas for students wishing to apply to Google Summer of Code. For more information on what the program is and how to apply, see the student guide. If you&amp;rsquo;re interested in applying we would love to get to know you more on Gitter.
+      <description>This is the list of ideas for students wishing to apply to Google Summer of Code. For more information on what the program is and how to apply, see the student guide. If you&amp;rsquo;re interested in applying we would love to get to know you more on Discord.
 The most successful projects are often those proposed by the students themselves. The following list represents some of our ideas and wishes for the project.</description>
     </item>
     
@@ -530,7 +530,7 @@ The most successful projects are often those proposed by the students themselves
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/community/</guid>
-      <description>Communication The Tokio community is most readily found on its gitter channel, where you&amp;rsquo;re welcome to ask questions, report problems, or pitch ideas.
+      <description>Communication The Tokio community is most readily found on its Discord, where you&amp;rsquo;re welcome to ask questions, report problems, or pitch ideas.
 Issues Github is used for tracking issues. The primary location for these is the main Tokio repository.
 If you&amp;rsquo;re a Tokio user, you&amp;rsquo;re highly encouraged to keep an eye on these issues and jump in on the discussions, to help us understand how design tradeoffs might affect you.</description>
     </item>
