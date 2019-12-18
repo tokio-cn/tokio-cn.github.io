@@ -6,10 +6,20 @@
     <description>Recent content in Blogs on Tokio——Rust 编程语言的异步运行时。</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Tue, 26 Nov 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 17 Dec 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://tokio-cn.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Announcing Mio 0.7-alpha.1</title>
+      <link>https://tokio-cn.github.io/blog/2019-12-mio-v0.7-alpha.1/</link>
+      <pubDate>Tue, 17 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/blog/2019-12-mio-v0.7-alpha.1/</guid>
+      <description>We are excited to announce Thomas de Zeeuw as the new lead of Mio. Mio is the low level I/O portability abstraction that backs Tokio and other Rust projects. Thomas has been behind most of the Mio 0.7 effort and will be continuing to lead the crate to 1.0. He has written the rest of the announcement.
+Mio 0.7 is the work of various contributors over the course of roughly half a year.</description>
+    </item>
     
     <item>
       <title>Announcing Tokio 0.2 and a Roadmap to 1.0</title>

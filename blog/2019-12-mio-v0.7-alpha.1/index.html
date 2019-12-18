@@ -27,7 +27,7 @@
 
     <title>
       
-        Tokio alpha release with async &amp; await · Tokio 中文站
+        Announcing Mio 0.7-alpha.1 · Tokio 中文站
       
     </title>
   </head>
@@ -95,7 +95,7 @@
     <div class="col-12 col-md-3 col-xl-2 tk-sidebar">
       
       <div class="tk-docs-toggle d-md-none p-0 d-flex ml-3 collapsed align-item-center">
-        <h1 class="tk-title">Tokio alpha release with async &amp; await</h1>
+        <h1 class="tk-title">Announcing Mio 0.7-alpha.1</h1>
         <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#tk-docs-nav" aria-controls="tk-docs-nav" aria-expanded="false" aria-label="Toggle docs navigation">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30" focusable="false"><title>Menu</title><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M4 7h22M4 15h22M4 23h22"></path></svg>
         </button>
@@ -108,7 +108,7 @@
             <ul class="nav tk-sidenav">
               
               
-                  <li><a href="https://tokio-cn.github.io/blog/2019-12-mio-v0.7-alpha.1/" class="">Announcing Mio 0.7-alpha.1</a></li>
+                  <li><a href="https://tokio-cn.github.io/blog/2019-12-mio-v0.7-alpha.1/" class="active">Announcing Mio 0.7-alpha.1</a></li>
               
                   <li><a href="https://tokio-cn.github.io/blog/2019-11-tokio-0-2/" class="">Announcing Tokio 0.2 and a Roadmap to 1.0</a></li>
               
@@ -116,7 +116,7 @@
               
                   <li><a href="https://tokio-cn.github.io/blog/2019-08-tracing/" class="">Diagnostics with Tracing</a></li>
               
-                  <li><a href="https://tokio-cn.github.io/blog/2019-08-alphas/" class="active">Tokio alpha release with async &amp; await</a></li>
+                  <li><a href="https://tokio-cn.github.io/blog/2019-08-alphas/" class="">Tokio alpha release with async &amp; await</a></li>
               
                   <li><a href="https://tokio-cn.github.io/blog/2018-12-recap-2018/" class="">A great 2018, an even better 2019</a></li>
               
@@ -148,223 +148,216 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
-<li><a href="#the-road-so-far">The road so far</a></li>
-<li><a href="#what-we-have-now">What we have now</a></li>
-<li><a href="#towards-a-final-release">Towards a final release</a></li>
+<li>
+<ul>
+<li><a href="#major-changes">Major changes</a>
+<ul>
+<li><a href="#wrapping-native-os-types">Wrapping native OS types</a></li>
+<li><a href="#removal-of-the-user-space-queue-deprecated-types">Removal of the user space queue &amp; deprecated types</a></li>
+<li><a href="#registering-i-o-resource-usages-changes">Registering &amp; I/O resource usages changes</a>
+<ul>
+<li><a href="#moving-to-edge-triggers">Moving to edge triggers</a></li>
+</ul></li>
+<li><a href="#addition-of-unix-socket-api">Addition of Unix socket API</a></li>
+<li><a href="#removal-of-deprecated-api">Removal of deprecated API</a></li>
+<li><a href="#removed-support-for-oses">Removed support for OSes</a></li>
+<li><a href="#increased-minimum-supported-rust-version">Increased minimum supported Rust version</a></li>
+</ul></li>
+<li><a href="#maintainer-changes">Maintainer changes</a></li>
+</ul></li>
 </ul>
 </nav>
       </div>
 
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">Tokio alpha release with async &amp; await</h1>
-      <p class="tk-date">August 08, 2019</p>
+      <h1 class="tk-title">Announcing Mio 0.7-alpha.1</h1>
+      <p class="tk-date">December 17th, 2019</p>
       
       
 
-<p>We&rsquo;re pleased to announce <a href="https://crates.io/crates/tokio/0.2.0-alpha.1">the release</a> of the first Tokio alpha with async &amp; await
-support. This includes updating all of the Tokio crates to use <code>std::future</code>
-instead of <code>futures</code> 0.1. It also includes adding <code>async fn</code> versions of the
-APIs.</p>
+<p>We are excited to announce <a href="https://github.com/Thomasdezeeuw">Thomas de Zeeuw</a> as
+the new lead of Mio. Mio is the low level I/O portability abstraction that
+backs Tokio and other Rust projects. Thomas has been behind most of
+the Mio 0.7 effort and will be continuing to lead the crate to 1.0. He has
+written the rest of the announcement.</p>
 
-<p>Get it by adding:</p>
+<hr />
 
-<pre><code class="language-toml">tokio = &quot;=0.2.0-alpha.1&quot;
+<p>Mio 0.7 is the work of <a href="https://github.com/tokio-rs/mio/graphs/contributors?from=2019-03-01&amp;to=2019-12-13">various contributors</a> over the course of roughly half a
+year. Compared to Mio version 0.6, version 0.7 reduces the size of the provided
+API in an attempt to simplify the implementation and usage. The API version 0.7
+will be close to the proposed API for a future version 1.0. The scope of the
+crate was reduced to providing a cross-platform event notification mechanism and
+commonly used types such as cross-thread poll waking and non-blocking networking
+I/O primitives.</p>
+
+<h2 id="major-changes">Major changes</h2>
+
+<p>Since this is a large release only some highlights are described here, all
+changes can be found in the <a href="https://github.com/tokio-rs/mio/blob/master/CHANGELOG.md#070-alpha1">change log</a>. Overall a large number of API changes
+have been made to reduce the complexity of the implementation and remove
+overhead where possible.</p>
+
+<h3 id="wrapping-native-os-types">Wrapping native OS types</h3>
+
+<p>In version 0.6, Mio defined its own <code>Event</code> structure to which the native OS
+types were converted. This meant that after polling the native types (i.e.
+<code>kevent</code> or <code>epoll_event</code> structures) would be converted into Mio&rsquo;s <code>Event</code>
+type. In version 0.7, the <code>Event</code> was changed to simply be a type wrapper around
+<code>kevent</code> or <code>epoll_event</code>, which provides convenience methods to get the event
+readiness indicators (such as readable or writable). Similar changes have been
+made throughout the crate. For example <code>Poll</code> is now just a file descriptor on
+Unix.</p>
+
+<p>The way events are handled using the <code>Events</code> struct has also changed. In
+version 0.6.10, index access was already deprecated and replaced with an
+iteration API. The index access was completely removed in version 0.7, and the
+iteration API was changed to return a reference to <code>Event</code> rather than making a
+copy. All methods on <code>Event</code> only need a reference, so this shouldn&rsquo;t be a
+problem.</p>
+
+<h3 id="removal-of-the-user-space-queue-deprecated-types">Removal of the user space queue &amp; deprecated types</h3>
+
+<p>Mio version 0.6 had a user space queue, available through the <code>SetReadiness</code> and
+<code>Registration</code> types, but this has been removed in version 0.7 as it was deemed
+to be outside of the scope for Mio. Users who need a user space queue can use
+one of the queue types found in the <a href="https://crates.io/crates/crossbeam">crossbeam</a> crate.</p>
+
+<p>One use case for the user space queue was to wake a polling thread (i.e. calling
+<code>Poll::poll</code>) from another thread. To support this use case, a new <code>Waker</code> type
+has been introduced. Calling <code>Waker::wake</code> will wake the associated <code>Poll</code>.</p>
+
+<h3 id="registering-i-o-resource-usages-changes">Registering &amp; I/O resource usages changes</h3>
+
+<p>By far the biggest user facing change of version 0.7 is the way Mio registers
+I/O sources. In version 0.6 resources were registered using <code>Token</code>, <code>Ready</code>,
+and <code>PollOpt</code> arguments. For example the following code would register <code>socket</code>
+with readable interests and edge triggers.</p>
+
+<pre><code class="language-rust">poll.register(&amp;socket, Token(0), Ready::readable(), PollOpt::edge())?;
 </code></pre>
 
-<p>to your <code>Cargo.toml</code> file. This is how an echo server is now written:</p>
+<p>As mentioned above the <code>Event</code> type was changed to be a wrapper around the
+native OS type. In turn this removed the <code>Ready</code> type in favour of having
+methods on <code>Event</code> to check for the readiness indicators and getting the
+<code>Token</code>. The <code>Ready</code> type, as used in registration, was changed to <code>Interest</code>
+to better reflect its usage. The API of <code>Interest</code> was also changed to take
+advantage of the (somewhat) new associated constants, ensuring that is no longer
+possible to register an event source with empty interests.</p>
 
-<pre><code class="language-rust,ignore">#![feature(async_await)]
+<p>In version 0.7 Mio registers all sources with edge triggers, removing the need
+for <code>PollOpt</code>. The use of edge triggers is explained below.</p>
 
-use tokio::net::TcpListener;
-use tokio::prelude::*;
+<p>The trait that defined how to register an event source in version 0.6 was called
+<code>Evented</code>. This was changed to <code>Source</code> and is now referred to as
+<code>event::Source</code>, as the type lives inside the <code>event</code> module. <code>event::Source</code>
+has the same three methods as <code>Evented</code>: <code>register</code>, <code>reregister</code>, and
+<code>deregister</code> but are changed as described above.</p>
 
-#[tokio::main]
-async fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
-    let addr = &quot;127.0.0.1:8080&quot;.parse()?;
-    let mut listener = TcpListener::bind(&amp;addr)?;
+<p>Finally the registration functions have moved from <code>Poll</code> to a new <code>Registry</code>
+type which can be <code>try_clone</code>d and used to register sources from different
+threads. All together that means registering the same <code>socket</code> with readable
+interests now looks like this:</p>
 
-    loop {
-        let (mut socket, _) = listener.accept().await?;
+<pre><code class="language-rust">poll.registry().register(&amp;socket, Token(0), Interest::READABLE)?;
+</code></pre>
 
-        tokio::spawn(async move {
-            let mut buf = [0; 1024];
+<h4 id="moving-to-edge-triggers">Moving to edge triggers</h4>
 
-            // In a loop, read data from the socket and write the data back.
-            loop {
-                let n = match socket.read(&amp;mut buf).await {
-                    // socket closed
-                    Ok(n) if n == 0 =&gt; return,
-                    Ok(n) =&gt; n,
-                    Err(e) =&gt; {
-                        println!(&quot;failed to read from socket; err = {:?}&quot;, e);
-                        return;
-                    }
-                };
+<p>As already mentioned Mio now registers all I/O sources with edge triggers which
+means that users of one-shot and level trigger need to change how they respond
+to events.</p>
 
-                // Write the data back
-                if let Err(e) = socket.write_all(&amp;buf[0..n]).await {
-                    println!(&quot;failed to write to socket; err = {:?}&quot;, e);
-                    return;
-                }
-            }
-        });
-    }
+<p>A problem is that certain uses of level and one-shot triggers show differences
+between OSes that Mio can&rsquo;t cancel without unacceptable overhead. We want Mio to
+present a nice cross-platform experience, so we decided to make all I/O sources
+edge-triggered. This way the behavior is identical on all platforms.</p>
+
+<p>Users that previously used one-shot triggers should now <code>deregister</code> the I/O
+source after receiving an event.</p>
+
+<p>Users of level triggers basically need to put a loop around all I/O operations.
+When using edge triggers the user is required to perform I/O after receiving an
+event. For example, in response to a read event, the user must read from the I/O
+source until it would block (it returns an <code>io::Error</code> of kind
+<code>io::ErrorKind::WouldBlock</code>). Only once an operation returns a <code>WouldBlock</code>
+error will Mio report any more events for that <code>Interest</code> on that I/O source.
+Below is an example of how to read from a <code>TcpStream</code> using edge triggers.</p>
+
+<pre><code class="language-rust">let stream: TcpStream = ...;
+
+// When we polled we received a readable event for our `TcpStream`.
+
+let mut buf = [0; 4096];
+// With edge triggers we need to read all data available on the socket.
+loop {
+    let bytes_read = match stream.read(&amp;mut buf) {
+        // Read successful, proceed like normal.
+        Ok(bytes_read) =&gt; bytes_read,
+        // No more data to read at the moment. We will receive another event
+        // once more data is available to read.
+        Err(ref err) if err.kind() == io::ErrorKind::WouldBlock =&gt; break,
+        // Got interrupted, try again.
+        Err(ref err) if err.kind() == io::ErrorKind::Interrupted =&gt; continue,
+        // Hit an actual error.
+        Err(err) =&gt; return Err(err),
+    };
+
+    process_byte(&amp;buf[0..bytes_read]);
 }
 </code></pre>
 
-<p>More examples are in the <a href="https://github.com/tokio-rs/tokio/tree/master/tokio/examples">git repository</a>.</p>
+<p><strong>Note</strong>: this needs to happen for all I/O operations on registered event
+sources so be careful when using automated tools to convert to the new register
+API.</p>
 
-<h1 id="the-road-so-far">The road so far</h1>
+<h3 id="addition-of-unix-socket-api">Addition of Unix socket API</h3>
 
-<p>Tokio was first announced almost exactly <a href="https://medium.com/@carllerche/announcing-tokio-df6bb4ddb34">three years
-ago</a>. When Tokio was first released, it contained a minimal,
-single-threaded, scheduler and APIs for TCP. Since then, it has grown to include
-a multi-threaded work-stealing scheduler, APIs for timers, TCP, UDP, UDS, file
-system access, signal handling, managing child processes, high performance async
-aware channels, and more. All this thanks to a <a href="https://github.com/orgs/tokio-rs/people">dedicated team of
-maintainers</a> and an <a href="https://github.com/tokio-rs/tokio/graphs/contributors">active community of contributors</a>. Tokio
-would not be where it is without you! Thank you so much.</p>
+<p>New in the <code>net</code> module are the <code>UnixListener</code>, <code>UnixStream</code> and <code>UnixDatagram</code>
+types that support Unix sockets with an API similar to that found in the
+standard library.</p>
 
-<p>Tokio&rsquo;s goal has always been to provide an ergonomic library for writing
-asynchronous applications for Rust without compromising on performance. The past
-three years have been spent building out the Rust I/O ecosystem and discovering
-idioms and patterns for writing asynchronous Rust. Over the past three years,
-the Rust community built a vibrant ecosystem around Tokio.</p>
+<p>These APIs are currently only support on Unix based OSes.</p>
 
-<p>Some libraries include:</p>
+<h3 id="removal-of-deprecated-api">Removal of deprecated API</h3>
+
+<p>In Mio version 0.6 various types, such as the old event loop related and channel
+types, were deprecated. In version 0.7 all deprecated type were removed.</p>
+
+<h3 id="removed-support-for-oses">Removed support for OSes</h3>
+
+<p>Support for the following OSes has been dropped:</p>
 
 <ul>
-<li>an <a href="https://github.com/hyperium/">HTTP client and server</a> (with <a href="https://github.com/hyperium/h2">HTTP/2.0 support</a>).</li>
-<li>web frameworks (<a href="https://github.com/seanmonstar/warp/">warp</a>, <a href="https://github.com/actix/actix-web">actix</a>).</li>
-<li>a <a href="https://github.com/djc/quinn">QUIC</a> implementation.</li>
-<li><a href="https://github.com/tower-rs/tower">composable components</a> for building robust servers and clients.</li>
-<li>a <a href="https://github.com/tower-rs/tower-grpc/">gRPC client and server</a></li>
+<li>Linux below version 2.6.27 (and glibc 2.9), we are using newer APIs not
+present on older Linux versions, specifically <code>eventfd(2)</code>, <code>SOCK_NONBLOCK</code>
+and <code>SOCK_CLOEXEC</code> options in <code>socket(2)</code> and <code>epoll_create1(2)</code>.</li>
+<li>Fuchsia: didn&rsquo;t have any CI coverage and we don&rsquo;t have enough maintainers to
+properly support it.</li>
+<li>Bitrig: development on the OS seems to have stopped and rustc no longer
+supports it.</li>
 </ul>
 
-<p>(and of course, there are many more).</p>
+<h3 id="increased-minimum-supported-rust-version">Increased minimum supported Rust version</h3>
 
-<p>The number of users has been growing too! Users include:</p>
+<p>As of writing this the minimum supported Rust version is 1.36. For version 1.0
+we aim to target <a href="https://blog.rust-lang.org/2019/11/07/Rust-1.39.0.html">Rust version 1.39</a>, as this is the version in which <code>async</code>
+become stable (a major feature which a lot of our dependent crates are using).
+So keep those compilers up to date!</p>
 
-<ul>
-<li><a href="https://linkerd.io/">Linkerd</a></li>
-<li><a href="https://github.com/Azure/iotedge">Microsoft</a></li>
-<li><a href="https://github.com/firecracker-microvm/firecracker">Amazon</a></li>
-<li><a href="https://github.com/facebookexperimental/mononoke">Facebook</a></li>
-<li><a href="https://vector.dev/">Vector</a></li>
-<li><a href="https://github.com/denoland/deno">Deno</a></li>
-<li><a href="https://github.com/libra/libra">Libra</a></li>
-<li><a href="https://pingcap.com">PingCAP</a></li>
-<li><a href="https://www.parity.io/">Parity</a></li>
-</ul>
+<h2 id="maintainer-changes">Maintainer changes</h2>
 
-<p>Over the past three years, the Rust team has not been idle either. They have
-been working tirelessly on a huge feature that will greatly improve the
-experience of writing asynchronous code with Rust: <a href="https://github.com/rust-lang/rfcs/blob/master/text/2394-async_await.md">async &amp; await
-syntax</a>. This new syntax is about to land on Rust stable.</p>
+<p>Apart from code, we have also made some management changes. The repository has
+moved to the <a href="https://github.com/tokio-rs/mio">Tokio organization</a> and multiple new people have joined the team.</p>
 
-<p>All of Tokio&rsquo;s iteration to date was done while maintaining API stability. Tokio
-has not had a breaking release since the very first 0.1.0 release on September
-9, 2016. Understandably, a long list of changes to make has been building up.
-The introduction of async &amp; await syntax is the right moment to make these
-breaking changes.</p>
-
-<h1 id="what-we-have-now">What we have now</h1>
-
-<p>Today&rsquo;s release of Tokio <code>0.2.0-alpha.1</code> with async &amp; await updates all of Tokio&rsquo;s
-components to use <a href="https://doc.rust-lang.org/std/"><code>std::future</code></a>, and all usage of <code>futures</code> 0.1
-has been removed.</p>
-
-<p>Changes include:</p>
-
-<p><strong>Using async fns for asynchronous operations.</strong></p>
-
-<p>When possible, <code>async fn</code> has been used to provide asynchronous operations. For
-example, acceping sockets from a <code>TcpListener</code> is done with the async <code>accept</code>
-function:</p>
-
-<pre><code class="language-rust,ignore">let (mut socket, _) = listener.accept().await?;
-</code></pre>
-
-<p>I/O operations are provided as <code>async</code> functions:</p>
-
-<pre><code class="language-rust,ignore">let n = socket.read(&amp;mut buf).await?;
-
-let n = socket.write(&amp;buf).await?;
-</code></pre>
-
-<p>The same applies to most of the Tokio 0.2 APIs.</p>
-
-<p><strong>Starting the Tokio runtime</strong></p>
-
-<p>Setting the entry point of a Tokio application can now be done with a proc macro:</p>
-
-<pre><code class="language-rust,ignore">#[tokio::main]
-async fn main() {
-    println!(&quot;Hello from Tokio!&quot;);
-}
-</code></pre>
-
-<p>Creating a runtime by hand is still supported. The proc macro just provides some
-sugar. The equivalent application would be:</p>
-
-<pre><code class="language-rust,ignore">fn main() {
-    let mut rt = Runtime::new().unwrap();
-    rt.block_on(async {
-        println!(&quot;Hello from Tokio!&quot;);
-    });
-}
-</code></pre>
-
-<p>There is also a proc macro for tests that will set up a current thread runtime to run your tests:</p>
-
-<pre><code class="language-rust,ignore">#[tokio::test]
-async fn my_test() {
-    let addr = &quot;127.0.0.1:8080&quot;.parse().unwrap();
-    let mut listener = TcpListener::bind(&amp;addr).unwrap();
-    let addr = listener.local_addr().unwrap();
-
-    // Connect to the listener
-    TcpStream::connect(&amp;addr).await.unwrap();
-}
-</code></pre>
-
-<p><strong>Nightly only</strong></p>
-
-<p>Because async &amp; await are not available on the stable Rust channel yet, this
-alpha release requires using nightly Rust. Tokio includes a
-<a href="https://github.com/tokio-rs/tokio/blob/master/rust-toolchain">rust-toolchain</a> file that tracks the nightly Tokio tests again.</p>
-
-<h1 id="towards-a-final-release">Towards a final release</h1>
-
-<p>This alpha release represents the first step towards the next iteration of
-Tokio. Users are now able to experiment using Tokio and async &amp; await syntax,
-but nothing is set in stone.</p>
-
-<p>The availability of async &amp; await syntax is the perfect time to issue a major
-revision of the full stack. All of Tokio&rsquo;s components require more changes,
-including ecosystem crates such as <a href="https://github.com/tokio-rs/mio"><code>mio</code></a>, <a href="https://github.com/tokio-rs/bytes"><code>bytes</code></a>, and
-<a href="https://github.com/tokio-rs/tracing"><code>tracing</code></a>. Focus will be on tight integration and performance, i.e.
-providing ergonomic high level APIs without sacrificing speed. Lessons learned
-over the past three years will be applied. Follow up blog posts will cover these
-changes in more detail as they happen.</p>
-
-<p>As progress is made, alpha crates will be released. These releases will include
-breaking changes. Progress can be tracked on the <a href="https://github.com/tokio-rs/tokio/issues?q=is%3Aopen+is%3Aissue+milestone%3Av0.2">issue tracker</a>.</p>
-
-<p>Given the scope of the changes, it will take a few months before a final release
-is ready. Estimating software release dates is hard, but let&rsquo;s aim for before the
-end of the year.</p>
-
-<p>There is a ton of work to done on code, testing, and documentation. As always,
-your help is <strong>greatly</strong> appreciated! Check out the <a href="https://github.com/tokio-rs/tokio/issues?q=is%3Aopen+is%3Aissue+milestone%3Av0.2">issue tracker</a> or
-ping us on <a href="https://gitter.im/tokio-rs/tokio">Gitter</a>. We&rsquo;re always happy to mentor!</p>
+<div style="text-align:right">&mdash;Thomas de Zeeuw</div>
 
       
 
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/blog/2018-12-recap-2018/">A great 2018, an even better 2019</a>
+          <b>下一篇</b>：<a href ="/blog/2019-11-tokio-0-2/">Announcing Tokio 0.2 and a Roadmap to 1.0</a>
         </div>
       
     </main>

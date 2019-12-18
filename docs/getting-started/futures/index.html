@@ -54,7 +54,7 @@
           <li class="nav-item">
             
             
-            <a class="nav-link " href="https://tokio-cn.github.io/blog/2019-11-tokio-0-2/">博客</a>
+            <a class="nav-link " href="https://tokio-cn.github.io/blog/2019-12-mio-v0.7-alpha.1/">博客</a>
           </li>
         </ul>
       </div>
@@ -373,9 +373,9 @@ When the process receives the I/O notification from the operating system, it
 finds the function associated with it and calls it immediately. This is a
 <strong>push</strong> based model because the value is <strong>pushed</strong> into the callback.</p>
 
-<p>The rust asynchronous model uses a <strong>pull</strong> based model. Instead of a <code>Future</code>
+<p>The rust asynchronous model is <strong>pull</strong> based. Instead of a <code>Future</code>
 being responsible for pushing the data into a callback, it relies on <strong>something
-else</strong> asking it it is complete or not. In the case of Tokio, that <strong>something
+else</strong> asking it if it is complete or not. In the case of Tokio, that <strong>something
 else</strong> is the Tokio runtime.</p>
 
 <p>Using a poll based model offers <a href="https://aturon.github.io/blog/2016/09/07/futures-design/">many advantages</a>, including being a zero cost
