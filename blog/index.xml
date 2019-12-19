@@ -6,10 +6,19 @@
     <description>Recent content in Blogs on Tokio——Rust 编程语言的异步运行时。</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Tue, 17 Dec 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 18 Dec 2019 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://tokio-cn.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Announcing Tokio-Compat</title>
+      <link>https://tokio-cn.github.io/blog/2019-12-compat/</link>
+      <pubDate>Wed, 18 Dec 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/blog/2019-12-compat/</guid>
+      <description>The release of Tokio 0.2 was the culmination of a great deal of hard work from numerous contributors, and has brought several significant improvements to Tokio. Using std::future and async/await makes writing async code using Tokio much more ergonomic, and a new scheduler implementation makes Tokio 0.2&amp;rsquo;s thread pool as much as 10x faster. However, updating existing Tokio 0.1 projects to use 0.2 and std::future poses some new challenges. Therefore, we&amp;rsquo;re very excited to announce the release of the tokio-compat crate to help ease this transition, by providing a runtime compatible with both Tokio 0.</description>
+    </item>
     
     <item>
       <title>Announcing Mio 0.7-alpha.1</title>
