@@ -375,7 +375,7 @@ finds the function associated with it and calls it immediately. This is a
 
 <p>The rust asynchronous model is <strong>pull</strong> based. Instead of a <code>Future</code>
 being responsible for pushing the data into a callback, it relies on <strong>something
-else</strong> asking it it is complete or not. In the case of Tokio, that <strong>something
+else</strong> asking if it is complete or not. In the case of Tokio, that <strong>something
 else</strong> is the Tokio runtime.</p>
 
 <p>Using a poll based model offers <a href="https://aturon.github.io/blog/2016/09/07/futures-design/">many advantages</a>, including being a zero cost
