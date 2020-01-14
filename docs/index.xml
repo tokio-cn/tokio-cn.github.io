@@ -51,7 +51,7 @@ We&amp;rsquo;ll be taking a closer look at the runtime in the upcoming sections,
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/docs/getting-started/runtime/</guid>
-      <description>In the previous section we explored async fn Futures which allow us to represent a value that will be available &amp;ldquo;at some point in the future&amp;rdquo;. We mentioned that a Rust Future requires something to poll it for completion and hinted that the something is the Tokio runtime.
+      <description>In the previous section we explored async fn Futures which allow us to represent a value that will be available &amp;ldquo;at some point in the future&amp;rdquo;. We mentioned that a Rust Future requires something to poll it for completion and said that the something is the Tokio runtime.
 Tokio runtime The Runtime is responsible for repeatedly calling poll on a Future until its value is returned. There are a few different ways this can happen in practice.</description>
     </item>
     
