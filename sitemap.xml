@@ -96,6 +96,10 @@
   </url>
   
   <url>
+    <loc>https://tokio-cn.github.io/docs/getting-started/cargo-dependencies/</loc>
+  </url>
+  
+  <url>
     <loc>https://tokio-cn.github.io/docs/getting-started/futures/</loc>
   </url>
   
@@ -257,6 +261,14 @@
     <loc>https://tokio-cn.github.io/</loc>
     <lastmod>2019-12-18T00:00:00+00:00</lastmod>
     <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/network-utilities/socat/</loc>
+  </url>
+  
+  <url>
+    <loc>https://tokio-cn.github.io/docs/network-utilities/telnet/</loc>
   </url>
   
 </urlset>

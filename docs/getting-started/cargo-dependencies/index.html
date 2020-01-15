@@ -27,7 +27,7 @@
 
     <title>
       
-        Working with framed streams · Tokio 中文站
+        Cargo dependencies · Tokio 中文站
       
     </title>
   </head>
@@ -119,7 +119,7 @@
           
             
               
-              <div class="tk-toc-item ">
+              <div class="tk-toc-item active">
                 <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/getting-started/hello-world/">
                   入门
                 </a>
@@ -127,7 +127,7 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/hello-world/" class="">Hello world!</a></li>
                 
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/cargo-dependencies/" class="">Cargo dependencies</a></li>
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/cargo-dependencies/" class="active">Cargo dependencies</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="">async fn</a></li>
                 
@@ -169,188 +169,146 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
-<li><a href="#writing-a-codec">Writing a codec</a></li>
-<li><a href="#using-a-codec">Using a codec</a></li>
+<li>
+<ul>
+<li><a href="#often-using-all-features-is-fine">Often using all features is fine</a></li>
+</ul></li>
+<li><a href="#selecting-features">Selecting features</a>
+<ul>
+<li><a href="#tokio-main">tokio main</a></li>
+<li><a href="#tcpstream-connect">TcpStream connect</a></li>
+<li><a href="#writing-to-the-socket">Writing to the socket</a></li>
+<li><a href="#learn-more-about-features">Learn more about features</a></li>
+</ul></li>
 </ul>
 </nav>
       </div>
     </div>
     <main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 tk-content tk-docs">
-      <h1 class="tk-title">Working with framed streams</h1>
+      <h1 class="tk-title">Cargo dependencies</h1>
       <div class="github-edit">
-        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/going-deeper/frames.md"> 在 GitHub 上编辑</a>
+        <a class="fa fa-github" href="https://github.com/hltj/tokio-website-cn/tree/master/content/docs/getting-started/cargo-dependencies.md"> 在 GitHub 上编辑</a>
       </div>
       
 
-<p>Tokio has helpers to transform a stream of bytes into a stream of frames. Examples
-of byte streams include TCP connections, pipes, file objects and the standard
-input and output file descriptors. In Rust, streams are easily identified
-because they implement the <code>Read</code> and <code>Write</code> traits.</p>
+<p>Feel free to skip this section, and just use <code>features = [&quot;full&quot;]</code> while
+learning. This section provides some examples of how and when to choose
+specific <a href="https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section"><code>feature groups</code></a> in <code>Cargo.toml</code>.</p>
 
-<p>One of the simplest forms of framed message is the line delimited message.
-Each message ends with a <code>\n</code> character. Let&rsquo;s look at how one would implement
-a stream of line delimited messages with tokio.</p>
+<h2 id="often-using-all-features-is-fine">Often using all features is fine</h2>
 
-<h1 id="writing-a-codec">Writing a codec</h1>
+<p>When writing an app, we&rsquo;ll often use all of Tokio&rsquo;s features to accelerate
+our development time.</p>
 
-<p>The codec implements the <code>tokio_codec::Decoder</code> and
-<code>tokio_codec::Encoder</code> traits. Its job is to convert a frame to and from
-bytes. Those traits are used in conjunction with the <code>tokio_codec::Framed</code>
-struct to provide buffering, decoding and encoding of byte streams.</p>
+<p>Cargo.toml:</p>
 
-<p>Let&rsquo;s look at a simplified version of the <code>LinesCodec</code> struct, which implements
-decoding and encoding of the line delimited message.</p>
-
-<pre><code class="language-rust">pub struct LinesCodec {
-    // Stored index of the next index to examine for a `\n` character.
-    // This is used to optimize searching.
-    // For example, if `decode` was called with `abc`, it would hold `3`,
-    // because that is the next index to examine.
-    // The next time `decode` is called with `abcde\n`, the method will
-    // only look at `de\n` before returning.
-    next_index: usize,
-}
-
-# fn main() {}
+<pre><code class="language-toml">[dependencies]
+tokio = { version = &quot;0.2&quot;, features = [&quot;full&quot;] }
 </code></pre>
 
-<p>The comments here explain how, since the bytes are buffered until a line is
-found, it is wasteful to search for a <code>\n</code> from the beginning of the buffer
-everytime data is received. It&rsquo;s more efficient to keep the last length of
-the buffer and start searching from there when new data is received.</p>
+<p>For most apps, the additional compile time is hardly noticeable relative to the
+cognitive overhead of thinking about which features are needed.</p>
 
-<p>The <code>Decoder::decode</code> method is called when data is received on the underlying
-stream. The method can produce a frame or return <code>Ok(None)</code> to signify that
-it needs more data to produce a frame. The <code>decode</code> method is responsible
-for removing the data that no longer needs to be buffered by splitting it off
-using the <code>BytesMut</code> methods. If the data is not removed, the buffer will
-keep growing.</p>
+<h1 id="selecting-features">Selecting features</h1>
 
-<p>Let&rsquo;s look at how <code>Decoder::decode</code> is implemented for <code>LinesCodec</code>.</p>
+<p>When we develop protocol implementations that are used by client apps and
+servers, we want to limit the dependencies to decrease compile time &ndash;
+not just for us, but also for the users of our crates.</p>
 
-<pre><code class="language-rust"># extern crate bytes;
-# extern crate tokio_io;
-# use std::io;
-# use std::str;
-# use bytes::BytesMut;
-# use tokio_io::codec::*;
-# struct LinesCodec { next_index: usize }
-# impl Decoder for LinesCodec {
-#    type Item = String;
-#    type Error = io::Error;
-fn decode(&amp;mut self, buf: &amp;mut BytesMut) -&gt; Result&lt;Option&lt;String&gt;, io::Error&gt; {
-    // Look for a byte with the value '\n' in buf. Start searching from the search start index.
-    if let Some(newline_offset) = buf[self.next_index..].iter().position(|b| *b == b'\n')
-    {
-        // Found a '\n' in the string.
+<p>Let&rsquo;s take a look at our tiny client app and see what features are needed.</p>
 
-        // The index of the '\n' is at the sum of the start position + the offset found.
-        let newline_index = newline_offset + self.next_index;
+<h2 id="tokio-main">tokio main</h2>
 
-        // Split the buffer at the index of the '\n' + 1 to include the '\n'.
-        // `split_to` returns a new buffer with the contents up to the index.
-        // The buffer on which `split_to` is called will now start at this index.
-        let line = buf.split_to(newline_index + 1);
+<p>If we replace our <code>src/main.rs</code> with following code (only adding the
+<code>#[tokio:main]</code> macro to the default hello world generated by <code>cargo new</code>):</p>
 
-        // Trim the `\n` from the buffer because it's part of the protocol,
-        // not the data.
-        let line = &amp;line[..line.len() - 1];
+<p>main.rs:</p>
 
-        // Convert the bytes to a string and panic if the bytes are not valid utf-8.
-        let line = str::from_utf8(&amp;line).expect(&quot;invalid utf8 data&quot;);
-
-        // Set the search start index back to 0.
-        self.next_index = 0;
-
-        // Return Ok(Some(...)) to signal that a full frame has been produced.
-        Ok(Some(line.to_string()))
-    } else {
-        // '\n' not found in the string.
-
-        // Tell the next call to start searching after the current length of the buffer
-        // since all of it was scanned and no '\n' was found.
-        self.next_index = buf.len();
-
-        // Ok(None) signifies that more data is needed to produce a full frame.
-        Ok(None)
-    }
+<pre><code class="language-rust">#[tokio::main]
+async fn main() {
+    println!(&quot;doing nothing yet&quot;);
 }
-# }
-# fn main() {}
 </code></pre>
 
-<p>The <code>Encoder::encode</code> method is called when a frame must be written to the
-underlying stream. The frame must be written to the buffer received as a
-parameter. The data written to the buffer will be written to the
-stream as it becomes ready to send the data.</p>
+<p>Then we can choose whether to use threads (commonly used for servers):</p>
 
-<p>Let&rsquo;s now look at how <code>Encoder::encode</code> is implemented for <code>LinesCodec</code>.</p>
-
-<pre><code class="language-rust"># extern crate bytes;
-# extern crate tokio_io;
-# use std::io;
-# use std::str;
-# use bytes::*;
-# use tokio_io::codec::*;
-# struct LinesCodec { next_index: usize }
-# impl Encoder for LinesCodec {
-#    type Item = String;
-#    type Error = io::Error;
-fn encode(&amp;mut self, line: String, buf: &amp;mut BytesMut) -&gt; Result&lt;(), io::Error&gt; {
-    // It's important to reserve the amount of space needed. The `bytes` API
-    // does not grow the buffers implicitly.
-    // Reserve the length of the string + 1 for the '\n'.
-    buf.reserve(line.len() + 1);
-
-    // String implements IntoBuf, a trait used by the `bytes` API to work with
-    // types that can be expressed as a sequence of bytes.
-    buf.put(line);
-
-    // Put the '\n' in the buffer.
-    buf.put_u8(b'\n');
-
-    // Return ok to signal that no error occured.
-    Ok(())
-}
-# }
-# fn main() {}
+<pre><code class="language-toml">tokio = { version = &quot;0.2&quot;, features = [&quot;macros&quot;, &quot;rt-threaded&quot;] }
 </code></pre>
 
-<p>It&rsquo;s often simpler to encode information. Here we simply reserve the space
-needed and write the data to the buffer.</p>
+<p>or lightweight cooperative multi-tasking
+(often required for low-profile clients):</p>
 
-<h1 id="using-a-codec">Using a codec</h1>
+<pre><code class="language-toml">tokio = { version = &quot;0.2&quot;, features = [&quot;macros&quot;, &quot;rt-core&quot;] }
+</code></pre>
 
-<p>The simplest way of using a codec is with the <code>Framed</code> struct. It&rsquo;s a wrapper
-around a codec that implements automatic buffering. The <code>Framed</code> struct is both
-a <code>Stream</code> and a <code>Sink</code>. Thus, you can receive frames from it and send frames
-to it.</p>
+<h2 id="tcpstream-connect">TcpStream connect</h2>
 
-<p>You can create a <code>Framed</code> struct using any type that implements the <code>AsyncRead</code>
-and <code>AsyncWrite</code> traits using the <code>AsyncRead::framed</code> method.</p>
+<p>As we start to build the app, we&rsquo;ll need more features.  The line of code
+where we call <code>TcpStream::connect</code> requires two features:</p>
 
-<pre><code class="language-rust"># extern crate futures;
-# extern crate tokio;
-# extern crate tokio_codec;
-# use futures::prelude::*;
+<pre><code class="language-rust,no_run"># #![deny(deprecated)]
+# #![allow(unused_mut)]
+# #![allow(unused_variables)]
 # use tokio::net::TcpStream;
-# use tokio_codec::{Framed, LinesCodec};
-# fn main() {
-# let addr = &quot;127.0.0.1:5000&quot;.parse().expect(&quot;invalid socket address&quot;);
-TcpStream::connect(&amp;addr).and_then(|sock| {
-    let framed_sock = Framed::new(sock, LinesCodec::new());
-    framed_sock.for_each(|line| {
-        println!(&quot;Received line {}&quot;, line);
-        Ok(())
-    })
-});
+# #[tokio::main]
+# async fn main() {
+    let mut stream = TcpStream::connect(&quot;127.0.0.1:6142&quot;).await.unwrap();
 # }
 </code></pre>
+
+<ol>
+<li><code>dns</code> for converting the string <code>127.0.0.1:6142</code> to an IP address &ndash; Tokio
+will need to do a DNS lookup just in case.</li>
+<li><code>tcp</code> for handling the TCP connection</li>
+</ol>
+
+<p>Since our example uses a specific ip address, we can reduce dependendencies
+further by creating a <a href="https://doc.rust-lang.org/std/net/enum.SocketAddr.html"><code>std::net::SocketAddr</code></a>:</p>
+
+<pre><code class="language-rust,no_run"># #![deny(deprecated)]
+# #![allow(unused_mut)]
+# #![allow(unused_variables)]
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use tokio::net::TcpStream;
+
+#[tokio::main]
+async fn main() {
+  let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 6142);
+  let mut stream = TcpStream::connect(addr).await;
+}
+</code></pre>
+
+<h2 id="writing-to-the-socket">Writing to the socket</h2>
+
+<p>The <code>write</code> method is defined in <a href="https://docs.rs/tokio/*/tokio/io/trait.AsyncWriteExt.html"><code>tokio::io::AsyncWriteExt</code></a> which requires
+<code>io-util</code>.</p>
+
+<pre><code class="language-rust,no_run"># #![deny(deprecated)]
+# #![allow(unused_variables)]
+# use tokio::net::TcpStream;
+# use tokio::prelude::*;
+# #[tokio::main]
+# async fn main() {
+#    let mut stream = TcpStream::connect(&quot;127.0.0.1:6142&quot;).await.unwrap();
+    let result = stream.write(b&quot;hello world\n&quot;).await;
+# }
+
+</code></pre>
+
+<p>The <code>write</code> method in our example is declared with <code>use tokio::prelude::*</code>.
+The <a href="https://docs.rs/tokio/0.2.9/tokio/prelude/index.html"><code>tokio prelude</code></a> follows the <a href="https://doc.rust-lang.org/std/prelude/index.html#other-preludes"><code>Rust prelude pattern</code></a> to make using
+multiple types more convenient.  We could be more explicit by declaring <code>use tokio::io::AsyncWriteExt</code>:</p>
+
+<h2 id="learn-more-about-features">Learn more about features</h2>
+
+<p>The <a href="https://docs.rs/tokio/"><code>API reference</code></a> indicates which features are need for different APIs.
+If anything missing, please <a href="https://github.com/tokio-rs/tokio/issues/new"><code>open an issue</code></a> and one of the Tokio elves
+will figure out where it is declared and will fix it asap!</p>
 
       
       
         <div class="tk-next">
-          <b>下一篇</b>：<a href ="/docs/going-deeper/building-runtime/">Building a runtime</a>
+          <b>下一篇</b>：<a href ="/docs/getting-started/futures/">async fn</a>
         </div>
       
     </main>

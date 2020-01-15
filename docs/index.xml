@@ -21,17 +21,26 @@ More specifically, Tokio is an event-driven, non-blocking I/O platform for writi
     </item>
     
     <item>
-      <title>Hello World!</title>
+      <title>Hello world!</title>
       <link>https://tokio-cn.github.io/docs/getting-started/hello-world/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/docs/getting-started/hello-world/</guid>
-      <description>为了开始我们的 Tokio 之旅，我们会以惯例“hello world”开始。 这个程序会创建一个 TCP 流并将“hello, world!”写入到流中。 这与未使用 Tokio 写入到 TCP 流的 Rust 程序之间的区别在于，这个程序在创建流或者将“hello, world!”消息写入到流中的时候不会阻塞程序执行。
-在开始之前，你应该对 TCP 流的工作原理有最基本的了解。了解 Rust 的标准库实现也很有帮助。
-我们开始吧。
-首先，生成一个新的 crate。
-$ cargo new hello-world $ cd hello-world  接下来，在 Cargo.toml 中添加必要的依赖项：
-[dependencies] tokio = { version = &amp;quot;0.2&amp;quot;, features = [&amp;quot;full&amp;quot;] }  Tokio requires specifying the requested components using feature flags. This allows the user to only include what is needed to run the application, resulting in smaller binaries.</description>
+      <description>This guide assumes that a knowledge of the Rust programming language and are using Rust 1.39.0 or higher. To use Tokio with earlier versions of Rust, please check out the Tokio 0.1 docs.
+To check version of Rust on the command line:
+rustc --version rustc 1.39.0 (4560ea788 2019-11-04)  In version 1.39.0, Rust introduced async-await, see the Async Book for in-depth documentation of these new Rust language features. This guide also seeks to provide a practical, hands-on introduction for all of the Rust language features that are needed for programming with Tokio.</description>
+    </item>
+    
+    <item>
+      <title>Cargo dependencies</title>
+      <link>https://tokio-cn.github.io/docs/getting-started/cargo-dependencies/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/getting-started/cargo-dependencies/</guid>
+      <description>Feel free to skip this section, and just use features = [&amp;quot;full&amp;quot;] while learning. This section provides some examples of how and when to choose specific feature groups in Cargo.toml.
+Often using all features is fine When writing an app, we&amp;rsquo;ll often use all of Tokio&amp;rsquo;s features to accelerate our development time.
+Cargo.toml:
+[dependencies] tokio = { version = &amp;quot;0.2&amp;quot;, features = [&amp;quot;full&amp;quot;] }  For most apps, the additional compile time is hardly noticeable relative to the cognitive overhead of thinking about which features are needed.</description>
     </item>
     
     <item>
@@ -337,6 +346,27 @@ One of the simplest forms of framed message is the line delimited message. Each 
       <description>This section describes the network resources and drivers provided by Tokio. This component provides one of Tokio&amp;rsquo;s primary functions: non-blocking, event-driven, networking provided by the appropriate operating system primitives (epoll, kqueue, IOCP, &amp;hellip;). It is modeled after the resource and driver pattern described in the previous section.
 The network driver is built using mio and network resources are backed by types that implement Evented.
 This guide will be focused on TCP types.</description>
+    </item>
+    
+    <item>
+      <title>socat</title>
+      <link>https://tokio-cn.github.io/docs/network-utilities/socat/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/network-utilities/socat/</guid>
+      <description>socat provides the ability to redirect input and outputs. See instructions and links below for quick references on installation for most operating systems.
+How to install Debian / Ubuntu Linux sudo apt-get update &amp;amp;&amp;amp; sudo apt-get install socat  Fedora, CentOS, RedHat sudo yum install socat  Mac Homebrew brew install socat  Windows download</description>
+    </item>
+    
+    <item>
+      <title>telnet</title>
+      <link>https://tokio-cn.github.io/docs/network-utilities/telnet/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/docs/network-utilities/telnet/</guid>
+      <description>The word &amp;ldquo;telnet&amp;rdquo; often refers to the Telnet client, since the command to run the client has the same name as the protocol. This page is about the telnet client which we use in this guide to test and debug servers.
+Telnet is a computer protocol that was built for interacting with remote computers ([IETF RFC-854]: https://tools.ietf.org/html/rfc854).
+Telnet utility allows users to test connectivity to remote machines and issue commands through the use of a keyboard, and one of the simplest ways to check if a port is open and listening on a network.</description>
     </item>
     
   </channel>
