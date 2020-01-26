@@ -129,11 +129,23 @@
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/cargo-dependencies/" class="">Cargo dependencies</a></li>
                 
+                  <li><a href="https://tokio-cn.github.io/docs/getting-started/echo/" class="">Example: An Echo Server</a></li>
+                
+                </ul>
+              </div>
+            
+          
+            
+              
+              <div class="tk-toc-item ">
+                <a class="tk-toc-link" href="https://tokio-cn.github.io/docs/getting-started/futures/">
+                  Topics
+                </a>
+                <ul class="nav tk-sidenav">
+                
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/futures/" class="">async fn</a></li>
                 
                   <li><a href="https://tokio-cn.github.io/docs/getting-started/runtime/" class="">Runtime</a></li>
-                
-                  <li><a href="https://tokio-cn.github.io/docs/getting-started/echo/" class="">Example: An Echo Server</a></li>
                 
                 </ul>
               </div>
@@ -205,7 +217,7 @@ new to network programming should be able to follow along.</p>
 
 <h1 id="introducing-asynchronous-programming">Introducing asynchronous programming</h1>
 
-<p>As our first introduction to <a href="../overview">asynchronous programming</a> with
+<p>As our first introduction to <a href="../../overview">asynchronous programming</a> with
 Tokio, we will start with a tiny app that sends &ldquo;hello, world!&rdquo; over a
 network connection.</p>
 
@@ -227,7 +239,7 @@ each end of the connection. We&rsquo;ve chosen two to allow us to receive text
 Before writing code in Rust, let&rsquo;s install and use some network tools to
 manually do what our code will do later in the guide.</p>
 
-<p>Install <a href="../network-utilities/socat"><code>socat</code></a>, which is a network utility that
+<p>Install <a href="../../network-utilities/socat"><code>socat</code></a>, which is a network utility that
 we&rsquo;ll use to simulate a server. Then type the following command to print
 out everything that is received on port 6142 (a somewhat arbitrary number
 we have chosen for this example):</p>
@@ -236,7 +248,7 @@ we have chosen for this example):</p>
 </code></pre>
 
 <p>An easy way to simulate a client (for a text-based protocol) is to use
-[<code>telnet</code>]. To connect to our simulated server, we&rsquo;ll open a different
+<a href="../../network-utilities/telnet"><code>telnet</code></a>. To connect to our simulated server, we&rsquo;ll open a different
 window so we can see two terminals side-by-side and type the following on the
 command-line:</p>
 
