@@ -196,24 +196,24 @@
       </div>
       
 
-<p>This guide assumes that a knowledge of the <a href="https://www.rust-lang.org/">Rust programming language</a> and are
-using Rust <code>1.39.0</code> or higher. To use Tokio with earlier versions of Rust,
+<p>This guide assumes that you have some knowledge of the <a href="https://www.rust-lang.org/">Rust programming language</a>
+and are using Rust <code>1.39.0</code> or higher. To use Tokio with earlier versions of Rust,
 please check out the <a href="https://v0-1--tokio.netlify.com/docs/getting-started/hello-world/">Tokio 0.1 docs</a>.</p>
 
-<p>To check version of Rust on the command line:</p>
+<p>To check your version of Rust on the command line:</p>
 
 <pre><code class="language-bash">rustc --version
 rustc 1.39.0 (4560ea788 2019-11-04)
 </code></pre>
 
-<p>In version <code>1.39.0</code>, <a href="https://blog.rust-lang.org/2019/11/07/Async-await-stable.html">Rust introduced async-await</a>, see the <a href="https://rust-lang.github.io/async-book/index.html">Async Book</a> for
+<p>In version <code>1.39.0</code> <a href="https://blog.rust-lang.org/2019/11/07/Async-await-stable.html">Rust introduced async-await</a>, see the <a href="https://rust-lang.github.io/async-book/index.html">Async Book</a> for
 in-depth documentation of these new Rust language features. This guide also
 seeks to provide a practical, hands-on introduction for all of the Rust language
 features that are needed for programming with Tokio.</p>
 
 <p>Also, most readers will have some experience with writing networking code
 using the <a href="https://doc.rust-lang.org/std/net/index.html">Rust standard library</a> or another language, though folks who are
-new to network programming should be able to follow along.</p>
+new to network programming should also be able to follow along.</p>
 
 <h1 id="introducing-asynchronous-programming">Introducing asynchronous programming</h1>
 
@@ -249,7 +249,7 @@ we have chosen for this example):</p>
 
 <p>An easy way to simulate a client (for a text-based protocol) is to use
 <a href="../../network-utilities/telnet"><code>telnet</code></a>. To connect to our simulated server, we&rsquo;ll open a different
-window so we can see two terminals side-by-side and type the following on the
+window (so we can see two terminals side-by-side) and type the following on the
 command-line:</p>
 
 <pre><code class="language-bash">telnet localhost 6142

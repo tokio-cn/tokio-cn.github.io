@@ -212,14 +212,41 @@ current thread and process all spawned tasks in place. The
 distributes load across multiple threads. The <code>threaded_scheduler</code> is the
 default for applications and the <code>basic_scheduler</code> is the default for tests.</p>
 
-<p>It&rsquo;s important to remember that all async tasks <strong>must</strong> be spawned on the
-runtime or no work will be performed.</p>
+<p>Ultimately all asynchronous code must be polled to do any work. Polling the <code>Future</code> is
+the job of the Tokio runtime, but you must tell Tokio about the <code>Future</code> for this to
+happen.  You can directly tell Tokio about the <code>Future</code> with the <a href="https://docs.rs/tokio/0.2/tokio/fn.spawn.html"><code>tokio::spawn</code></a>
+function, but you can also use <code>.await</code> inside something Tokio already knows about. In
+this example, we don&rsquo;t tell Tokio about the <code>Future</code> created by the asynchronous function
+<a href="https://docs.rs/tokio/0.2/tokio/net/struct.TcpStream.html#method.connect"><code>TcpStream::connect</code></a>.</p>
+
+<pre><code class="language-rust"># #![allow(unused_must_use)]
+use tokio::net::TcpStream;
+
+#[tokio::main]
+async fn main() {
+  // Create a tcp stream, but do not call await.
+  TcpStream::connect(&quot;127.0.0.1:6142&quot;);
+}
+</code></pre>
+
+<p>This code will do nothing. Therefore, the compiler produces the warning below, reminding you
+that the future must be awaited in order for it to be executed.</p>
+
+<pre><code class="language-text">warning: unused implementer of `std::future::Future` that must be used
+ --&gt; src/main.rs:6:3
+  |
+6 |   TcpStream::connect(&quot;127.0.0.1:6142&quot;);
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_must_use)]` on by default
+  = note: futures do nothing unless you `.await` or poll them
+</code></pre>
 
 <h2 id="spawning-tasks">Spawning Tasks</h2>
 
 <p>One of the unique aspects of Tokio is that futures can be spawned on the runtime
 from within other async tasks. Tasks are the application’s “unit of logic”.
-They are similar to [Go’s goroutine] and [Erlang’s process], but asynchronous.
+They are similar to <a href="https://www.golang-book.com/books/intro/10">Go&rsquo;s goroutine</a> and <a href="http://erlang.org/doc/reference_manual/processes.html">Erlang&rsquo;s process</a>, but asynchronous.
 In other words, tasks are asynchronous green threads.</p>
 
 <p>Tasks are passed to the runtime, which handles scheduling the task. The runtime

@@ -210,9 +210,9 @@ Tokio is a platform for writing fast networking code in Rust. It&amp;rsquo;s bui
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/docs/getting-started/hello-world/</guid>
-      <description>This guide assumes that a knowledge of the Rust programming language and are using Rust 1.39.0 or higher. To use Tokio with earlier versions of Rust, please check out the Tokio 0.1 docs.
-To check version of Rust on the command line:
-rustc --version rustc 1.39.0 (4560ea788 2019-11-04)  In version 1.39.0, Rust introduced async-await, see the Async Book for in-depth documentation of these new Rust language features. This guide also seeks to provide a practical, hands-on introduction for all of the Rust language features that are needed for programming with Tokio.</description>
+      <description>This guide assumes that you have some knowledge of the Rust programming language and are using Rust 1.39.0 or higher. To use Tokio with earlier versions of Rust, please check out the Tokio 0.1 docs.
+To check your version of Rust on the command line:
+rustc --version rustc 1.39.0 (4560ea788 2019-11-04)  In version 1.39.0 Rust introduced async-await, see the Async Book for in-depth documentation of these new Rust language features.</description>
     </item>
     
     <item>
