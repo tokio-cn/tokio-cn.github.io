@@ -274,8 +274,11 @@ Tokio runtime The Runtime is responsible for repeatedly calling poll on a Future
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://tokio-cn.github.io/docs/network-utilities/socat/</guid>
-      <description>socat provides the ability to redirect input and outputs. See instructions and links below for quick references on installation for most operating systems.
-How to install Debian / Ubuntu Linux sudo apt-get update &amp;amp;&amp;amp; sudo apt-get install socat  Fedora, CentOS, RedHat sudo yum install socat  Mac Homebrew brew install socat  Windows download</description>
+      <description>socat provides the ability to redirect input and outputs. See install instructions with links below for quick references on getting set up on most operating systems.
+How it works First a quick introduction to socat&amp;hellip;
+&amp;copy; 2018 Julia Evans, for more programming zines and comics, see wizardzines.com/
+Examples in the comic included as text in our cheat sheet below for easy copy/paste.
+Cheat sheet -v option provides verbose output to stdout which is very useful for debugging</description>
     </item>
     
     <item>

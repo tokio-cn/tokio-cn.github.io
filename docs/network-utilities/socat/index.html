@@ -181,12 +181,22 @@
       <div class="section-nav">
         <nav id="TableOfContents">
 <ul>
+<li>
+<ul>
+<li><a href="#how-it-works">How it works</a></li>
+<li><a href="#cheat-sheet">Cheat sheet</a>
+<ul>
+<li><a href="#tcp-proxy">TCP proxy</a></li>
+<li><a href="#ssl">SSL</a></li>
+<li><a href="#unix-domain-socket">Unix domain socket</a></li>
+</ul></li>
 <li><a href="#how-to-install">How to install</a>
 <ul>
 <li><a href="#debian-ubuntu-linux">Debian / Ubuntu Linux</a></li>
 <li><a href="#fedora-centos-redhat">Fedora, CentOS, RedHat</a></li>
 <li><a href="#mac-homebrew">Mac Homebrew</a></li>
 <li><a href="#windows">Windows</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -200,27 +210,67 @@
       
 
 <p><a href="http://www.dest-unreach.org/socat/">socat</a> provides the ability to redirect
-input and outputs. See instructions and links below for quick references on
-installation for most operating systems.</p>
+input and outputs. See <a href="#how-to-install">install instructions</a> with links below for quick references on getting set up on most operating systems.</p>
 
-<h1 id="how-to-install">How to install</h1>
+<h2 id="how-it-works">How it works</h2>
 
-<h2 id="debian-ubuntu-linux">Debian / Ubuntu Linux</h2>
+<p>First a quick introduction to <code>socat</code>&hellip;</p>
+
+<p><img src="https://tokio-cn.github.io/img/external/socat-julia-evans.jpeg" alt="socat lets you proxy basically any 2 things. Basic syntax: socat thing1 thing2, socat supports tcp sockets, unix domain sockets, pipes, SSL sockets, files, processes, UDP sockets and more!" /></p>
+
+<p>&copy; 2018 Julia Evans, for more programming zines and comics, see <a href="https://wizardzines.com/">wizardzines.com/</a></p>
+
+<p>Examples in the comic included as text in our <em>cheat sheet</em> below for easy copy/paste.</p>
+
+<h2 id="cheat-sheet">Cheat sheet</h2>
+
+<p><code>-v</code> option provides verbose output to stdout which is very useful for debugging</p>
+
+<h3 id="tcp-proxy">TCP proxy</h3>
+
+<p>Proxy from local HTTP port to remote server:</p>
+
+<pre><code>socat -v TCP-LISTEN:1337 TCP:example.com:80
+</code></pre>
+
+<p>now if you go to localhost:1337 you will see a response from <a href="http://example.com">http://example.com</a>
+(though the Host field is incorrect, so you get a 404).  A deep dive into HTTP
+is outside of the scope of this socat cheat sheet, but you can test this with
+<code>curl --resolve example.com:80:localhost:1334 example.com</code>.</p>
+
+<h3 id="ssl">SSL</h3>
+
+<p>In real life, most servers will require SSL, which can be added on
+(where <code>verify=0</code> won&rsquo;t check the SSL cert, which is fine for most debug /
+learning use cases).</p>
+
+<p>socat -v TCP-LISTEN:1337 ssl:example.com:80,verify=0</p>
+
+<h3 id="unix-domain-socket">Unix domain socket</h3>
+
+<p>expose a <a href="http://man7.org/linux/man-pages/man7/unix.7.html">unix domain socket</a> on port 1337</p>
+
+<pre><code>socat TCP-LISTEN:1337 UNIX-CONNECT:/path
+</code></pre>
+
+<h2 id="how-to-install">How to install</h2>
+
+<h3 id="debian-ubuntu-linux">Debian / Ubuntu Linux</h3>
 
 <pre><code class="language-bash">sudo apt-get update &amp;&amp; sudo apt-get install socat
 </code></pre>
 
-<h2 id="fedora-centos-redhat">Fedora, CentOS, RedHat</h2>
+<h3 id="fedora-centos-redhat">Fedora, CentOS, RedHat</h3>
 
 <pre><code class="language-bash">sudo yum install socat
 </code></pre>
 
-<h2 id="mac-homebrew">Mac Homebrew</h2>
+<h3 id="mac-homebrew">Mac Homebrew</h3>
 
 <pre><code class="language-bash">brew install socat
 </code></pre>
 
-<h2 id="windows">Windows</h2>
+<h3 id="windows">Windows</h3>
 
 <p><a href="https://sourceforge.net/projects/unix-utils/files/socat/">download</a></p>
 
