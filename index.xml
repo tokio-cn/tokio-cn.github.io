@@ -6,7 +6,7 @@
     <description>Recent content on Tokio——Rust 编程语言的异步运行时。</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Wed, 18 Dec 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 01 Apr 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://tokio-cn.github.io/index.xml" rel="self" type="application/rss+xml" />
     
@@ -19,6 +19,16 @@
       <guid>https://tokio-cn.github.io/docs/overview/</guid>
       <description>Tokio allows developers to write asynchronous programs in the Rust programming language. Instead of synchronously waiting for long-running operations (like reading a file or waiting for a timer to complete) before moving on to the next thing, Tokio allows developers to write programs where execution continues while the long-running operations are in progress.
 More specifically, Tokio is an event-driven, non-blocking I/O platform for writing asynchronous applications with Rust. At a high level, it provides a few major components:</description>
+    </item>
+    
+    <item>
+      <title>Reducing tail latencies with automatic cooperative task yielding</title>
+      <link>https://tokio-cn.github.io/blog/2020-04-preemption/</link>
+      <pubDate>Wed, 01 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://tokio-cn.github.io/blog/2020-04-preemption/</guid>
+      <description>Tokio is a runtime for asynchronous Rust applications. It allows writing code using async &amp;amp; await syntax. For example:
+let mut listener = TcpListener::bind(&amp;amp;addr).await?; loop { let (mut socket, _) = listener.accept().await?; tokio::spawn(async move { // handle socket }); }  The Rust compiler transforms this code into a state machine. The Tokio runtime executes these state machines, multiplexing many tasks on a handful of threads. Tokio&amp;rsquo;s scheduler requires that the generated task&amp;rsquo;s state machine yields control back to the scheduler in order to multiplex tasks.</description>
     </item>
     
     <item>
