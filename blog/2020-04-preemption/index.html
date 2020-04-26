@@ -338,7 +338,7 @@ not need to change anything to gain this benefit. Simply upgrading the Tokio
 version will include this new functionality. Also, if Tokio&rsquo;s types are used
 from <strong>outside</strong> of the Tokio runtime, they will behave as they did before.</p>
 
-<p>There is more work that should happen on this topic. It is still how unclear how
+<p>There is more work that should happen on this topic. It is still unclear how
 task budgets should work with &ldquo;sub-schedulers&rdquo; (e.g.
 <a href="https://docs.rs/futures/0.3.4/futures/stream/struct.FuturesUnordered.html"><code>FuturesUnordered</code></a>). The task budget APIs should eventually be
 exposed publicly so that third party libs can integrate with them. It also would be nice to
